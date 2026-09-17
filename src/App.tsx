@@ -18,6 +18,9 @@ function App() {
   const [isLayerVisible, setIsLayerVisible] = useState(true)
   const [isRenamingLayer, setIsRenamingLayer] = useState(false)
   const [canvasSize, setCanvasSize] = useState<{ width: number; height: number } | null>(null)
+  const [showBlankCanvasForm, setShowBlankCanvasForm] = useState(false)
+  const [blankWidth, setBlankWidth] = useState(1200)
+  const [blankHeight, setBlankHeight] = useState(800)
   const [isDragging, setIsDragging] = useState(false)
   const [brightness, setBrightness] = useState(100)
   const [contrast, setContrast] = useState(100)
@@ -49,6 +52,7 @@ function App() {
     setLayerName(file.name)
     setIsLayerVisible(true)
     setCanvasSize(null)
+    setShowBlankCanvasForm(false)
   }
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => { loadFile(event.target.files?.[0]); event.target.value = '' }
   const handleDrop = (event: DragEvent<HTMLDivElement>) => { event.preventDefault(); setIsDragging(false); loadFile(event.dataTransfer.files[0]) }
@@ -70,13 +74,13 @@ function App() {
       <div className="editor_layout">
         <section className="canvas_panel" aria-label="編集キャンバス">
           <div className={`canvas_empty${isDragging ? ' is_dragging' : ''}`} onClick={() => !imageUrl && fileInputRef.current?.click()} onKeyDown={(event) => { if (!imageUrl && (event.key === 'Enter' || event.key === ' ')) fileInputRef.current?.click() }} onDragEnter={(event) => { event.preventDefault(); setIsDragging(true) }} onDragOver={(event) => event.preventDefault()} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} role={imageUrl ? undefined : 'button'} tabIndex={imageUrl ? undefined : 0}>
-            {imageUrl && isLayerVisible ? <div className="output_frame" style={{ ...(canvasSize ? { aspectRatio: `${canvasSize.width} / ${canvasSize.height}` } : {}), '--frame-opacity': frameOpacity / 100, '--frame-thickness': `${frameThickness}px` } as CSSProperties}><img className="canvas_image" src={imageUrl} alt="編集キャンバスの画像" onLoad={(event) => { const image = event.currentTarget; setCanvasSize((size) => size ?? { width: image.naturalWidth, height: image.naturalHeight }) }} style={{ filter, transform: imageTransform, opacity: initialEffects.opacity / 100 }} /></div> : !imageUrl ? <><span className="empty_cross" aria-hidden="true">＋</span><p>ここをクリック、または画像をドロップして読み込み</p></> : <p className="hidden_layer_message">レイヤーは非表示です</p>}
+            {canvasSize ? <div className="output_frame" style={{ aspectRatio: `${canvasSize.width} / ${canvasSize.height}`, '--frame-opacity': frameOpacity / 100, '--frame-thickness': `${frameThickness}px` } as CSSProperties}>{imageUrl && isLayerVisible && <img className="canvas_image" src={imageUrl} alt="編集キャンバスの画像" onLoad={(event) => { const image = event.currentTarget; setCanvasSize((size) => size ?? { width: image.naturalWidth, height: image.naturalHeight }) }} style={{ filter, transform: imageTransform, opacity: initialEffects.opacity / 100 }} />}</div> : <><span className="empty_cross" aria-hidden="true">＋</span><p>ここをクリック、または画像をドロップして読み込み</p><button type="button" className="blank_canvas_button" onClick={(event) => { event.stopPropagation(); setShowBlankCanvasForm(true) }}>画像なしで始める</button>{showBlankCanvasForm && <div className="blank_canvas_form" onClick={(event) => event.stopPropagation()}><label>幅<input type="number" min="1" value={blankWidth} onChange={(event) => setBlankWidth(Number(event.target.value))} /> px</label><label>高さ<input type="number" min="1" value={blankHeight} onChange={(event) => setBlankHeight(Number(event.target.value))} /> px</label><button type="button" onClick={() => { setCanvasSize({ width: blankWidth, height: blankHeight }); setShowBlankCanvasForm(false) }}>作成</button></div>}</>}
             <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} hidden />
           </div>
         </section>
         <aside className="effects_panel" aria-label="レイヤーとエフェクト">
           <section className="layers_section" aria-label="オブジェクトレイヤー"><div className="layers_list" role="list">
-            <div className={`layer_item${imageUrl ? ' is_selected' : ' is_empty'}`} role="listitem"><button type="button" className="layer_icon_button" aria-label={isLayerVisible ? 'レイヤーを非表示' : 'レイヤーを表示'} onClick={() => setIsLayerVisible((visible) => !visible)}>{isLayerVisible ? '◉' : '○'}</button><span className="layer_thumbnail">{imageUrl ? <img src={imageUrl} alt="" style={{ opacity: isLayerVisible ? 1 : .35 }} /> : '＋'}</span>{isRenamingLayer && imageUrl ? <input className="layer_name_input" value={layerName} autoFocus onChange={(event) => setLayerName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') setIsRenamingLayer(false) }} onBlur={() => setIsRenamingLayer(false)} /> : <span className="layer_name">{imageUrl ? layerName : '画像を読み込んでください'}</span>}{imageUrl && <span className="layer_actions"><button type="button" className="layer_icon_button" aria-label="レイヤー名を変更" onClick={() => setIsRenamingLayer(true)}>✎</button><button type="button" className="layer_icon_button layer_delete_button" aria-label="画像を削除" onClick={clearImage}>×</button></span>}</div>
+            <div className={`layer_item${imageUrl || canvasSize ? ' is_selected' : ' is_empty'}`} role="listitem"><button type="button" className="layer_icon_button" aria-label={isLayerVisible ? 'レイヤーを非表示' : 'レイヤーを表示'} onClick={() => setIsLayerVisible((visible) => !visible)}>{isLayerVisible ? '◉' : '○'}</button><span className="layer_thumbnail">{imageUrl ? <img src={imageUrl} alt="" style={{ opacity: isLayerVisible ? 1 : .35 }} /> : canvasSize ? '□' : '＋'}</span>{isRenamingLayer && (imageUrl || canvasSize) ? <input className="layer_name_input" value={layerName} autoFocus onChange={(event) => setLayerName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') setIsRenamingLayer(false) }} onBlur={() => setIsRenamingLayer(false)} /> : <span className="layer_name">{imageUrl ? layerName : canvasSize ? '空のキャンバス' : '画像を読み込んでください'}</span>}{(imageUrl || canvasSize) && <span className="layer_actions"><button type="button" className="layer_icon_button" aria-label="レイヤー名を変更" onClick={() => setIsRenamingLayer(true)}>✎</button><button type="button" className="layer_icon_button layer_delete_button" aria-label="画像を削除" onClick={clearImage}>×</button></span>}</div>
           </div>
           </section>
           <section className="effects_section" aria-label="エフェクト設定">
