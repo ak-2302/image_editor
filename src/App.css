@@ -1,0 +1,12 @@
+.app_shell { min-height: 100svh; display: grid; place-items: center; padding: 2rem; }
+.welcome_panel { width: min(100%, 42rem); padding: clamp(2rem, 7vw, 5rem); border: 1px solid var(--border_color); background: var(--surface_color); box-shadow: 0 1.5rem 4rem rgb(27 35 45 / 8%); }
+.brand_mark { display: flex; gap: .35rem; margin-bottom: 3rem; }
+.brand_mark span { width: .55rem; height: 2.4rem; background: var(--accent_color); transform: skewX(-18deg); }
+.brand_mark span:nth-child(2) { height: 3.3rem; margin-top: -.45rem; }
+.brand_mark span:nth-child(3) { height: 1.8rem; margin-top: .3rem; }
+.status_label { color: var(--accent_color); font-size: .78rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+h1 { margin: .65rem 0 1.25rem; color: var(--heading_color); font-size: clamp(2.7rem, 8vw, 5.6rem); line-height: .98; letter-spacing: -.06em; }
+.welcome_message { color: var(--muted_color); font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.8; }
+.stack_list { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: 2.5rem; }
+.stack_list span { padding: .45rem .75rem; border: 1px solid var(--border_color); color: var(--heading_color); font-size: .82rem; }
+@media (max-width: 32rem) { .app_shell { padding: 1rem; } .brand_mark { margin-bottom: 2rem; } }
