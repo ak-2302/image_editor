@@ -1,6 +1,14 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from 'react'
 import './App.css'
 
+type EffectName = 'brightness' | 'contrast' | 'grayscale' | 'sepia'
+const effectDefinitions: Array<{ name: EffectName; label: string; min: number; max: number; initial: number }> = [
+  { name: 'brightness', label: '明るさ', min: 0, max: 200, initial: 100 },
+  { name: 'contrast', label: 'コントラスト', min: 0, max: 200, initial: 100 },
+  { name: 'grayscale', label: 'グレースケール', min: 0, max: 100, initial: 0 },
+  { name: 'sepia', label: 'セピア', min: 0, max: 100, initial: 0 },
+]
+
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
@@ -10,6 +18,8 @@ function App() {
   const [contrast, setContrast] = useState(100)
   const [grayscale, setGrayscale] = useState(0)
   const [sepia, setSepia] = useState(0)
+  const [activeEffects, setActiveEffects] = useState<EffectName[]>([])
+  const [showEffectMenu, setShowEffectMenu] = useState(false)
 
   const loadFile = (file?: File) => {
     if (!file || !file.type.startsWith('image/')) return
@@ -19,6 +29,13 @@ function App() {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => { loadFile(event.target.files?.[0]); event.target.value = '' }
   const handleDrop = (event: DragEvent<HTMLDivElement>) => { event.preventDefault(); setIsDragging(false); loadFile(event.dataTransfer.files[0]) }
   const clearImage = () => { if (imageUrl) URL.revokeObjectURL(imageUrl); setImageUrl(null); setFileName(null) }
+  const updateEffect = (name: EffectName, value: number) => {
+    if (name === 'brightness') setBrightness(value)
+    if (name === 'contrast') setContrast(value)
+    if (name === 'grayscale') setGrayscale(value)
+    if (name === 'sepia') setSepia(value)
+  }
+  const effectValues: Record<EffectName, number> = { brightness, contrast, grayscale, sepia }
   const filter = `brightness(${brightness}%) contrast(${contrast}%) grayscale(${grayscale}%) sepia(${sepia}%)`
 
   return (
@@ -36,9 +53,8 @@ function App() {
             <div className={`layer_item${imageUrl ? ' is_selected' : ' is_empty'}`}><span className="layer_thumbnail">{imageUrl ? <img src={imageUrl} alt="" /> : '＋'}</span><span className="layer_name">{fileName ?? '画像を読み込んでください'}</span><span className="layer_visibility" aria-label="表示中">●</span></div>
           </section>
           <section className="effects_section" aria-label="エフェクト設定">
-          <div className="effect_controls">
-            {([['明るさ', brightness, setBrightness, 0, 200], ['コントラスト', contrast, setContrast, 0, 200], ['グレースケール', grayscale, setGrayscale, 0, 100], ['セピア', sepia, setSepia, 0, 100]] as const).map(([label, value, setter, min, max]) => <label className="range_control" key={label}><span><b>{label}</b><output>{value}%</output></span><input type="range" min={min} max={max} value={value} onChange={(event) => setter(Number(event.target.value))} /></label>)}
-          </div>
+          <div className="effects_toolbar"><button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu} onClick={() => setShowEffectMenu((visible) => !visible)}>＋</button>{showEffectMenu && <div className="effect_menu">{effectDefinitions.filter(({ name }) => !activeEffects.includes(name)).map(({ name, label }) => <button type="button" key={name} onClick={() => { setActiveEffects((effects) => [...effects, name]); setShowEffectMenu(false) }}>{label}</button>)}</div>}</div>
+          <div className="effect_controls">{activeEffects.map((name) => { const definition = effectDefinitions.find((effect) => effect.name === name)!; return <label className="range_control" key={name}><span><b>{definition.label}</b><output>{effectValues[name]}%</output></span><input type="range" min={definition.min} max={definition.max} value={effectValues[name]} onChange={(event) => updateEffect(name, Number(event.target.value))} /></label> })}</div>
           {imageUrl && <div className="image_actions"><span title={fileName ?? undefined}>{fileName}</span><button type="button" className="text_button" onClick={clearImage}>画像を取り除く</button></div>}
           </section>
         </aside>
