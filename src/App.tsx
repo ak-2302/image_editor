@@ -26,7 +26,6 @@ function App() {
       <header className="top_bar"><div className="brand_lockup"><div className="brand_mark" aria-hidden="true"><span /><span /><span /></div><span>Image Editor</span></div></header>
       <div className="editor_layout">
         <section className="canvas_panel" aria-label="編集キャンバス">
-          <div className="canvas_header"><span>{imageUrl ? '編集中' : '未選択'}</span></div>
           <div className={`canvas_empty${isDragging ? ' is_dragging' : ''}`} onClick={() => !imageUrl && fileInputRef.current?.click()} onKeyDown={(event) => { if (!imageUrl && (event.key === 'Enter' || event.key === ' ')) fileInputRef.current?.click() }} onDragEnter={(event) => { event.preventDefault(); setIsDragging(true) }} onDragOver={(event) => event.preventDefault()} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} role={imageUrl ? undefined : 'button'} tabIndex={imageUrl ? undefined : 0}>
             {imageUrl ? <img className="canvas_image" src={imageUrl} alt="編集キャンバスの画像" style={{ filter }} /> : <><span className="empty_cross" aria-hidden="true">＋</span><p>ここをクリック、または画像をドロップして読み込み</p></>}
             <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} hidden />
