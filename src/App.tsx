@@ -26,6 +26,7 @@ function App() {
   const [initialEffectsOpen, setInitialEffectsOpen] = useState(true)
   const [initialEffects, setInitialEffects] = useState<InitialEffectValues>({ x: 0, y: 0, scale: 100, rotation: 0, opacity: 100 })
   const [openMenu, setOpenMenu] = useState<'file' | 'settings' | null>(null)
+  const [showEffectMenu, setShowEffectMenu] = useState(false)
   const [frameOpacity, setFrameOpacity] = useState(100)
   const [frameThickness, setFrameThickness] = useState(1)
 
@@ -40,8 +41,6 @@ function App() {
     document.addEventListener('pointerdown', closeMenus)
     return () => document.removeEventListener('pointerdown', closeMenus)
   }, [])
-  const [showEffectMenu, setShowEffectMenu] = useState(false)
-
   const loadFile = (file?: File) => {
     if (!file || !file.type.startsWith('image/')) return
     setImageUrl((currentUrl) => { if (currentUrl) URL.revokeObjectURL(currentUrl); return URL.createObjectURL(file) })
