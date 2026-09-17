@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type CSSProperties, type DragEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties, type DragEvent } from 'react'
 import './App.css'
 import InitialEffectsAccordion from './components/initial-effects/InitialEffectsAccordion'
 import type { InitialEffectKey, InitialEffectValues } from './components/initial-effects/effectTypes'
@@ -28,6 +28,18 @@ function App() {
   const [openMenu, setOpenMenu] = useState<'file' | 'settings' | null>(null)
   const [frameOpacity, setFrameOpacity] = useState(100)
   const [frameThickness, setFrameThickness] = useState(1)
+
+  useEffect(() => {
+    const closeMenus = (event: PointerEvent) => {
+      const target = event.target as HTMLElement
+      if (!target.closest('.header_menu_group') && !target.closest('.effects_toolbar')) {
+        setOpenMenu(null)
+        setShowEffectMenu(false)
+      }
+    }
+    document.addEventListener('pointerdown', closeMenus)
+    return () => document.removeEventListener('pointerdown', closeMenus)
+  }, [])
   const [showEffectMenu, setShowEffectMenu] = useState(false)
 
   const loadFile = (file?: File) => {
