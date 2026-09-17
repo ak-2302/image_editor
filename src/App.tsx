@@ -1,5 +1,7 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from 'react'
 import './App.css'
+import InitialEffectsAccordion from './components/initial-effects/InitialEffectsAccordion'
+import type { InitialEffectKey, InitialEffectValues } from './components/initial-effects/effectTypes'
 
 type EffectName = 'brightness' | 'contrast' | 'grayscale' | 'sepia'
 const effectDefinitions: Array<{ name: EffectName; label: string; min: number; max: number; initial: number }> = [
@@ -20,6 +22,8 @@ function App() {
   const [sepia, setSepia] = useState(0)
   const [activeEffects, setActiveEffects] = useState<EffectName[]>([])
   const [expandedEffects, setExpandedEffects] = useState<EffectName[]>([])
+  const [initialEffectsOpen, setInitialEffectsOpen] = useState(true)
+  const [initialEffects, setInitialEffects] = useState<InitialEffectValues>({ x: 0, y: 0, scale: 100, rotation: 0, opacity: 100 })
   const [showEffectMenu, setShowEffectMenu] = useState(false)
 
   const loadFile = (file?: File) => {
@@ -38,6 +42,8 @@ function App() {
   }
   const effectValues: Record<EffectName, number> = { brightness, contrast, grayscale, sepia }
   const filter = `brightness(${brightness}%) contrast(${contrast}%) grayscale(${grayscale}%) sepia(${sepia}%)`
+  const imageTransform = `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`
+  const handleInitialEffectChange = (key: InitialEffectKey, value: number) => setInitialEffects((current) => ({ ...current, [key]: value }))
 
   return (
     <main className="editor_app">
@@ -45,7 +51,7 @@ function App() {
       <div className="editor_layout">
         <section className="canvas_panel" aria-label="編集キャンバス">
           <div className={`canvas_empty${isDragging ? ' is_dragging' : ''}`} onClick={() => !imageUrl && fileInputRef.current?.click()} onKeyDown={(event) => { if (!imageUrl && (event.key === 'Enter' || event.key === ' ')) fileInputRef.current?.click() }} onDragEnter={(event) => { event.preventDefault(); setIsDragging(true) }} onDragOver={(event) => event.preventDefault()} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} role={imageUrl ? undefined : 'button'} tabIndex={imageUrl ? undefined : 0}>
-            {imageUrl ? <img className="canvas_image" src={imageUrl} alt="編集キャンバスの画像" style={{ filter }} /> : <><span className="empty_cross" aria-hidden="true">＋</span><p>ここをクリック、または画像をドロップして読み込み</p></>}
+            {imageUrl ? <img className="canvas_image" src={imageUrl} alt="編集キャンバスの画像" style={{ filter, transform: imageTransform, opacity: initialEffects.opacity / 100 }} /> : <><span className="empty_cross" aria-hidden="true">＋</span><p>ここをクリック、または画像をドロップして読み込み</p></>}
             <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} hidden />
           </div>
         </section>
@@ -55,7 +61,7 @@ function App() {
           </section>
           <section className="effects_section" aria-label="エフェクト設定">
           <div className="effects_toolbar"><button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu} onClick={() => setShowEffectMenu((visible) => !visible)}>＋</button>{showEffectMenu && <div className="effect_menu">{effectDefinitions.filter(({ name }) => !activeEffects.includes(name)).map(({ name, label }) => <button type="button" key={name} onClick={() => { setActiveEffects((effects) => [...effects, name]); setExpandedEffects((effects) => [...effects, name]); setShowEffectMenu(false) }}>{label}</button>)}</div>}</div>
-          <div className="effect_controls">{activeEffects.map((name) => { const definition = effectDefinitions.find((effect) => effect.name === name)!; const isExpanded = expandedEffects.includes(name); return <div className={`effect_accordion${isExpanded ? ' is_open' : ''}`} key={name}><button type="button" className="effect_accordion_trigger" aria-expanded={isExpanded} onClick={() => setExpandedEffects((effects) => isExpanded ? effects.filter((effect) => effect !== name) : [...effects, name])}><b>{definition.label}</b><span>{isExpanded ? '−' : '＋'}</span></button>{isExpanded && <label className="range_control"><span><span>強度</span><output>{effectValues[name]}%</output></span><input type="range" min={definition.min} max={definition.max} value={effectValues[name]} onChange={(event) => updateEffect(name, Number(event.target.value))} /></label>}</div> })}</div>
+          <div className="effect_controls"><InitialEffectsAccordion values={initialEffects} isOpen={initialEffectsOpen} onToggle={() => setInitialEffectsOpen((open) => !open)} onChange={handleInitialEffectChange} />{activeEffects.map((name) => { const definition = effectDefinitions.find((effect) => effect.name === name)!; const isExpanded = expandedEffects.includes(name); return <div className={`effect_accordion${isExpanded ? ' is_open' : ''}`} key={name}><button type="button" className="effect_accordion_trigger" aria-expanded={isExpanded} onClick={() => setExpandedEffects((effects) => isExpanded ? effects.filter((effect) => effect !== name) : [...effects, name])}><b>{definition.label}</b><span>{isExpanded ? '−' : '＋'}</span></button>{isExpanded && <label className="range_control"><span><span>強度</span><output>{effectValues[name]}%</output></span><input type="range" min={definition.min} max={definition.max} value={effectValues[name]} onChange={(event) => updateEffect(name, Number(event.target.value))} /></label>}</div> })}</div>
           {imageUrl && <div className="image_actions"><span title={fileName ?? undefined}>{fileName}</span><button type="button" className="text_button" onClick={clearImage}>画像を取り除く</button></div>}
           </section>
         </aside>
