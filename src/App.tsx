@@ -19,6 +19,7 @@ function App() {
   const [grayscale, setGrayscale] = useState(0)
   const [sepia, setSepia] = useState(0)
   const [activeEffects, setActiveEffects] = useState<EffectName[]>([])
+  const [expandedEffects, setExpandedEffects] = useState<EffectName[]>([])
   const [showEffectMenu, setShowEffectMenu] = useState(false)
 
   const loadFile = (file?: File) => {
@@ -53,8 +54,8 @@ function App() {
             <div className={`layer_item${imageUrl ? ' is_selected' : ' is_empty'}`}><span className="layer_thumbnail">{imageUrl ? <img src={imageUrl} alt="" /> : '＋'}</span><span className="layer_name">{fileName ?? '画像を読み込んでください'}</span><span className="layer_visibility" aria-label="表示中">●</span></div>
           </section>
           <section className="effects_section" aria-label="エフェクト設定">
-          <div className="effects_toolbar"><button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu} onClick={() => setShowEffectMenu((visible) => !visible)}>＋</button>{showEffectMenu && <div className="effect_menu">{effectDefinitions.filter(({ name }) => !activeEffects.includes(name)).map(({ name, label }) => <button type="button" key={name} onClick={() => { setActiveEffects((effects) => [...effects, name]); setShowEffectMenu(false) }}>{label}</button>)}</div>}</div>
-          <div className="effect_controls">{activeEffects.map((name) => { const definition = effectDefinitions.find((effect) => effect.name === name)!; return <label className="range_control" key={name}><span><b>{definition.label}</b><output>{effectValues[name]}%</output></span><input type="range" min={definition.min} max={definition.max} value={effectValues[name]} onChange={(event) => updateEffect(name, Number(event.target.value))} /></label> })}</div>
+          <div className="effects_toolbar"><button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu} onClick={() => setShowEffectMenu((visible) => !visible)}>＋</button>{showEffectMenu && <div className="effect_menu">{effectDefinitions.filter(({ name }) => !activeEffects.includes(name)).map(({ name, label }) => <button type="button" key={name} onClick={() => { setActiveEffects((effects) => [...effects, name]); setExpandedEffects((effects) => [...effects, name]); setShowEffectMenu(false) }}>{label}</button>)}</div>}</div>
+          <div className="effect_controls">{activeEffects.map((name) => { const definition = effectDefinitions.find((effect) => effect.name === name)!; const isExpanded = expandedEffects.includes(name); return <div className={`effect_accordion${isExpanded ? ' is_open' : ''}`} key={name}><button type="button" className="effect_accordion_trigger" aria-expanded={isExpanded} onClick={() => setExpandedEffects((effects) => isExpanded ? effects.filter((effect) => effect !== name) : [...effects, name])}><b>{definition.label}</b><span>{isExpanded ? '−' : '＋'}</span></button>{isExpanded && <label className="range_control"><span><span>強度</span><output>{effectValues[name]}%</output></span><input type="range" min={definition.min} max={definition.max} value={effectValues[name]} onChange={(event) => updateEffect(name, Number(event.target.value))} /></label>}</div> })}</div>
           {imageUrl && <div className="image_actions"><span title={fileName ?? undefined}>{fileName}</span><button type="button" className="text_button" onClick={clearImage}>画像を取り除く</button></div>}
           </section>
         </aside>
