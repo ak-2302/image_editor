@@ -32,12 +32,19 @@ function App() {
             <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} hidden />
           </div>
         </section>
-        <aside className="effects_panel" aria-labelledby="effects_title">
-          <div className="panel_heading"><p className="panel_kicker">02 / EFFECTS</p><h1 id="effects_title">エフェクト</h1><p>画像の見え方を調整できます。</p></div>
+        <aside className="effects_panel">
+          <section className="layers_section" aria-labelledby="layers_title">
+            <div className="section_header"><div><p className="panel_kicker">02 / OBJECTS</p><h1 id="layers_title">レイヤー</h1></div><span className="section_count">{imageUrl ? '1' : '0'}</span></div>
+            <div className={`layer_item${imageUrl ? ' is_selected' : ' is_empty'}`}><span className="layer_thumbnail">{imageUrl ? <img src={imageUrl} alt="" /> : '＋'}</span><span className="layer_name">{fileName ?? '画像を読み込んでください'}</span><span className="layer_visibility" aria-label="表示中">●</span></div>
+          </section>
+          <section className="effects_section" aria-labelledby="effects_title">
+            <div className="section_header"><div><p className="panel_kicker">03 / EFFECTS</p><h1 id="effects_title">エフェクト</h1></div><span className="section_count">4</span></div>
+            <p className="section_description">追加したエフェクトを調整できます。</p>
           <div className="effect_controls">
             {([['明るさ', brightness, setBrightness, 0, 200], ['コントラスト', contrast, setContrast, 0, 200], ['グレースケール', grayscale, setGrayscale, 0, 100], ['セピア', sepia, setSepia, 0, 100]] as const).map(([label, value, setter, min, max]) => <label className="range_control" key={label}><span><b>{label}</b><output>{value}%</output></span><input type="range" min={min} max={max} value={value} onChange={(event) => setter(Number(event.target.value))} /></label>)}
           </div>
           {imageUrl && <div className="image_actions"><span title={fileName ?? undefined}>{fileName}</span><button type="button" className="text_button" onClick={clearImage}>画像を取り除く</button></div>}
+          </section>
         </aside>
       </div>
     </main>
