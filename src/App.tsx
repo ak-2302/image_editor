@@ -3,12 +3,13 @@ import './App.css'
 import InitialEffectsAccordion from './components/initial-effects/InitialEffectsAccordion'
 import type { InitialEffectKey, InitialEffectValues } from './components/initial-effects/effectTypes'
 
-type EffectName = 'brightness' | 'contrast' | 'grayscale' | 'sepia'
+type EffectName = 'brightness' | 'contrast' | 'grayscale' | 'sepia' | 'colorAdjust'
 const effectDefinitions: Array<{ name: EffectName; label: string; min: number; max: number; initial: number }> = [
   { name: 'brightness', label: '明るさ', min: 0, max: 200, initial: 100 },
   { name: 'contrast', label: 'コントラスト', min: 0, max: 200, initial: 100 },
   { name: 'grayscale', label: 'グレースケール', min: 0, max: 100, initial: 0 },
   { name: 'sepia', label: 'セピア', min: 0, max: 100, initial: 0 },
+  { name: 'colorAdjust', label: '色調補正', min: -180, max: 180, initial: 0 },
 ]
 
 function App() {
@@ -26,6 +27,9 @@ function App() {
   const [contrast, setContrast] = useState(100)
   const [grayscale, setGrayscale] = useState(0)
   const [sepia, setSepia] = useState(0)
+  const [hue, setHue] = useState(0)
+  const [saturation, setSaturation] = useState(100)
+  const [lightness, setLightness] = useState(100)
   const [activeEffects, setActiveEffects] = useState<EffectName[]>([])
   const [expandedEffects, setExpandedEffects] = useState<EffectName[]>([])
   const [initialEffectsOpen, setInitialEffectsOpen] = useState(true)
@@ -63,8 +67,8 @@ function App() {
     if (name === 'grayscale') setGrayscale(value)
     if (name === 'sepia') setSepia(value)
   }
-  const effectValues: Record<EffectName, number> = { brightness, contrast, grayscale, sepia }
-  const filter = `brightness(${brightness}%) contrast(${contrast}%) grayscale(${grayscale}%) sepia(${sepia}%)`
+  const effectValues: Record<EffectName, number> = { brightness, contrast, grayscale, sepia, colorAdjust: hue }
+  const filter = `brightness(${brightness}%) contrast(${contrast}%) grayscale(${grayscale}%) sepia(${sepia}%) hue-rotate(${hue}deg) saturate(${saturation}%) brightness(${lightness}%)`
   const imageTransform = `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`
   const hasCanvas = Boolean(imageUrl || canvasSize)
   const frameScale = canvasSize ? Math.min(800 / canvasSize.width, 560 / canvasSize.height, 1) : 1
@@ -88,7 +92,7 @@ function App() {
           </section>
           <section className="effects_section" aria-label="エフェクト設定">
           <div className="effects_toolbar"><button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu} onClick={() => setShowEffectMenu((visible) => !visible)}>＋</button>{showEffectMenu && <div className="effect_menu">{effectDefinitions.filter(({ name }) => !activeEffects.includes(name)).map(({ name, label }) => <button type="button" key={name} onClick={() => { setActiveEffects((effects) => [...effects, name]); setExpandedEffects((effects) => [...effects, name]); setShowEffectMenu(false) }}>{label}</button>)}</div>}</div>
-          <div className="effect_controls"><InitialEffectsAccordion values={initialEffects} isOpen={initialEffectsOpen} onToggle={() => setInitialEffectsOpen((open) => !open)} onChange={handleInitialEffectChange} />{activeEffects.map((name) => { const definition = effectDefinitions.find((effect) => effect.name === name)!; const isExpanded = expandedEffects.includes(name); return <div className={`effect_accordion${isExpanded ? ' is_open' : ''}`} key={name}><button type="button" className="effect_accordion_trigger" aria-expanded={isExpanded} onClick={() => setExpandedEffects((effects) => isExpanded ? effects.filter((effect) => effect !== name) : [...effects, name])}><b>{definition.label}</b><span>{isExpanded ? '−' : '＋'}</span></button>{isExpanded && <label className="range_control"><span><span>強度</span><output>%</output></span><input type="number" min={definition.min} max={definition.max} value={effectValues[name]} onChange={(event) => updateEffect(name, Number(event.target.value))} /></label>}</div> })}</div>
+          <div className="effect_controls"><InitialEffectsAccordion values={initialEffects} isOpen={initialEffectsOpen} onToggle={() => setInitialEffectsOpen((open) => !open)} onChange={handleInitialEffectChange} />{activeEffects.map((name) => { const definition = effectDefinitions.find((effect) => effect.name === name)!; const isExpanded = expandedEffects.includes(name); return <div className={`effect_accordion${isExpanded ? ' is_open' : ''}`} key={name}><button type="button" className="effect_accordion_trigger" aria-expanded={isExpanded} onClick={() => setExpandedEffects((effects) => isExpanded ? effects.filter((effect) => effect !== name) : [...effects, name])}><b>{definition.label}</b><span>{isExpanded ? '−' : '＋'}</span></button>{isExpanded && (name === 'colorAdjust' ? <div className="color_adjust_controls"><label className="range_control"><span><span>色相</span><output>°</output></span><input type="number" min={-180} max={180} value={hue} onChange={(event) => setHue(Number(event.target.value))} /></label><label className="range_control"><span><span>彩度</span><output>%</output></span><input type="number" min={0} max={200} value={saturation} onChange={(event) => setSaturation(Number(event.target.value))} /></label><label className="range_control"><span><span>明度</span><output>%</output></span><input type="number" min={0} max={200} value={lightness} onChange={(event) => setLightness(Number(event.target.value))} /></label></div> : <label className="range_control"><span><span>強度</span><output>%</output></span><input type="number" min={definition.min} max={definition.max} value={effectValues[name]} onChange={(event) => updateEffect(name, Number(event.target.value))} /></label>)}</div> })}</div>
           </section>
         </aside>
       </div>
