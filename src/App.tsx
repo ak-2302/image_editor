@@ -72,8 +72,9 @@ function App() {
           </div>
         </section>
         <aside className="effects_panel" aria-label="レイヤーとエフェクト">
-          <section className="layers_section" aria-label="オブジェクトレイヤー">
-            <div className={`layer_item${imageUrl ? ' is_selected' : ' is_empty'}`}><span className="layer_thumbnail">{imageUrl ? <img src={imageUrl} alt="" /> : '＋'}</span><span className="layer_name">{fileName ?? '画像を読み込んでください'}</span>{imageUrl && <button type="button" className="layer_delete_button" aria-label="画像を削除" onClick={clearImage}>×</button>}<span className="layer_visibility" aria-label="表示中">●</span></div>
+          <section className="layers_section" aria-label="オブジェクトレイヤー"><div className="layers_list" role="list">
+            <div className={`layer_item${imageUrl ? ' is_selected' : ' is_empty'}`} role="listitem"><span className="layer_thumbnail">{imageUrl ? <img src={imageUrl} alt="" /> : '＋'}</span><span className="layer_name">{fileName ?? '画像を読み込んでください'}</span>{imageUrl && <button type="button" className="layer_delete_button" aria-label="画像を削除" onClick={clearImage}>×</button>}<span className="layer_visibility" aria-label="表示中">●</span></div>
+          </div>
           </section>
           <section className="effects_section" aria-label="エフェクト設定">
           <div className="effects_toolbar"><button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu} onClick={() => setShowEffectMenu((visible) => !visible)}>＋</button>{showEffectMenu && <div className="effect_menu">{effectDefinitions.filter(({ name }) => !activeEffects.includes(name)).map(({ name, label }) => <button type="button" key={name} onClick={() => { setActiveEffects((effects) => [...effects, name]); setExpandedEffects((effects) => [...effects, name]); setShowEffectMenu(false) }}>{label}</button>)}</div>}</div>
