@@ -4,13 +4,14 @@ import EffectValueRow from './components/effects/EffectValueRow'
 import type { InitialEffectKey, InitialEffectValues } from './components/initial-effects/effectTypes'
 import InitialEffectsAccordion from './components/initial-effects/InitialEffectsAccordion'
 
-type EffectName = 'brightness' | 'contrast' | 'grayscale' | 'sepia' | 'colorAdjust'
+type EffectName = 'brightness' | 'contrast' | 'grayscale' | 'sepia' | 'colorAdjust' | 'transparency'
 const effectDefinitions: Array<{ name: EffectName; label: string; min: number; max: number; initial: number }> = [
   { name: 'brightness', label: '明るさ', min: 0, max: 200, initial: 100 },
   { name: 'contrast', label: 'コントラスト', min: 0, max: 200, initial: 100 },
   { name: 'grayscale', label: 'グレースケール', min: 0, max: 100, initial: 0 },
   { name: 'sepia', label: 'セピア', min: 0, max: 100, initial: 0 },
   { name: 'colorAdjust', label: '色調補正', min: -180, max: 180, initial: 0 },
+  { name: 'transparency', label: '透過', min: 0, max: 100, initial: 0 },
 ]
 
 function App() {
@@ -31,6 +32,11 @@ function App() {
   const [hue, setHue] = useState(0)
   const [saturation, setSaturation] = useState(100)
   const [lightness, setLightness] = useState(100)
+  const [chromaKeyColor, setChromaKeyColor] = useState('#00ff00')
+  const [chromaKeyTolerance, setChromaKeyTolerance] = useState(30)
+  const [colorKeyColor, setColorKeyColor] = useState('#ffffff')
+  const [colorKeyTolerance, setColorKeyTolerance] = useState(10)
+  const [luminanceKey, setLuminanceKey] = useState(0)
   const [activeEffects, setActiveEffects] = useState<EffectName[]>([])
   const [expandedEffects, setExpandedEffects] = useState<EffectName[]>([])
   const [initialEffectsOpen, setInitialEffectsOpen] = useState(true)
@@ -68,7 +74,7 @@ function App() {
     if (name === 'grayscale') setGrayscale(value)
     if (name === 'sepia') setSepia(value)
   }
-  const effectValues: Record<EffectName, number> = { brightness, contrast, grayscale, sepia, colorAdjust: hue }
+  const effectValues: Record<EffectName, number> = { brightness, contrast, grayscale, sepia, colorAdjust: hue, transparency: 0 }
   const filter = `brightness(${brightness}%) contrast(${contrast}%) grayscale(${grayscale}%) sepia(${sepia}%) hue-rotate(${hue}deg) saturate(${saturation}%) brightness(${lightness}%)`
   const imageTransform = `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`
   const hasCanvas = Boolean(imageUrl || canvasSize)
@@ -93,7 +99,7 @@ function App() {
           </section>
           <section className="effects_section" aria-label="エフェクト設定">
             <div className="effects_toolbar"><button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu} onClick={() => setShowEffectMenu((visible) => !visible)}>＋</button>{showEffectMenu && <div className="effect_menu">{effectDefinitions.filter(({ name }) => !activeEffects.includes(name)).map(({ name, label }) => <button type="button" key={name} onClick={() => { setActiveEffects((effects) => [...effects, name]); setExpandedEffects((effects) => [...effects, name]); setShowEffectMenu(false) }}>{label}</button>)}</div>}</div>
-            <div className="effect_controls"><InitialEffectsAccordion values={initialEffects} isOpen={initialEffectsOpen} onToggle={() => setInitialEffectsOpen((open) => !open)} onChange={handleInitialEffectChange} />{activeEffects.map((name) => { const definition = effectDefinitions.find((effect) => effect.name === name)!; const isExpanded = expandedEffects.includes(name); return <div className={`effect_accordion${isExpanded ? ' is_open' : ''}`} key={name}><button type="button" className="effect_accordion_trigger" aria-expanded={isExpanded} onClick={() => setExpandedEffects((effects) => isExpanded ? effects.filter((effect) => effect !== name) : [...effects, name])}><b>{definition.label}</b><span>{isExpanded ? '−' : '＋'}</span></button>{isExpanded && (name === 'colorAdjust' ? <div className="initial_effect_fields"><EffectValueRow label="色相" value={hue} min={-180} max={180} unit="°" initial={0} onChange={setHue} /><EffectValueRow label="彩度" value={saturation} min={0} max={200} unit="%" initial={100} onChange={setSaturation} /><EffectValueRow label="明度" value={lightness} min={0} max={200} unit="%" initial={100} onChange={setLightness} /></div> : <div className="initial_effect_fields"><EffectValueRow label="強度" value={effectValues[name]} min={definition.min} max={definition.max} unit="%" initial={definition.initial} onChange={(value) => updateEffect(name, value)} /></div>)}</div> })}</div>
+          <div className="effect_controls"><InitialEffectsAccordion values={initialEffects} isOpen={initialEffectsOpen} onToggle={() => setInitialEffectsOpen((open) => !open)} onChange={handleInitialEffectChange} />{activeEffects.map((name) => { const definition = effectDefinitions.find((effect) => effect.name === name)!; const isExpanded = expandedEffects.includes(name); return <div className={`effect_accordion${isExpanded ? ' is_open' : ''}`} key={name}><button type="button" className="effect_accordion_trigger" aria-expanded={isExpanded} onClick={() => setExpandedEffects((effects) => isExpanded ? effects.filter((effect) => effect !== name) : [...effects, name])}><b>{definition.label}</b><span>{isExpanded ? '−' : '＋'}</span></button>{isExpanded && (name === 'colorAdjust' ? <div className="initial_effect_fields"><EffectValueRow label="色相" value={hue} min={-180} max={180} unit="°" initial={0} onChange={setHue} /><EffectValueRow label="彩度" value={saturation} min={0} max={200} unit="%" initial={100} onChange={setSaturation} /><EffectValueRow label="明度" value={lightness} min={0} max={200} unit="%" initial={100} onChange={setLightness} /></div> : name === 'transparency' ? <div className="initial_effect_fields"><div className="initial_effect_row"><label htmlFor="chroma_key_color">クロマキー</label><input id="chroma_key_color" type="color" value={chromaKeyColor} onChange={(event) => setChromaKeyColor(event.target.value)} /><span className="effect_unit">色</span><input type="number" min={0} max={100} value={chromaKeyTolerance} aria-label="クロマキー許容値" onChange={(event) => setChromaKeyTolerance(Number(event.target.value))} /></div><div className="initial_effect_row"><label htmlFor="color_key_color">カラーキー</label><input id="color_key_color" type="color" value={colorKeyColor} onChange={(event) => setColorKeyColor(event.target.value)} /><span className="effect_unit">色</span><input type="number" min={0} max={100} value={colorKeyTolerance} aria-label="カラーキー許容値" onChange={(event) => setColorKeyTolerance(Number(event.target.value))} /></div><EffectValueRow label="ルミナンスキー" value={luminanceKey} min={0} max={100} unit="%" initial={0} onChange={setLuminanceKey} /></div> : <div className="initial_effect_fields"><EffectValueRow label="強度" value={effectValues[name]} min={definition.min} max={definition.max} unit="%" initial={definition.initial} onChange={(value) => updateEffect(name, value)} /></div>)}</div> })}</div>
           </section>
         </aside>
       </div>
