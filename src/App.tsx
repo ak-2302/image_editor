@@ -23,7 +23,7 @@ function App() {
 
   return (
     <main className="editor_app">
-      <header className="top_bar"><div className="brand_lockup"><div className="brand_mark" aria-hidden="true"><span /><span /><span /></div><span>Image Editor</span></div><span className="workspace_status">LOCAL WORKSPACE</span></header>
+      <header className="top_bar"><div className="brand_lockup"><div className="brand_mark" aria-hidden="true"><span /><span /><span /></div><span>Image Editor</span></div></header>
       <div className="editor_layout">
         <section className="canvas_panel" aria-labelledby="canvas_title">
           <div className="canvas_header"><span id="canvas_title">01 / CANVAS</span><span>{imageUrl ? '編集中' : '未選択'}</span></div>
