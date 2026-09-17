@@ -5,3 +5,4 @@
 .canvas_panel{overflow:hidden;position:relative;z-index:0}.canvas_image{position:relative;z-index:0}.effects_panel{position:relative;z-index:2}
 .effects_section{position:relative}.effects_toolbar{position:absolute;right:1.75rem;bottom:1.5rem;z-index:3}.effect_menu{top:auto;bottom:2.5rem}
 .effects_section{display:flex;flex-direction:column}.effects_section .effect_controls{margin-top:0;padding-top:0}
+.layer_delete_button{margin-left:auto;width:1.7rem;height:1.7rem;display:grid;place-items:center;border:1px solid #cbd4da;border-radius:50%;background:#f7f8f8;color:#7d8992;font-size:1.05rem;font-weight:300;line-height:1;cursor:pointer;transition:background .2s,border-color .2s,color .2s}.layer_delete_button:hover{border-color:#d95c45;background:#fff1ed;color:#d95c45}.layer_delete_button:focus-visible{outline:2px solid var(--accent_color);outline-offset:2px}
