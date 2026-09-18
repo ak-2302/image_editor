@@ -423,7 +423,7 @@ function App() {
                       type="button"
                       onClick={() => {
                         setShapeType("rectangle");
-                        setLayerName("四角形");
+                        if (!imageUrl && !canvasSize) setLayerName("四角形");
                         setObjectLayers((layers) => [
                           ...layers,
                           { id: Date.now(), name: "四角形", type: "rectangle" },
@@ -440,7 +440,7 @@ function App() {
                       type="button"
                       onClick={() => {
                         setShapeType("circle");
-                        setLayerName("円形");
+                        if (!imageUrl && !canvasSize) setLayerName("円形");
                         setObjectLayers((layers) => [
                           ...layers,
                           { id: Date.now(), name: "円形", type: "circle" },
@@ -457,7 +457,7 @@ function App() {
                       type="button"
                       onClick={() => {
                         setShapeType("triangle");
-                        setLayerName("三角形");
+                        if (!imageUrl && !canvasSize) setLayerName("三角形");
                         setObjectLayers((layers) => [
                           ...layers,
                           { id: Date.now(), name: "三角形", type: "triangle" },
