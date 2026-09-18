@@ -139,6 +139,19 @@ function App() {
       setColorKeyColor(nextParameters.colorKeyColor);
       setColorKeyTolerance(nextParameters.colorKeyTolerance);
       setLuminanceKey(nextParameters.luminanceKey);
+    } else {
+      setBrightness(100);
+      setContrast(100);
+      setGrayscale(0);
+      setSepia(0);
+      setHue(0);
+      setSaturation(100);
+      setLightness(100);
+      setChromaKeyColor("#00ff00");
+      setChromaKeyTolerance(30);
+      setColorKeyColor("#ffffff");
+      setColorKeyTolerance(10);
+      setLuminanceKey(0);
     }
     setExpandedEffectIndex(null);
     setOpenEffectMenu(null);
