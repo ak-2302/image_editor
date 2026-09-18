@@ -46,8 +46,12 @@ function App() {
   const [colorKeyTolerance, setColorKeyTolerance] = useState(10);
   const [luminanceKey, setLuminanceKey] = useState(0);
   const [activeEffects, setActiveEffects] = useState<EffectName[]>([]);
-  const [selectedObjectId, setSelectedObjectId] = useState<string | number>("main");
-  const [effectsByObject, setEffectsByObject] = useState<Record<string, EffectName[]>>({ main: [] });
+  const [selectedObjectId, setSelectedObjectId] = useState<string | number>(
+    "main",
+  );
+  const [effectsByObject, setEffectsByObject] = useState<
+    Record<string, EffectName[]>
+  >({ main: [] });
   const [expandedEffectIndex, setExpandedEffectIndex] = useState<number | null>(
     null,
   );
@@ -73,7 +77,9 @@ function App() {
   const [frameThickness, setFrameThickness] = useState(1);
 
   const objectKey = String(selectedObjectId);
-  const updateActiveEffects = (updater: (effects: EffectName[]) => EffectName[]) => {
+  const updateActiveEffects = (
+    updater: (effects: EffectName[]) => EffectName[],
+  ) => {
     setActiveEffects((current) => {
       const next = updater(current);
       setEffectsByObject((objects) => ({ ...objects, [objectKey]: next }));
@@ -111,10 +117,10 @@ function App() {
     if (imageUrl)
       setObjectLayers((layers) => [
         ...layers,
-        { id: Date.now(), name: file.name, type: "image" },
+        { id: Date.now(), name: layerName, type: "image", url: imageUrl },
       ]);
     setImageUrl((currentUrl) => {
-      if (currentUrl) URL.revokeObjectURL(currentUrl);
+      if (currentUrl && !imageUrl) URL.revokeObjectURL(currentUrl);
       return nextUrl;
     });
     if (!imageUrl) setLayerName(file.name);
@@ -323,6 +329,21 @@ function App() {
                     }}
                   />
                 )}
+                {objectLayers
+                  .filter((layer) => layer.type === "image" && layer.url)
+                  .map((layer) => (
+                    <img
+                      className="canvas_image"
+                      key={layer.id}
+                      src={layer.url}
+                      alt={layer.name}
+                      style={{
+                        filter,
+                        transform: imageTransform,
+                        opacity: (100 - initialEffects.opacity) / 100,
+                      }}
+                    />
+                  ))}
               </div>
             ) : (
               <>
