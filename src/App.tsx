@@ -5,12 +5,12 @@ import type { InitialEffectKey, InitialEffectValues } from './components/initial
 import InitialEffectsAccordion from './components/initial-effects/InitialEffectsAccordion'
 
 type EffectName = 'brightness' | 'contrast' | 'grayscale' | 'sepia' | 'colorAdjust' | 'transparency'
-const effectDefinitions: Array<{ name: EffectName; label: string; min: number; max: number; initial: number }> = [
-  { name: 'brightness', label: '明るさ', min: 0, max: 200, initial: 100 },
-  { name: 'contrast', label: 'コントラスト', min: 0, max: 200, initial: 100 },
-  { name: 'grayscale', label: 'グレースケール', min: 0, max: 100, initial: 0 },
-  { name: 'sepia', label: 'セピア', min: 0, max: 100, initial: 0 },
-  { name: 'colorAdjust', label: '色調補正', min: -180, max: 180, initial: 0 },
+const effectDefinitions: Array<{ name: EffectName; label: string; min?: number; max?: number; initial: number }> = [
+  { name: 'brightness', label: '明るさ', initial: 100 },
+  { name: 'contrast', label: 'コントラスト', initial: 100 },
+  { name: 'grayscale', label: 'グレースケール', initial: 0 },
+  { name: 'sepia', label: 'セピア', initial: 0 },
+  { name: 'colorAdjust', label: '色調補正', initial: 0 },
   { name: 'transparency', label: '透過', min: 0, max: 100, initial: 0 },
 ]
 
