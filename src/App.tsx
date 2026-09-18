@@ -68,7 +68,9 @@ function App() {
   }, [])
   const loadFile = (file?: File) => {
     if (!file || !file.type.startsWith('image/')) return
-    setImageUrl((currentUrl) => { if (currentUrl) URL.revokeObjectURL(currentUrl); return URL.createObjectURL(file) })
+    const nextUrl = URL.createObjectURL(file)
+    if (imageUrl) setObjectLayers((layers) => [...layers, { id: Date.now(), name: file.name, type: 'image' }])
+    setImageUrl((currentUrl) => { if (currentUrl) URL.revokeObjectURL(currentUrl); return nextUrl })
     setLayerName(file.name)
     setShapeType(null)
     setIsLayerVisible(true)
