@@ -52,7 +52,7 @@ function App() {
   useEffect(() => {
     const closeMenus = (event: PointerEvent) => {
       const target = event.target as HTMLElement
-      if (!target.closest('.header_menu_group') && !target.closest('.effects_toolbar')) {
+      if (!target.closest('.header_menu_group') && !target.closest('.effects_toolbar') && !target.closest('.effect_more_menu')) {
         setOpenMenu(null)
         setShowEffectMenu(false)
         setOpenEffectMenu(null)
