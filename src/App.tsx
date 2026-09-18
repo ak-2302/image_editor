@@ -19,6 +19,21 @@ import {
 } from "./features/effects/effectDefinitions";
 import type { ObjectLayer } from "./features/layers/objectTypes";
 
+type EffectParameters = {
+  brightness: number;
+  contrast: number;
+  grayscale: number;
+  sepia: number;
+  hue: number;
+  saturation: number;
+  lightness: number;
+  chromaKeyColor: string;
+  chromaKeyTolerance: number;
+  colorKeyColor: string;
+  colorKeyTolerance: number;
+  luminanceKey: number;
+};
+
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -52,6 +67,9 @@ function App() {
   const [effectsByObject, setEffectsByObject] = useState<
     Record<string, EffectName[]>
   >({ main: [] });
+  const [parametersByObject, setParametersByObject] = useState<
+    Record<string, EffectParameters>
+  >({});
   const [expandedEffectIndex, setExpandedEffectIndex] = useState<number | null>(
     null,
   );
@@ -77,6 +95,20 @@ function App() {
   const [frameThickness, setFrameThickness] = useState(1);
 
   const objectKey = String(selectedObjectId);
+  const currentParameters = (): EffectParameters => ({
+    brightness,
+    contrast,
+    grayscale,
+    sepia,
+    hue,
+    saturation,
+    lightness,
+    chromaKeyColor,
+    chromaKeyTolerance,
+    colorKeyColor,
+    colorKeyTolerance,
+    luminanceKey,
+  });
   const updateActiveEffects = (
     updater: (effects: EffectName[]) => EffectName[],
   ) => {
@@ -87,8 +119,27 @@ function App() {
     });
   };
   const selectObject = (id: string | number) => {
+    const nextParameters = parametersByObject[String(id)];
+    setParametersByObject((objects) => ({
+      ...objects,
+      [objectKey]: currentParameters(),
+    }));
     setSelectedObjectId(id);
     setActiveEffects(effectsByObject[String(id)] ?? []);
+    if (nextParameters) {
+      setBrightness(nextParameters.brightness);
+      setContrast(nextParameters.contrast);
+      setGrayscale(nextParameters.grayscale);
+      setSepia(nextParameters.sepia);
+      setHue(nextParameters.hue);
+      setSaturation(nextParameters.saturation);
+      setLightness(nextParameters.lightness);
+      setChromaKeyColor(nextParameters.chromaKeyColor);
+      setChromaKeyTolerance(nextParameters.chromaKeyTolerance);
+      setColorKeyColor(nextParameters.colorKeyColor);
+      setColorKeyTolerance(nextParameters.colorKeyTolerance);
+      setLuminanceKey(nextParameters.luminanceKey);
+    }
     setExpandedEffectIndex(null);
     setOpenEffectMenu(null);
   };
