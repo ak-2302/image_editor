@@ -5,6 +5,7 @@ import type { InitialEffectKey, InitialEffectValues } from './components/initial
 import InitialEffectsAccordion from './components/initial-effects/InitialEffectsAccordion'
 
 type EffectName = 'brightness' | 'contrast' | 'grayscale' | 'sepia' | 'colorAdjust' | 'transparency'
+type ObjectLayer = { id: number; name: string; type: 'image' | 'rectangle' | 'circle' | 'triangle' }
 const effectDefinitions: Array<{ name: EffectName; label: string; min?: number; max?: number; initial: number }> = [
   { name: 'brightness', label: '明るさ', initial: 100 },
   { name: 'contrast', label: 'コントラスト', initial: 100 },
@@ -45,6 +46,7 @@ function App() {
   const [showEffectMenu, setShowEffectMenu] = useState(false)
   const [showObjectMenu, setShowObjectMenu] = useState(false)
   const [shapeType, setShapeType] = useState<'rectangle' | 'circle' | 'triangle' | null>(null)
+  const [objectLayers, setObjectLayers] = useState<ObjectLayer[]>([])
   const [openEffectMenu, setOpenEffectMenu] = useState<number | null>(null)
   const [draggingEffect, setDraggingEffect] = useState<EffectName | null>(null)
   const [movingEffect, setMovingEffect] = useState<EffectName | null>(null)
@@ -68,6 +70,7 @@ function App() {
     if (!file || !file.type.startsWith('image/')) return
     setImageUrl((currentUrl) => { if (currentUrl) URL.revokeObjectURL(currentUrl); return URL.createObjectURL(file) })
     setLayerName(file.name)
+    setObjectLayers((layers) => [...layers, { id: Date.now(), name: file.name, type: 'image' }])
     setShapeType(null)
     setIsLayerVisible(true)
     setCanvasSize(null)
@@ -75,7 +78,7 @@ function App() {
   }
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => { loadFile(event.target.files?.[0]); event.target.value = '' }
   const handleDrop = (event: DragEvent<HTMLDivElement>) => { event.preventDefault(); setIsDragging(false); loadFile(event.dataTransfer.files[0]) }
-  const clearImage = () => { if (imageUrl) URL.revokeObjectURL(imageUrl); setImageUrl(null); setShapeType(null); setLayerName('画像レイヤー'); setCanvasSize(null) }
+  const clearImage = () => { if (imageUrl) URL.revokeObjectURL(imageUrl); setImageUrl(null); setShapeType(null); setLayerName('画像レイヤー'); setCanvasSize(null); setObjectLayers([]) }
   const updateEffect = (name: EffectName, value: number) => {
     if (name === 'brightness') setBrightness(value)
     if (name === 'contrast') setContrast(value)
@@ -115,9 +118,8 @@ function App() {
           </div>
         </section>
         <aside className="effects_panel" aria-label="レイヤーとエフェクト">
-          <section className="layers_section" aria-label="オブジェクトレイヤー"><div className="layers_section_header"><span>オブジェクト</span><div className="layer_add_menu_wrap"><button type="button" className="layer_add_button" aria-label="オブジェクトを追加" aria-expanded={showObjectMenu} onClick={() => setShowObjectMenu((visible) => !visible)}>＋</button>{showObjectMenu && <div className="layer_add_menu"><button type="button" onClick={() => { setShowObjectMenu(false); fileInputRef.current?.click() }}>画像</button><button type="button" onClick={() => { setShapeType('rectangle'); setLayerName('四角形'); setCanvasSize((size) => size ?? { width: 800, height: 600 }); setShowObjectMenu(false) }}>四角形</button><button type="button" onClick={() => { setShapeType('circle'); setLayerName('円形'); setCanvasSize((size) => size ?? { width: 800, height: 600 }); setShowObjectMenu(false) }}>円形</button><button type="button" onClick={() => { setShapeType('triangle'); setLayerName('三角形'); setCanvasSize((size) => size ?? { width: 800, height: 600 }); setShowObjectMenu(false) }}>三角形</button></div>}</div></div><div className="layers_list" role="list">
-            <div className={`layer_item${imageUrl || canvasSize || shapeType ? ' is_selected' : ' is_empty'}`} role="listitem"><button type="button" className="layer_icon_button" aria-label={isLayerVisible ? 'レイヤーを非表示' : 'レイヤーを表示'} onClick={() => setIsLayerVisible((visible) => !visible)}>{isLayerVisible ? '◉' : '○'}</button><span className="layer_thumbnail">{imageUrl ? <img src={imageUrl} alt="" style={{ opacity: isLayerVisible ? 1 : .35 }} /> : shapeType ? '◇' : canvasSize ? '□' : '＋'}</span>{isRenamingLayer && (imageUrl || canvasSize || shapeType) ? <input className="layer_name_input" value={layerName} autoFocus onChange={(event) => setLayerName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') setIsRenamingLayer(false) }} onBlur={() => setIsRenamingLayer(false)} /> : <span className="layer_name">{imageUrl || shapeType ? layerName : canvasSize ? '空のキャンバス' : '画像を読み込んでください'}</span>}{(imageUrl || canvasSize || shapeType) && <span className="layer_actions"><button type="button" className="layer_icon_button" aria-label="レイヤー名を変更" onClick={() => setIsRenamingLayer(true)}>✎</button><button type="button" className="layer_icon_button layer_delete_button" aria-label="画像を削除" onClick={clearImage}>×</button></span>}</div>
-          </div>
+          <section className="layers_section" aria-label="オブジェクトレイヤー"><div className="layers_section_header"><span>オブジェクト</span><div className="layer_add_menu_wrap"><button type="button" className="layer_add_button" aria-label="オブジェクトを追加" aria-expanded={showObjectMenu} onClick={() => setShowObjectMenu((visible) => !visible)}>＋</button>{showObjectMenu && <div className="layer_add_menu"><button type="button" onClick={() => { setShowObjectMenu(false); fileInputRef.current?.click() }}>画像</button><button type="button" onClick={() => { setShapeType('rectangle'); setLayerName('四角形'); setObjectLayers((layers) => [...layers, { id: Date.now(), name: '四角形', type: 'rectangle' }]); setCanvasSize((size) => size ?? { width: 800, height: 600 }); setShowObjectMenu(false) }}>四角形</button><button type="button" onClick={() => { setShapeType('circle'); setLayerName('円形'); setObjectLayers((layers) => [...layers, { id: Date.now(), name: '円形', type: 'circle' }]); setCanvasSize((size) => size ?? { width: 800, height: 600 }); setShowObjectMenu(false) }}>円形</button><button type="button" onClick={() => { setShapeType('triangle'); setLayerName('三角形'); setObjectLayers((layers) => [...layers, { id: Date.now(), name: '三角形', type: 'triangle' }]); setCanvasSize((size) => size ?? { width: 800, height: 600 }); setShowObjectMenu(false) }}>三角形</button></div>}</div></div><div className="layers_list" role="list">
+            <div className={`layer_item${imageUrl || canvasSize || shapeType ? ' is_selected' : ' is_empty'}`} role="listitem"><button type="button" className="layer_icon_button" aria-label={isLayerVisible ? 'レイヤーを非表示' : 'レイヤーを表示'} onClick={() => setIsLayerVisible((visible) => !visible)}>{isLayerVisible ? '◉' : '○'}</button><span className="layer_thumbnail">{imageUrl ? <img src={imageUrl} alt="" style={{ opacity: isLayerVisible ? 1 : .35 }} /> : shapeType ? '◇' : canvasSize ? '□' : '＋'}</span>{isRenamingLayer && (imageUrl || canvasSize || shapeType) ? <input className="layer_name_input" value={layerName} autoFocus onChange={(event) => setLayerName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') setIsRenamingLayer(false) }} onBlur={() => setIsRenamingLayer(false)} /> : <span className="layer_name">{imageUrl || shapeType ? layerName : canvasSize ? '空のキャンバス' : '画像を読み込んでください'}</span>}{(imageUrl || canvasSize || shapeType) && <span className="layer_actions"><button type="button" className="layer_icon_button" aria-label="レイヤー名を変更" onClick={() => setIsRenamingLayer(true)}>✎</button><button type="button" className="layer_icon_button layer_delete_button" aria-label="画像を削除" onClick={clearImage}>×</button></span>}</div>{objectLayers.map((layer) => <div className="layer_item is_selected" role="listitem" key={layer.id}><span className="layer_thumbnail">{layer.type === "image" ? "▧" : "◇"}</span><span className="layer_name">{layer.name}</span><span className="layer_actions"><button type="button" className="layer_icon_button layer_delete_button" aria-label={`を削除`} onClick={() => setObjectLayers((layers) => layers.filter((item) => item.id !== layer.id))}>×</button></span></div>)}</div>
           </section>
           <section className="effects_section" aria-label="エフェクト設定">
             <div className="effects_toolbar"><button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu} onClick={() => setShowEffectMenu((visible) => !visible)}>＋</button>{showEffectMenu && <div className="effect_menu">{effectDefinitions.map(({ name, label }) => <button type="button" key={name} onClick={() => { setActiveEffects((effects) => [...effects, name]); setExpandedEffectIndex(activeEffects.length); setShowEffectMenu(false) }}>{label}</button>)}</div>}</div>
