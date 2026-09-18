@@ -46,6 +46,8 @@ function App() {
   const [colorKeyTolerance, setColorKeyTolerance] = useState(10);
   const [luminanceKey, setLuminanceKey] = useState(0);
   const [activeEffects, setActiveEffects] = useState<EffectName[]>([]);
+  const [selectedObjectId, setSelectedObjectId] = useState<string | number>("main");
+  const [effectsByObject, setEffectsByObject] = useState<Record<string, EffectName[]>>({ main: [] });
   const [expandedEffectIndex, setExpandedEffectIndex] = useState<number | null>(
     null,
   );
@@ -69,6 +71,21 @@ function App() {
   const [movingEffect, setMovingEffect] = useState<EffectName | null>(null);
   const [frameOpacity, setFrameOpacity] = useState(100);
   const [frameThickness, setFrameThickness] = useState(1);
+
+  const objectKey = String(selectedObjectId);
+  const updateActiveEffects = (updater: (effects: EffectName[]) => EffectName[]) => {
+    setActiveEffects((current) => {
+      const next = updater(current);
+      setEffectsByObject((objects) => ({ ...objects, [objectKey]: next }));
+      return next;
+    });
+  };
+  const selectObject = (id: string | number) => {
+    setSelectedObjectId(id);
+    setActiveEffects(effectsByObject[String(id)] ?? []);
+    setExpandedEffectIndex(null);
+    setOpenEffectMenu(null);
+  };
 
   useEffect(() => {
     const closeMenus = (event: PointerEvent) => {
@@ -154,7 +171,7 @@ function App() {
   const handleInitialEffectChange = (key: InitialEffectKey, value: number) =>
     setInitialEffects((current) => ({ ...current, [key]: value }));
   const reorderEffects = (from: EffectName, to: EffectName) => {
-    setActiveEffects((effects) => {
+    updateActiveEffects((effects) => {
       const fromIndex = effects.indexOf(from);
       const toIndex = effects.indexOf(to);
       if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return effects;
@@ -459,6 +476,7 @@ function App() {
             </div>
             <div className="layers_list" role="list">
               <div
+                onClick={() => selectObject("main")}
                 className={`layer_item${imageUrl || canvasSize || shapeType ? " is_selected" : " is_empty"}`}
                 role="listitem"
               >
@@ -530,6 +548,7 @@ function App() {
               </div>
               {objectLayers.map((layer) => (
                 <div
+                  onClick={() => selectObject(layer.id)}
                   className="layer_item is_selected"
                   role="listitem"
                   key={layer.id}
@@ -574,7 +593,7 @@ function App() {
                       type="button"
                       key={name}
                       onClick={() => {
-                        setActiveEffects((effects) => [...effects, name]);
+                        updateActiveEffects((effects) => [...effects, name]);
                         setExpandedEffectIndex(activeEffects.length);
                         setShowEffectMenu(false);
                       }}
@@ -601,7 +620,7 @@ function App() {
                 const isExpanded = expandedEffectIndex === index;
                 const isMenuOpen = openEffectMenu === index;
                 const removeEffect = () => {
-                  setActiveEffects((effects) =>
+                  updateActiveEffects((effects) =>
                     effects.filter((_, effectIndex) => effectIndex !== index),
                   );
                   setExpandedEffectIndex(null);
