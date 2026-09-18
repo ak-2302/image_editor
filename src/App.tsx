@@ -71,7 +71,7 @@ function App() {
     const nextUrl = URL.createObjectURL(file)
     if (imageUrl) setObjectLayers((layers) => [...layers, { id: Date.now(), name: file.name, type: 'image' }])
     setImageUrl((currentUrl) => { if (currentUrl) URL.revokeObjectURL(currentUrl); return nextUrl })
-    setLayerName(file.name)
+    if (!imageUrl) setLayerName(file.name)
     setShapeType(null)
     setIsLayerVisible(true)
     setCanvasSize(null)
