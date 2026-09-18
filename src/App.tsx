@@ -276,7 +276,10 @@ function App() {
     transparency: 0,
   };
   const filter = `brightness(${brightness}%) contrast(${contrast}%) grayscale(${grayscale}%) sepia(${sepia}%) hue-rotate(${hue}deg) saturate(${saturation}%) brightness(${lightness}%)`;
-  const imageTransform = `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`;
+  const imageTransform =
+    selectedObjectId === "main"
+      ? `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`
+      : "none";
   const hasCanvas = Boolean(imageUrl || canvasSize || shapeType);
   const frameScale = canvasSize
     ? Math.min(800 / canvasSize.width, 560 / canvasSize.height, 1)
