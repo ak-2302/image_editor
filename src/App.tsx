@@ -253,6 +253,25 @@ function App() {
     setIsDragging(false);
     loadFile(event.dataTransfer.files[0]);
   };
+  const addShape = (
+    type: "rectangle" | "circle" | "triangle",
+    name: string,
+  ) => {
+    const isEmptyCanvas = !imageUrl && !canvasSize && !shapeType;
+    const id = Date.now();
+    setShapeType(type);
+    setCanvasSize((size) => size ?? { width: 800, height: 600 });
+    if (isEmptyCanvas) {
+      setLayerName(name);
+      setSelectedObjectId("main");
+      return;
+    }
+    setObjectLayers((layers) => [
+      ...layers,
+      { id, name, type, visible: true },
+    ]);
+    selectObject(id);
+  };
   const clearImage = () => {
     if (imageUrl) URL.revokeObjectURL(imageUrl);
     setImageUrl(null);
@@ -280,6 +299,7 @@ function App() {
     selectedObjectId === "main"
       ? `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`
       : "none";
+  const selectedObjectTransform = `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`;
   const hasCanvas = Boolean(imageUrl || canvasSize || shapeType);
   const frameScale = canvasSize
     ? Math.min(800 / canvasSize.width, 560 / canvasSize.height, 1)
@@ -447,6 +467,16 @@ function App() {
                     }}
                   />
                 )}
+                {shapeType && selectedObjectId === "main" && isLayerVisible && (
+                  <div
+                    className={`canvas_shape${shapeType === "circle" ? " canvas_shape_circle" : ""}${shapeType === "triangle" ? " canvas_shape_triangle" : ""}`}
+                    aria-label={layerName}
+                    style={{
+                      transform: selectedObjectTransform,
+                      opacity: (100 - initialEffects.opacity) / 100,
+                    }}
+                  />
+                )}
                 {objectLayers
                   .filter(
                     (layer) =>
@@ -462,6 +492,28 @@ function App() {
                         filter,
                         transform: imageTransform,
                         opacity: (100 - initialEffects.opacity) / 100,
+                      }}
+                    />
+                  ))}
+                {objectLayers
+                  .filter(
+                    (layer) =>
+                      layer.type !== "image" && layer.visible,
+                  )
+                  .map((layer) => (
+                    <div
+                      className={`canvas_shape${layer.type === "circle" ? " canvas_shape_circle" : ""}${layer.type === "triangle" ? " canvas_shape_triangle" : ""}`}
+                      key={layer.id}
+                      aria-label={layer.name}
+                      style={{
+                        transform:
+                          selectedObjectId === layer.id
+                            ? selectedObjectTransform
+                            : "none",
+                        opacity:
+                          selectedObjectId === layer.id
+                            ? (100 - initialEffects.opacity) / 100
+                            : 1,
                       }}
                     />
                   ))}
@@ -564,20 +616,7 @@ function App() {
                     <button
                       type="button"
                       onClick={() => {
-                        setShapeType("rectangle");
-                        if (!imageUrl && !canvasSize) setLayerName("四角形");
-                        setObjectLayers((layers) => [
-                          ...layers,
-                          {
-                            id: Date.now(),
-                            name: "四角形",
-                            type: "rectangle",
-                            visible: true,
-                          },
-                        ]);
-                        setCanvasSize(
-                          (size) => size ?? { width: 800, height: 600 },
-                        );
+                        addShape("rectangle", "四角形");
                         setShowObjectMenu(false);
                       }}
                     >
@@ -586,20 +625,7 @@ function App() {
                     <button
                       type="button"
                       onClick={() => {
-                        setShapeType("circle");
-                        if (!imageUrl && !canvasSize) setLayerName("円形");
-                        setObjectLayers((layers) => [
-                          ...layers,
-                          {
-                            id: Date.now(),
-                            name: "円形",
-                            type: "circle",
-                            visible: true,
-                          },
-                        ]);
-                        setCanvasSize(
-                          (size) => size ?? { width: 800, height: 600 },
-                        );
+                        addShape("circle", "円形");
                         setShowObjectMenu(false);
                       }}
                     >
@@ -608,20 +634,7 @@ function App() {
                     <button
                       type="button"
                       onClick={() => {
-                        setShapeType("triangle");
-                        if (!imageUrl && !canvasSize) setLayerName("三角形");
-                        setObjectLayers((layers) => [
-                          ...layers,
-                          {
-                            id: Date.now(),
-                            name: "三角形",
-                            type: "triangle",
-                            visible: true,
-                          },
-                        ]);
-                        setCanvasSize(
-                          (size) => size ?? { width: 800, height: 600 },
-                        );
+                        addShape("triangle", "三角形");
                         setShowObjectMenu(false);
                       }}
                     >
