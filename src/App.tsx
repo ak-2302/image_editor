@@ -536,7 +536,7 @@ function App() {
         <aside className="effects_panel" aria-label="レイヤーとエフェクト">
           <section className="layers_section" aria-label="オブジェクトレイヤー">
             <div className="layers_section_header">
-              <span>{selectedObjectLabel}</span>
+              <span>オブジェクト</span>
               <div className="layer_add_menu_wrap">
                 <button
                   type="button"
@@ -749,6 +749,7 @@ function App() {
             </div>
           </section>
           <section className="effects_section" aria-label="エフェクト設定">
+            <div className="selected_object_type">{selectedObjectLabel}</div>
             <div className="effects_toolbar">
               <button
                 type="button"

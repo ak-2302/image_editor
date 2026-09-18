@@ -998,6 +998,12 @@ input[type="range"] {
   background: #f1f4f5;
   color: var(--accent_color);
 }
+.selected_object_type {
+  margin-bottom: 0.7rem;
+  color: var(--heading_color);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
 .canvas_shape {
   position: absolute;
   width: 45%;
