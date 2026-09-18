@@ -181,7 +181,13 @@ function App() {
     if (imageUrl)
       setObjectLayers((layers) => [
         ...layers,
-        { id: Date.now(), name: layerName, type: "image", url: imageUrl },
+        {
+          id: Date.now(),
+          name: layerName,
+          type: "image",
+          url: imageUrl,
+          visible: true,
+        },
       ]);
     setImageUrl((currentUrl) => {
       if (currentUrl && !imageUrl) URL.revokeObjectURL(currentUrl);
@@ -394,7 +400,10 @@ function App() {
                   />
                 )}
                 {objectLayers
-                  .filter((layer) => layer.type === "image" && layer.url)
+                  .filter(
+                    (layer) =>
+                      layer.type === "image" && layer.url && layer.visible,
+                  )
                   .map((layer) => (
                     <img
                       className="canvas_image"
@@ -511,7 +520,12 @@ function App() {
                         if (!imageUrl && !canvasSize) setLayerName("四角形");
                         setObjectLayers((layers) => [
                           ...layers,
-                          { id: Date.now(), name: "四角形", type: "rectangle" },
+                          {
+                            id: Date.now(),
+                            name: "四角形",
+                            type: "rectangle",
+                            visible: true,
+                          },
                         ]);
                         setCanvasSize(
                           (size) => size ?? { width: 800, height: 600 },
@@ -528,7 +542,12 @@ function App() {
                         if (!imageUrl && !canvasSize) setLayerName("円形");
                         setObjectLayers((layers) => [
                           ...layers,
-                          { id: Date.now(), name: "円形", type: "circle" },
+                          {
+                            id: Date.now(),
+                            name: "円形",
+                            type: "circle",
+                            visible: true,
+                          },
                         ]);
                         setCanvasSize(
                           (size) => size ?? { width: 800, height: 600 },
@@ -545,7 +564,12 @@ function App() {
                         if (!imageUrl && !canvasSize) setLayerName("三角形");
                         setObjectLayers((layers) => [
                           ...layers,
-                          { id: Date.now(), name: "三角形", type: "triangle" },
+                          {
+                            id: Date.now(),
+                            name: "三角形",
+                            type: "triangle",
+                            visible: true,
+                          },
                         ]);
                         setCanvasSize(
                           (size) => size ?? { width: 800, height: 600 },
@@ -638,6 +662,25 @@ function App() {
                   role="listitem"
                   key={layer.id}
                 >
+                  <button
+                    type="button"
+                    className="layer_icon_button"
+                    aria-label={
+                      layer.visible ? "レイヤーを非表示" : "レイヤーを表示"
+                    }
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setObjectLayers((layers) =>
+                        layers.map((item) =>
+                          item.id === layer.id
+                            ? { ...item, visible: !item.visible }
+                            : item,
+                        ),
+                      );
+                    }}
+                  >
+                    {layer.visible ? "◉" : "○"}
+                  </button>
                   <span className="layer_thumbnail">
                     {layer.type === "image" ? "▧" : "◇"}
                   </span>

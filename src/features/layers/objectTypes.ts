@@ -3,4 +3,5 @@ export type ObjectLayer = {
   name: string;
   type: "image" | "rectangle" | "circle" | "triangle";
   url?: string;
+  visible: boolean;
 };
