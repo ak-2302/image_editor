@@ -70,7 +70,6 @@ function App() {
     if (!file || !file.type.startsWith('image/')) return
     setImageUrl((currentUrl) => { if (currentUrl) URL.revokeObjectURL(currentUrl); return URL.createObjectURL(file) })
     setLayerName(file.name)
-    setObjectLayers((layers) => [...layers, { id: Date.now(), name: file.name, type: 'image' }])
     setShapeType(null)
     setIsLayerVisible(true)
     setCanvasSize(null)
