@@ -111,7 +111,7 @@ function App() {
           </div>
         </section>
         <aside className="effects_panel" aria-label="レイヤーとエフェクト">
-          <section className="layers_section" aria-label="オブジェクトレイヤー"><div className="layers_list" role="list">
+          <section className="layers_section" aria-label="オブジェクトレイヤー"><div className="layers_section_header"><span>オブジェクト</span><button type="button" className="layer_add_button" aria-label="オブジェクトを追加" onClick={() => fileInputRef.current?.click()}>＋</button></div><div className="layers_list" role="list">
             <div className={`layer_item${imageUrl || canvasSize ? ' is_selected' : ' is_empty'}`} role="listitem"><button type="button" className="layer_icon_button" aria-label={isLayerVisible ? 'レイヤーを非表示' : 'レイヤーを表示'} onClick={() => setIsLayerVisible((visible) => !visible)}>{isLayerVisible ? '◉' : '○'}</button><span className="layer_thumbnail">{imageUrl ? <img src={imageUrl} alt="" style={{ opacity: isLayerVisible ? 1 : .35 }} /> : canvasSize ? '□' : '＋'}</span>{isRenamingLayer && (imageUrl || canvasSize) ? <input className="layer_name_input" value={layerName} autoFocus onChange={(event) => setLayerName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') setIsRenamingLayer(false) }} onBlur={() => setIsRenamingLayer(false)} /> : <span className="layer_name">{imageUrl ? layerName : canvasSize ? '空のキャンバス' : '画像を読み込んでください'}</span>}{(imageUrl || canvasSize) && <span className="layer_actions"><button type="button" className="layer_icon_button" aria-label="レイヤー名を変更" onClick={() => setIsRenamingLayer(true)}>✎</button><button type="button" className="layer_icon_button layer_delete_button" aria-label="画像を削除" onClick={clearImage}>×</button></span>}</div>
           </div>
           </section>
