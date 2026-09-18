@@ -95,6 +95,24 @@ function App() {
   const [frameThickness, setFrameThickness] = useState(1);
 
   const objectKey = String(selectedObjectId);
+  const selectedObjectLabel =
+    selectedObjectId === "main"
+      ? imageUrl
+        ? "画像"
+        : canvasSize
+          ? "空のキャンバス"
+          : "未選択"
+      : (
+          {
+            rectangle: "四角形",
+            circle: "円形",
+            triangle: "三角形",
+            image: "画像",
+          } as const
+        )[
+          objectLayers.find((layer) => layer.id === selectedObjectId)?.type ??
+            "image"
+        ];
   const currentParameters = (): EffectParameters => ({
     brightness,
     contrast,
@@ -491,7 +509,7 @@ function App() {
         <aside className="effects_panel" aria-label="レイヤーとエフェクト">
           <section className="layers_section" aria-label="オブジェクトレイヤー">
             <div className="layers_section_header">
-              <span>オブジェクト</span>
+              <span>{selectedObjectLabel}</span>
               <div className="layer_add_menu_wrap">
                 <button
                   type="button"
