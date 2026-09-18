@@ -127,6 +127,33 @@ function App() {
     colorKeyTolerance,
     luminanceKey,
   });
+  const updateParameter = <K extends keyof EffectParameters>(
+    key: K,
+    value: EffectParameters[K],
+  ) => {
+    setParametersByObject((objects) => ({
+      ...objects,
+      [objectKey]: {
+        ...(objects[objectKey] ?? currentParameters()),
+        [key]: value,
+      },
+    }));
+    const setters = {
+      brightness: setBrightness,
+      contrast: setContrast,
+      grayscale: setGrayscale,
+      sepia: setSepia,
+      hue: setHue,
+      saturation: setSaturation,
+      lightness: setLightness,
+      chromaKeyColor: setChromaKeyColor,
+      chromaKeyTolerance: setChromaKeyTolerance,
+      colorKeyColor: setColorKeyColor,
+      colorKeyTolerance: setColorKeyTolerance,
+      luminanceKey: setLuminanceKey,
+    } as const;
+    setters[key](value as never);
+  };
   const updateActiveEffects = (
     updater: (effects: EffectName[]) => EffectName[],
   ) => {
@@ -235,10 +262,10 @@ function App() {
     setObjectLayers([]);
   };
   const updateEffect = (name: EffectName, value: number) => {
-    if (name === "brightness") setBrightness(value);
-    if (name === "contrast") setContrast(value);
-    if (name === "grayscale") setGrayscale(value);
-    if (name === "sepia") setSepia(value);
+    if (name === "brightness") updateParameter("brightness", value);
+    if (name === "contrast") updateParameter("contrast", value);
+    if (name === "grayscale") updateParameter("grayscale", value);
+    if (name === "sepia") updateParameter("sepia", value);
   };
   const effectValues: Record<EffectName, number> = {
     brightness,
@@ -831,7 +858,7 @@ function App() {
                             max={180}
                             unit="°"
                             initial={0}
-                            onChange={setHue}
+                            onChange={(value) => updateParameter("hue", value)}
                           />
                           <EffectValueRow
                             label="彩度"
@@ -840,7 +867,9 @@ function App() {
                             max={200}
                             unit="%"
                             initial={100}
-                            onChange={setSaturation}
+                            onChange={(value) =>
+                              updateParameter("saturation", value)
+                            }
                           />
                           <EffectValueRow
                             label="明度"
@@ -849,7 +878,9 @@ function App() {
                             max={200}
                             unit="%"
                             initial={100}
-                            onChange={setLightness}
+                            onChange={(value) =>
+                              updateParameter("lightness", value)
+                            }
                           />
                         </div>
                       ) : name === "transparency" ? (
@@ -861,7 +892,10 @@ function App() {
                               type="color"
                               value={chromaKeyColor}
                               onChange={(event) =>
-                                setChromaKeyColor(event.target.value)
+                                updateParameter(
+                                  "chromaKeyColor",
+                                  event.target.value,
+                                )
                               }
                             />
                             <span className="effect_unit">色</span>
@@ -872,7 +906,8 @@ function App() {
                               value={chromaKeyTolerance}
                               aria-label="クロマキー許容値"
                               onChange={(event) =>
-                                setChromaKeyTolerance(
+                                updateParameter(
+                                  "chromaKeyTolerance",
                                   Number(event.target.value),
                                 )
                               }
@@ -885,7 +920,10 @@ function App() {
                               type="color"
                               value={colorKeyColor}
                               onChange={(event) =>
-                                setColorKeyColor(event.target.value)
+                                updateParameter(
+                                  "colorKeyColor",
+                                  event.target.value,
+                                )
                               }
                             />
                             <span className="effect_unit">色</span>
@@ -896,7 +934,10 @@ function App() {
                               value={colorKeyTolerance}
                               aria-label="カラーキー許容値"
                               onChange={(event) =>
-                                setColorKeyTolerance(Number(event.target.value))
+                                updateParameter(
+                                  "colorKeyTolerance",
+                                  Number(event.target.value),
+                                )
                               }
                             />
                           </div>
@@ -907,7 +948,9 @@ function App() {
                             max={100}
                             unit="%"
                             initial={0}
-                            onChange={setLuminanceKey}
+                            onChange={(value) =>
+                              updateParameter("luminanceKey", value)
+                            }
                           />
                         </div>
                       ) : (
