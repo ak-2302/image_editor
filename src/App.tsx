@@ -477,7 +477,7 @@ function App() {
             <div className="layers_list" role="list">
               <div
                 onClick={() => selectObject("main")}
-                className={`layer_item${imageUrl || canvasSize || shapeType ? " is_selected" : " is_empty"}`}
+                className={`layer_item${selectedObjectId === "main" && (imageUrl || canvasSize || shapeType) ? " is_selected" : !imageUrl && !canvasSize && !shapeType ? " is_empty" : ""}`}
                 role="listitem"
               >
                 <button
@@ -549,7 +549,7 @@ function App() {
               {objectLayers.map((layer) => (
                 <div
                   onClick={() => selectObject(layer.id)}
-                  className="layer_item is_selected"
+                  className={`layer_item${selectedObjectId === layer.id ? " is_selected" : ""}`}
                   role="listitem"
                   key={layer.id}
                 >
