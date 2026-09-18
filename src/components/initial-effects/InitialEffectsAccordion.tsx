@@ -10,6 +10,7 @@ type InitialEffectsAccordionProps = {
   isOpen: boolean;
   onToggle: () => void;
   onChange: (key: InitialEffectKey, value: number) => void;
+  title?: string;
 };
 
 function InitialEffectsAccordion({
@@ -17,6 +18,7 @@ function InitialEffectsAccordion({
   isOpen,
   onToggle,
   onChange,
+  title = "初期エフェクト",
 }: InitialEffectsAccordionProps) {
   const draggingRef = useRef<{
     key: InitialEffectKey;
@@ -74,7 +76,7 @@ function InitialEffectsAccordion({
         aria-expanded={isOpen}
         onClick={onToggle}
       >
-        <b>初期エフェクト</b>
+        <b>{title}</b>
         <span>{isOpen ? "−" : "＋"}</span>
       </button>
       {isOpen && (

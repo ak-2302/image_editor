@@ -749,7 +749,6 @@ function App() {
             </div>
           </section>
           <section className="effects_section" aria-label="エフェクト設定">
-            <div className="selected_object_type">{selectedObjectLabel}</div>
             <div className="effects_toolbar">
               <button
                 type="button"
@@ -783,6 +782,7 @@ function App() {
             >
               <InitialEffectsAccordion
                 values={initialEffects}
+                title={`${selectedObjectLabel}の初期エフェクト`}
                 isOpen={initialEffectsOpen}
                 onToggle={() => setInitialEffectsOpen((open) => !open)}
                 onChange={handleInitialEffectChange}
