@@ -16,6 +16,7 @@ type LayerPanelProps = {
   setObjectLayers: (update: (layers: ObjectLayer[]) => ObjectLayer[]) => void;
   clearImage: () => void;
   addShape: (type: "rectangle" | "circle" | "triangle", name: string) => void;
+  addText: () => void;
 };
 
 function LayerPanel({
@@ -33,6 +34,7 @@ function LayerPanel({
   setObjectLayers,
   clearImage,
   addShape,
+  addText,
 }: LayerPanelProps) {
   const [showObjectMenu, setShowObjectMenu] = useState(false);
   const [isRenamingLayer, setIsRenamingLayer] = useState(false);
@@ -81,6 +83,15 @@ function LayerPanel({
                   {name}
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() => {
+                  addText();
+                  setShowObjectMenu(false);
+                }}
+              >
+                テキスト
+              </button>
             </div>
           )}
         </div>
@@ -180,7 +191,11 @@ function LayerPanel({
               {layer.visible ? "◉" : "○"}
             </button>
             <span className="layer_thumbnail">
-              {layer.type === "image" ? "▧" : "◇"}
+              {layer.type === "image"
+                ? "▧"
+                : layer.type === "text"
+                  ? "T"
+                  : "◇"}
             </span>
             <span className="layer_name">{layer.name}</span>
             <span className="layer_actions">

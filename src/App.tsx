@@ -10,6 +10,8 @@ import "./App.css";
 import EffectValueRow from "./components/effects/EffectValueRow";
 import ShapeObject from "./components/canvas/ShapeObject";
 import LayerPanel from "./components/layers/LayerPanel";
+import TextObject from "./components/canvas/TextObject";
+import TextSettings from "./components/layers/TextSettings";
 import type {
   InitialEffectKey,
   InitialEffectValues,
@@ -119,6 +121,7 @@ function App() {
             circle: "円形",
             triangle: "三角形",
             image: "画像",
+            text: "テキスト",
           } as const
         )[
           objectLayers.find((layer) => layer.id === selectedObjectId)?.type ??
@@ -330,6 +333,27 @@ function App() {
     setObjectLayers((layers) => [
       ...layers,
       { id, name, type, visible: true },
+    ]);
+    selectObject(id);
+  };
+  const addText = () => {
+    const id = Date.now();
+    setCanvasSize((size) => size ?? { width: 800, height: 600 });
+    setObjectLayers((layers) => [
+      ...layers,
+      {
+        id,
+        name: "テキスト",
+        type: "text",
+        visible: true,
+        text: {
+          content: "テキスト",
+          fontSize: 48,
+          color: "#222222",
+          bold: false,
+          italic: false,
+        },
+      },
     ]);
     selectObject(id);
   };
@@ -586,6 +610,27 @@ function App() {
                       }
                     />
                   ))}
+                {objectLayers
+                  .filter((layer) => layer.type === "text" && layer.visible)
+                  .map((layer) =>
+                    layer.text ? (
+                      <TextObject
+                        key={layer.id}
+                        {...layer.text}
+                        name={layer.name}
+                        transform={
+                          selectedObjectId === layer.id
+                            ? selectedObjectTransform
+                            : "none"
+                        }
+                        opacity={
+                          selectedObjectId === layer.id
+                            ? (100 - initialEffects.opacity) / 100
+                            : 1
+                        }
+                      />
+                    ) : null,
+                  )}
               </div>
             ) : (
               <>
@@ -848,6 +893,7 @@ function App() {
             setObjectLayers={setObjectLayers}
             clearImage={clearImage}
             addShape={addShape}
+            addText={addText}
           />
           <section className="effects_section" aria-label="エフェクト設定">
             <div className="effects_toolbar">
@@ -881,6 +927,32 @@ function App() {
             <div
               className={`effect_controls${movingEffect ? " effect_reordering" : ""}`}
             >
+              {selectedObjectId !== "main" &&
+                objectLayers.find((layer) => layer.id === selectedObjectId)
+                  ?.type === "text" &&
+                (() => {
+                  const textLayer = objectLayers.find(
+                    (layer) => layer.id === selectedObjectId,
+                  );
+                  if (!textLayer?.text) return null;
+                  return (
+                    <TextSettings
+                      {...textLayer.text}
+                      onChange={(changes) =>
+                        setObjectLayers((layers) =>
+                          layers.map((layer) =>
+                            layer.id === selectedObjectId
+                              ? {
+                                  ...layer,
+                                  text: { ...layer.text!, ...changes },
+                                }
+                              : layer,
+                          ),
+                        )
+                      }
+                    />
+                  );
+                })()}
               <InitialEffectsAccordion
                 values={initialEffects}
                 title={`${selectedObjectLabel}の初期エフェクト`}

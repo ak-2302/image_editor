@@ -1041,3 +1041,44 @@ input[type="range"] {
   border-right: 10rem solid transparent;
   border-bottom: 18rem solid var(--accent_color);
 }
+
+.canvas_text {
+  position: absolute;
+  z-index: 1;
+  min-width: 1ch;
+  white-space: pre;
+  transform-origin: left center;
+}
+
+.text_settings {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid var(--line_color);
+  font-size: 0.76rem;
+}
+
+.text_settings input[type="text"],
+.text_settings input[type="number"] {
+  width: 100%;
+  min-height: 2rem;
+  border: 1px solid var(--line_color);
+  background: #fff;
+  padding: 0.25rem 0.45rem;
+}
+
+.text_setting_inline {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.text_setting_inline input {
+  max-width: 7rem;
+}
+
+.text_setting_check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
