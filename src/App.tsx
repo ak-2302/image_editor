@@ -20,6 +20,8 @@ import {
   effectDefinitions,
   type EffectName,
 } from "./features/effects/effectDefinitions";
+import { getEffectsFilter } from "./features/effects/effectProcessing";
+import { getFlipScale, isAlphaInverted } from "./features/effects/processors/flipEffect";
 import {
   defaultEffectParameters,
   type EffectParameters,
@@ -566,48 +568,17 @@ const isAvailableEffect = (effect: EffectInstance) =>
       ? value
       : effectDefaultValues[effect.name];
   };
-  const getFilter = (effects: EffectInstance[]) =>
-    effects
-      .map((effect) => {
-      switch (effect.name) {
-        case "brightness":
-          return `brightness(${getEffectValue(effect)}%)`;
-        case "contrast":
-          return `contrast(${getEffectValue(effect)}%)`;
-        case "grayscale":
-          return `grayscale(${getEffectValue(effect)}%)`;
-        case "sepia":
-          return `sepia(${getEffectValue(effect)}%)`;
-        case "colorAdjust": {
-          const hueValue = effect.values.hue ?? 0;
-          const saturationValue = effect.values.saturation ?? 100;
-          const lightnessValue = effect.values.lightness ?? 100;
-          return `hue-rotate(${hueValue}deg) saturate(${saturationValue}%) brightness(${lightnessValue}%)`;
-        }
-        case "transparency":
-          return "";
-        case "flip":
-          return `${effect.values.invertLuminance ? "invert(100%)" : ""} ${effect.values.invertHue ? "hue-rotate(180deg)" : ""}`.trim();
-        default:
-          return "";
-      }
-      })
-      .filter(Boolean)
-      .join(" ") || "none";
   const getObjectTransform = (
     transform: typeof initialEffects,
     effects: EffectInstance[],
   ) => {
-    const flip = effects.find((effect) => effect.name === "flip")?.values;
-    const scaleX = flip?.flipHorizontal ? -1 : 1;
-    const scaleY = flip?.flipVertical ? -1 : 1;
-    return `translate(${transform.x}px, ${transform.y}px) scale(${(transform.scale / 100) * scaleX}, ${(transform.scale / 100) * scaleY}) rotate(${transform.rotation}deg)`;
+    const flip = effects.find((effect) => effect.name === "flip")?.values ?? {};
+    const flipScale = getFlipScale(flip);
+    return `translate(${transform.x}px, ${transform.y}px) scale(${(transform.scale / 100) * flipScale.x}, ${(transform.scale / 100) * flipScale.y}) rotate(${transform.rotation}deg)`;
   };
   const getObjectOpacity = (opacity: number, effects: EffectInstance[]) => {
     const value = (100 - opacity) / 100;
-    return effects.some(
-      (effect) => effect.name === "flip" && effect.values.invertAlpha,
-    )
+    return effects.some((effect) => effect.name === "flip" && isAlphaInverted(effect.values))
       ? 1 - value
       : value;
   };
@@ -827,7 +798,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                       );
                     }}
                     style={{
-                      filter: getFilter(activeEffects),
+                      filter: getEffectsFilter(activeEffects),
                       transform: imageTransform,
                       opacity: getObjectOpacity(initialEffects.opacity, activeEffects),
                     }}
@@ -840,7 +811,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     transform={mainShapeTransform}
                     opacity={mainShapeOpacity}
                     zIndex={0}
-                    filter={getFilter(activeEffects)}
+                    filter={getEffectsFilter(activeEffects)}
                     properties={shapeProperties}
                   />
                 )}
@@ -869,7 +840,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                         alt={layer.name}
                         onError={() => setNotice(`${layer.name}を表示できませんでした。`)}
                         style={{
-                          filter: getFilter(effectsByObject[String(layer.id)] ?? []),
+                          filter: getEffectsFilter(effectsByObject[String(layer.id)] ?? []),
                           transform,
                           opacity,
                           zIndex,
@@ -886,7 +857,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                         transform={transform}
                         opacity={opacity}
                         zIndex={zIndex}
-                        filter={getFilter(effectsByObject[String(layer.id)] ?? [])}
+                        filter={getEffectsFilter(effectsByObject[String(layer.id)] ?? [])}
                         properties={layer.shape}
                       />
                     );
@@ -900,7 +871,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                         transform={transform}
                         opacity={opacity}
                         zIndex={zIndex}
-                        filter={getFilter(effectsByObject[String(layer.id)] ?? [])}
+                        filter={getEffectsFilter(effectsByObject[String(layer.id)] ?? [])}
                       />
                     );
                   }

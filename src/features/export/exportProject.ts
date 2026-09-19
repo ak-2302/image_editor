@@ -1,6 +1,8 @@
 import type { EditorHistorySnapshot } from "../history/historyTypes";
 import type { EffectInstance } from "../project/projectTypes";
 import type { ObjectLayer } from "../layers/objectTypes";
+import { getEffectsFilter } from "../effects/effectProcessing";
+import { getFlipScale, isAlphaInverted } from "../effects/processors/flipEffect";
 
 type ExportFormat = "png" | "jpeg";
 
@@ -11,30 +13,6 @@ const loadImage = (src: string) =>
     image.onerror = reject;
     image.src = src;
   });
-
-const getFilter = (effects: EffectInstance[]) =>
-  effects
-    .map((effect) => {
-      const values = effect.values;
-      switch (effect.name) {
-        case "brightness":
-          return `brightness(${values.brightness ?? 100}%)`;
-        case "contrast":
-          return `contrast(${values.contrast ?? 100}%)`;
-        case "grayscale":
-          return `grayscale(${values.grayscale ?? 0}%)`;
-        case "sepia":
-          return `sepia(${values.sepia ?? 0}%)`;
-        case "colorAdjust":
-          return `hue-rotate(${values.hue ?? 0}deg) saturate(${values.saturation ?? 100}%) brightness(${values.lightness ?? 100}%)`;
-        case "flip":
-          return `${values.invertLuminance ? "invert(100%)" : ""} ${values.invertHue ? "hue-rotate(180deg)" : ""}`.trim();
-        default:
-          return "";
-      }
-    })
-    .filter(Boolean)
-    .join(" ") || "none";
 
 const drawShape = (
   context: CanvasRenderingContext2D,
@@ -71,18 +49,19 @@ const drawObject = async (
   context.save();
   context.translate(canvasWidth / 2 + transform.x, canvasHeight / 2 + transform.y);
   context.rotate((transform.rotation * Math.PI) / 180);
-  const flip = effects.find((effect) => effect.name === "flip")?.values;
+  const flip = effects.find((effect) => effect.name === "flip")?.values ?? {};
+  const flipScale = getFlipScale(flip);
   context.scale(
-    (transform.scale / 100) * (flip?.flipHorizontal ? -1 : 1),
-    (transform.scale / 100) * (flip?.flipVertical ? -1 : 1),
+    (transform.scale / 100) * flipScale.x,
+    (transform.scale / 100) * flipScale.y,
   );
   const baseOpacity = (100 - transform.opacity) / 100;
   context.globalAlpha = effects.some(
-    (effect) => effect.name === "flip" && effect.values.invertAlpha,
+    (effect) => effect.name === "flip" && isAlphaInverted(effect.values),
   )
     ? 1 - baseOpacity
     : baseOpacity;
-  context.filter = getFilter(effects);
+  context.filter = getEffectsFilter(effects);
 
   if (layer.type === "image" && layer.url) {
     const image = await loadImage(layer.url);
