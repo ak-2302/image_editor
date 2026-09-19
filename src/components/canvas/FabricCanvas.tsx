@@ -203,6 +203,7 @@ function FabricCanvas({
               layer.text.color,
               objectEffects,
             ),
+            fontFamily: layer.text.fontFamily ?? "sans-serif",
             fontSize: layer.text.fontSize,
             fontWeight: layer.text.bold ? "700" : "400",
             fontStyle: layer.text.italic ? "italic" : "normal",

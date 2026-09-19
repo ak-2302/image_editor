@@ -504,6 +504,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
         visible: true,
         text: {
           content: "テキスト",
+          fontFamily: "sans-serif",
           fontSize: 48,
           color: "#222222",
           bold: false,

@@ -116,6 +116,7 @@ const createObject = async (
   if (layer.type === "text" && layer.text) {
     return new Textbox(layer.text.content, {
       fill: getTextFill(layer.text.color, effects),
+      fontFamily: layer.text.fontFamily ?? "sans-serif",
       fontSize: layer.text.fontSize,
       fontWeight: layer.text.bold ? "700" : "400",
       fontStyle: layer.text.italic ? "italic" : "normal",

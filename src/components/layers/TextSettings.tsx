@@ -3,6 +3,7 @@ import EffectValueRow from "../effects/EffectValueRow";
 
 type TextSettingsProps = {
   content: string;
+  fontFamily?: string;
   fontSize: number;
   color: string;
   bold: boolean;
@@ -11,6 +12,7 @@ type TextSettingsProps = {
   linethrough?: boolean;
   onChange: (changes: {
     content?: string;
+    fontFamily?: string;
     fontSize?: number;
     color?: string;
     bold?: boolean;
@@ -22,6 +24,7 @@ type TextSettingsProps = {
 
 function TextSettings({
   content,
+  fontFamily = "sans-serif",
   fontSize,
   color,
   bold,
@@ -63,6 +66,18 @@ function TextSettings({
           rows={3}
           onChange={(event) => onChange({ content: event.target.value })}
         />
+        <label htmlFor="text_font_family">フォント</label>
+        <select
+          id="text_font_family"
+          value={fontFamily}
+          onChange={(event) => onChange({ fontFamily: event.target.value })}
+        >
+          <option value="sans-serif">ゴシック体</option>
+          <option value="serif">明朝体</option>
+          <option value="Arial, sans-serif">Arial</option>
+          <option value="Georgia, serif">Georgia</option>
+          <option value="monospace">等幅</option>
+        </select>
         <EffectValueRow
           label="文字サイズ"
           value={fontSize}

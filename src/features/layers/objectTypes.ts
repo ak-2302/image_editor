@@ -9,6 +9,7 @@ export type ObjectLayer = {
   shape?: ShapeProperties;
   text?: {
     content: string;
+    fontFamily: string;
     fontSize: number;
     color: string;
     bold: boolean;
