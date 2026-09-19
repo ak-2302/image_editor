@@ -45,66 +45,60 @@ export function applyObjectClipping(object: FabricObject, effects: EffectInstanc
   const width = object.width ?? 0;
   const height = object.height ?? 0;
   if (!width || !height) return;
-  let left = 0;
-  let right = 0;
-  let top = 0;
-  let bottom = 0;
-  let mask: EffectInstance["values"] | undefined;
-  let diagonalAngle: number | undefined;
+  let combinedClipPath: FabricObject | undefined;
+  const appendClipPath = (clipPath: FabricObject) => {
+    if (combinedClipPath) clipPath.set({ clipPath: combinedClipPath });
+    combinedClipPath = clipPath;
+  };
   for (const effect of effects) {
     if (effect.name === "clipping") {
-      top += Number(effect.values.clipTop ?? 0);
-      bottom += Number(effect.values.clipBottom ?? 0);
-      left += Number(effect.values.clipLeft ?? 0);
-      right += Number(effect.values.clipRight ?? 0);
+      const left = Number(effect.values.clipLeft ?? 0);
+      const right = Number(effect.values.clipRight ?? 0);
+      const top = Number(effect.values.clipTop ?? 0);
+      const bottom = Number(effect.values.clipBottom ?? 0);
+      if (left || right || top || bottom) {
+        appendClipPath(new Rect({
+          width: Math.max(0, width - left - right),
+          height: Math.max(0, height - top - bottom),
+          left: (left - right) / 2,
+          top: (top - bottom) / 2,
+          originX: "center",
+          originY: "center",
+        }));
+      }
     }
-    if (effect.name === "diagonalClipping") diagonalAngle = Number(effect.values.diagonalClipAngle ?? 0);
-    if (effect.name === "mask") mask = effect.values;
-  }
-  if (mask && (mask.maskWidth !== undefined || mask.maskHeight !== undefined)) {
-    const maskWidth = Math.min(width, Number(mask.maskWidth ?? width));
-    const maskHeight = Math.min(height, Number(mask.maskHeight ?? height));
-    const x = Number(mask.maskX ?? 0);
-    const y = Number(mask.maskY ?? 0);
-    const shape = mask.maskShape ?? "rectangle";
-    const clipPath = shape === "circle"
-      ? new Circle({ radius: Math.min(maskWidth, maskHeight) / 2, left: x, top: y, originX: "center", originY: "center" })
-      : shape === "ellipse"
-        ? new Ellipse({ rx: maskWidth / 2, ry: maskHeight / 2, left: x, top: y, originX: "center", originY: "center" })
-        : new Rect({ width: maskWidth, height: maskHeight, left: x, top: y, originX: "center", originY: "center" });
-    clipPath.set({
-      inverted: Boolean(mask.maskInvert),
-      shadow: Number(mask.maskBlur ?? 0) > 0
-        ? new Shadow({ color: "#000000", blur: Number(mask.maskBlur ?? 0), offsetX: 0, offsetY: 0 })
-        : undefined,
-    });
-    object.set({ clipPath });
-  }
-  if (left || right || top || bottom) {
-    object.set({
-      clipPath: new Rect({
-        width: Math.max(0, width - left - right),
-        height: Math.max(0, height - top - bottom),
-        left: (left - right) / 2,
-        top: (top - bottom) / 2,
-        originX: "center",
-        originY: "center",
-      }),
-    });
-  }
-  if (diagonalAngle !== undefined) {
-    const radians = (diagonalAngle * Math.PI) / 180;
-    object.set({
-      clipPath: new Polygon(
+    if (effect.name === "diagonalClipping") {
+      appendClipPath(new Polygon(
         [
           { x: -width / 2, y: -height / 2 },
           { x: width / 2, y: -height / 2 },
           { x: -width / 2, y: height / 2 },
         ],
-        { left: 0, top: 0, angle: radians * 180 / Math.PI, originX: "center", originY: "center" },
-      ),
-    });
+        { left: 0, top: 0, angle: Number(effect.values.diagonalClipAngle ?? 0), originX: "center", originY: "center" },
+      ));
+    }
+    if (effect.name === "mask") {
+      const values = effect.values;
+      const maskWidth = Math.min(width, Number(values.maskWidth ?? width));
+      const maskHeight = Math.min(height, Number(values.maskHeight ?? height));
+      const x = Number(values.maskX ?? 0);
+      const y = Number(values.maskY ?? 0);
+      const shape = values.maskShape ?? "rectangle";
+      const clipPath = shape === "circle"
+        ? new Circle({ radius: Math.min(maskWidth, maskHeight) / 2, left: x, top: y, originX: "center", originY: "center" })
+        : shape === "ellipse"
+          ? new Ellipse({ rx: maskWidth / 2, ry: maskHeight / 2, left: x, top: y, originX: "center", originY: "center" })
+          : new Rect({ width: maskWidth, height: maskHeight, left: x, top: y, originX: "center", originY: "center" });
+      clipPath.set({
+        inverted: Boolean(values.maskInvert),
+        shadow: Number(values.maskBlur ?? 0) > 0
+          ? new Shadow({ color: "#000000", blur: Number(values.maskBlur ?? 0), offsetX: 0, offsetY: 0 })
+          : undefined,
+      });
+      appendClipPath(clipPath);
+    }
   }
+  if (combinedClipPath) object.set({ clipPath: combinedClipPath });
 }
 
 export async function createImageLoopCopies(
