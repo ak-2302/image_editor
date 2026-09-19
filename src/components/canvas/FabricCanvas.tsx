@@ -22,6 +22,10 @@ type FabricCanvasProps = {
   transformsByObject: Record<string, typeof defaultObjectTransform>;
   effectsByObject: Record<string, { name: string; values: Record<string, unknown> }[]>;
   onSelect?: (id: string | number) => void;
+  onTransformChange?: (
+    id: string | number,
+    transform: { x: number; y: number; scale: number; rotation: number; opacity: number },
+  ) => void;
 };
 
 const getTransform = (
@@ -68,6 +72,7 @@ function FabricCanvas({
   transformsByObject,
   effectsByObject,
   onSelect,
+  onTransformChange,
 }: FabricCanvasProps) {
   const canvasElementRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = useRef<Canvas | null>(null);
@@ -132,6 +137,7 @@ function FabricCanvas({
       if (!cancelled) {
         canvas.on("selection:created", handleSelection);
         canvas.on("selection:updated", handleSelection);
+        canvas.on("object:modified", handleObjectModified);
         canvas.renderAll();
       }
     };
@@ -142,13 +148,37 @@ function FabricCanvas({
       const id = selected?.data?.objectId;
       if (id !== undefined) onSelect?.(id);
     };
+    const handleObjectModified = (event: {
+      target?: FabricObject & {
+        data?: { objectId?: string | number };
+        left?: number;
+        top?: number;
+        scaleX?: number;
+        angle?: number;
+        opacity?: number;
+        width?: number;
+      };
+    }) => {
+      const target = event.target;
+      const id = target?.data?.objectId;
+      if (id === undefined || !target || target.left === undefined || target.top === undefined) return;
+      const scale = Math.abs(target.scaleX ?? 1) * 100;
+      onTransformChange?.(id, {
+        x: target.left - width / 2,
+        y: target.top - height / 2,
+        scale,
+        rotation: target.angle ?? 0,
+        opacity: 100 - (target.opacity ?? 1) * 100,
+      });
+    };
     void renderLayers();
     return () => {
       cancelled = true;
       canvas.off("selection:created", handleSelection);
       canvas.off("selection:updated", handleSelection);
+      canvas.off("object:modified", handleObjectModified);
     };
-  }, [effectsByObject, layers, onSelect, transformsByObject]);
+  }, [effectsByObject, height, layers, mainEffects, mainLayer, mainTransform, onSelect, onTransformChange, transformsByObject, width]);
 
   return <canvas ref={canvasElementRef} aria-label="Fabric.js編集キャンバス" />;
 }

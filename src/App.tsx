@@ -536,6 +536,13 @@ const isAvailableEffect = (effect: EffectInstance) =>
     setShowEffectMenu(false);
     setOpenMenu(null);
   };
+  const handleFabricTransformChange = (
+    id: string | number,
+    transform: typeof defaultObjectTransform,
+  ) => {
+    recordHistory();
+    setTransformForObject(id === 0 ? "main" : String(id), transform);
+  };
   const updateShapeProperty = <K extends keyof ShapeProperties>(
     key: K,
     value: ShapeProperties[K],
@@ -857,6 +864,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     transformsByObject={transformsByObject}
                     effectsByObject={effectsByObject}
                     onSelect={selectObject}
+                    onTransformChange={handleFabricTransformChange}
                   />
                 )}
                 <div style={{ display: "none" }}>
