@@ -23,22 +23,32 @@ import {
   type EffectParameters,
 } from "./features/effects/effectParameters";
 import { isSupportedImage, readImageAsDataUrl } from "./features/images/imageUtils";
+import { useCanvasState } from "./features/canvas/useCanvasState";
 import type { ObjectLayer } from "./features/layers/objectTypes";
 
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showLegacyLayerPanel] = useState(false);
+  const legacyLayerPanelEnabled = import.meta.env.VITE_LEGACY_LAYER_PANEL === "true";
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [layerName, setLayerName] = useState("画像レイヤー");
   const [isLayerVisible, setIsLayerVisible] = useState(true);
   const [isRenamingLayer, setIsRenamingLayer] = useState(false);
-  const [canvasSize, setCanvasSize] = useState<{
-    width: number;
-    height: number;
-  } | null>(null);
-  const [showBlankCanvasForm, setShowBlankCanvasForm] = useState(false);
-  const [blankWidth, setBlankWidth] = useState(1200);
-  const [blankHeight, setBlankHeight] = useState(800);
+  const {
+    canvasSize,
+    setCanvasSize,
+    showBlankCanvasForm,
+    setShowBlankCanvasForm,
+    blankWidth,
+    setBlankWidth,
+    blankHeight,
+    setBlankHeight,
+    frameOpacity,
+    setFrameOpacity,
+    frameThickness,
+    setFrameThickness,
+    createBlankCanvas,
+    resetCanvas,
+  } = useCanvasState();
   const [isDragging, setIsDragging] = useState(false);
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
@@ -83,8 +93,6 @@ function App() {
   const [openEffectMenu, setOpenEffectMenu] = useState<number | null>(null);
   const [draggingEffect, setDraggingEffect] = useState<EffectName | null>(null);
   const [movingEffect, setMovingEffect] = useState<EffectName | null>(null);
-  const [frameOpacity, setFrameOpacity] = useState(100);
-  const [frameThickness, setFrameThickness] = useState(1);
   const [notice, setNotice] = useState<string | null>(null);
 
   const objectKey = String(selectedObjectId);
@@ -239,8 +247,7 @@ function App() {
     if (!imageUrl) setLayerName(file.name);
     setShapeType(null);
     setIsLayerVisible(true);
-    setCanvasSize(null);
-    setShowBlankCanvasForm(false);
+    resetCanvas();
     setNotice(null);
   };
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -275,7 +282,7 @@ function App() {
     setImageUrl(null);
     setShapeType(null);
     setLayerName("画像レイヤー");
-    setCanvasSize(null);
+    resetCanvas();
     setObjectLayers([]);
   };
   const updateEffect = (name: EffectName, value: number) => {
@@ -572,11 +579,9 @@ function App() {
                     <button
                       type="button"
                       onClick={() => {
-                        setCanvasSize({
-                          width: blankWidth,
-                          height: blankHeight,
-                        });
-                        setShowBlankCanvasForm(false);
+                        if (!createBlankCanvas()) {
+                          setNotice("幅と高さは1以上で指定してください。");
+                        }
                       }}
                     >
                       作成
@@ -595,7 +600,7 @@ function App() {
           </div>
         </section>
         <aside className="effects_panel" aria-label="レイヤーとエフェクト">
-          {showLegacyLayerPanel && (
+          {legacyLayerPanelEnabled && (
             <section className="layers_section" aria-label="オブジェクトレイヤー">
             <div className="layers_section_header">
               <span>オブジェクト</span>
