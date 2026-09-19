@@ -8,10 +8,8 @@ import {
 } from "react";
 import "./App.css";
 import EffectValueRow from "./components/effects/EffectValueRow";
-import ShapeObject from "./components/canvas/ShapeObject";
 import FabricCanvas from "./components/canvas/FabricCanvas";
 import LayerPanel from "./components/layers/LayerPanel";
-import TextObject from "./components/canvas/TextObject";
 import TextSettings from "./components/layers/TextSettings";
 import type {
   InitialEffectKey,
@@ -21,8 +19,6 @@ import {
   effectDefinitions,
   type EffectName,
 } from "./features/effects/effectDefinitions";
-import { getEffectsFilter } from "./features/effects/effectProcessing";
-import { getFlipScale, isAlphaInverted } from "./features/effects/processors/flipEffect";
 import {
   defaultEffectParameters,
   type EffectParameters,
@@ -46,15 +42,6 @@ import {
   normalizeShapeProperties,
   type ShapeProperties,
 } from "./features/shapes/shapeTypes";
-
-const isShapeLayer = (
-  layer: ObjectLayer,
-): layer is ObjectLayer & {
-  type: "rectangle" | "circle" | "triangle";
-} =>
-  layer.type === "rectangle" ||
-  layer.type === "circle" ||
-  layer.type === "triangle";
 
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -601,37 +588,6 @@ const isAvailableEffect = (effect: EffectInstance) =>
       ? value
       : effectDefaultValues[effect.name];
   };
-  const getObjectTransform = (
-    transform: typeof initialEffects,
-    effects: EffectInstance[],
-  ) => {
-    const flip = effects.find((effect) => effect.name === "flip")?.values ?? {};
-    const flipScale = getFlipScale(flip);
-    return `translate(${transform.x}px, ${transform.y}px) scale(${(transform.scale / 100) * flipScale.x}, ${(transform.scale / 100) * flipScale.y}) rotate(${transform.rotation}deg)`;
-  };
-  const getObjectOpacity = (opacity: number, effects: EffectInstance[]) => {
-    const value = (100 - opacity) / 100;
-    return effects.some((effect) => effect.name === "flip" && isAlphaInverted(effect.values))
-      ? 1 - value
-      : value;
-  };
-  const imageTransform =
-    selectedObjectId === "main"
-      ? getObjectTransform(initialEffects, activeEffects)
-      : "none";
-  const selectedObjectTransform = getObjectTransform(initialEffects, activeEffects);
-  const mainObjectTransform = transformsByObject.main ?? defaultObjectTransform;
-  const mainShapeTransform =
-    selectedObjectId === "main"
-      ? selectedObjectTransform
-      : getObjectTransform(mainObjectTransform, effectsByObject.main ?? []);
-  const mainShapeOpacity =
-    getObjectOpacity(
-      selectedObjectId === "main"
-        ? initialEffects.opacity
-        : mainObjectTransform.opacity,
-      selectedObjectId === "main" ? activeEffects : effectsByObject.main ?? [],
-    );
   const hasCanvas = Boolean(imageUrl || canvasSize || shapeType);
   const mainFabricLayer: ObjectLayer | null = imageUrl
     ? {
@@ -859,7 +815,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     height={canvasSize.height}
                     mainLayer={mainFabricLayer}
                     layers={[...objectLayers].reverse()}
-                    mainTransform={mainObjectTransform}
+                    mainTransform={transformsByObject.main ?? defaultObjectTransform}
                     mainEffects={selectedObjectId === "main" ? activeEffects : effectsByObject.main ?? []}
                     transformsByObject={transformsByObject}
                     effectsByObject={effectsByObject}
@@ -867,96 +823,6 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     onTransformChange={handleFabricTransformChange}
                   />
                 )}
-                <div style={{ display: "none" }}>
-                {imageUrl && isLayerVisible && (
-                  <img
-                    className="canvas_image"
-                    src={imageUrl}
-                    alt="編集キャンバスの画像"
-                    onError={() => setNotice("画像を表示できませんでした。")}
-                    onLoad={(event) => {
-                      const image = event.currentTarget;
-                      setCanvasSize(
-                        (size) =>
-                          size ?? {
-                            width: image.naturalWidth,
-                            height: image.naturalHeight,
-                          },
-                      );
-                    }}
-                    style={{
-                      filter: getEffectsFilter(activeEffects),
-                      transform: imageTransform,
-                      opacity: getObjectOpacity(initialEffects.opacity, activeEffects),
-                    }}
-                  />
-                )}
-                {shapeType && isLayerVisible && (
-                  <ShapeObject
-                    type={shapeType}
-                    name={layerName}
-                    transform={mainShapeTransform}
-                    opacity={mainShapeOpacity}
-                    zIndex={0}
-                    filter={getEffectsFilter(activeEffects)}
-                    properties={shapeProperties}
-                  />
-                )}
-                {[...objectLayers].reverse().map((layer, renderIndex) => {
-                  if (!layer.visible) return null;
-                  const layerEffects = effectsByObject[String(layer.id)] ?? [];
-                  const layerTransform =
-                    transformsByObject[String(layer.id)] ?? defaultObjectTransform;
-                  const transform = getObjectTransform(layerTransform, layerEffects);
-                  const opacity = getObjectOpacity(layerTransform.opacity, layerEffects);
-                  const zIndex = renderIndex + 1;
-                  if (layer.type === "image" && layer.url) {
-                    return (
-                      <img
-                        className="canvas_image"
-                        key={layer.id}
-                        src={layer.url}
-                        alt={layer.name}
-                        onError={() => setNotice(`${layer.name}を表示できませんでした。`)}
-                        style={{
-                          filter: getEffectsFilter(layerEffects),
-                          transform,
-                          opacity,
-                          zIndex,
-                        }}
-                      />
-                    );
-                  }
-                  if (isShapeLayer(layer)) {
-                    return (
-                      <ShapeObject
-                        key={layer.id}
-                        type={layer.type}
-                        name={layer.name}
-                        transform={transform}
-                        opacity={opacity}
-                        zIndex={zIndex}
-                        filter={getEffectsFilter(layerEffects)}
-                        properties={layer.shape}
-                      />
-                    );
-                  }
-                  if (layer.type === "text" && layer.text) {
-                    return (
-                      <TextObject
-                        key={layer.id}
-                        {...layer.text}
-                        name={layer.name}
-                        transform={transform}
-                        opacity={opacity}
-                        zIndex={zIndex}
-                        filter={getEffectsFilter(layerEffects)}
-                      />
-                    );
-                  }
-                  return null;
-                })}
-                </div>
               </div>
             ) : (
               <>
