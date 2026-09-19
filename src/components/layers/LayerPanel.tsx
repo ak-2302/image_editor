@@ -58,7 +58,7 @@ function LayerPanel({
           open={showObjectMenu}
           onToggle={() => setShowObjectMenu((visible) => !visible)}
           trigger={<button type="button" className="layer_add_button" aria-label="オブジェクトを追加" aria-expanded={showObjectMenu}>＋</button>}
-          menuClassName="layer_add_menu"
+          menuClassName="header_dropdown layer_add_menu"
         >
               <button
                 type="button"

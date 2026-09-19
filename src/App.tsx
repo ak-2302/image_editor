@@ -1170,7 +1170,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                 open={showEffectMenu}
                 onToggle={() => setShowEffectMenu((visible) => !visible)}
                 trigger={<button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu}>＋</button>}
-                menuClassName="effect_menu"
+                menuClassName="header_dropdown effect_menu"
               >
                   {effectDefinitions.map(({ name, label }) => (
                     <button

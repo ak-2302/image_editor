@@ -438,31 +438,7 @@ input[type="range"] {
 }
 
 .effect_menu {
-  position: absolute;
-  top: 2.5rem;
-  right: 0;
-  z-index: 2;
   display: grid;
-  min-width: 10rem;
-  padding: 0.35rem;
-  border: 1px solid var(--border_color);
-  background: #fff;
-  box-shadow: 0 0.75rem 2rem rgb(27 35 45 / 12%);
-}
-
-.effect_menu button {
-  padding: 0.55rem 0.7rem;
-  border: 0;
-  background: transparent;
-  color: var(--heading_color);
-  text-align: left;
-  font-size: 0.78rem;
-  cursor: pointer;
-}
-
-.effect_menu button:hover {
-  background: #f1f4f5;
-  color: var(--accent_color);
 }
 
 .effect_controls {
@@ -1268,29 +1244,7 @@ input[type="range"] {
   position: relative;
 }
 .layer_add_menu {
-  position: absolute;
-  right: 0;
-  top: 2.2rem;
-  z-index: 5;
   display: grid;
-  min-width: 7rem;
-  padding: 0.25rem;
-  border: 1px solid var(--border_color);
-  background: #fff;
-  box-shadow: 0 0.75rem 2rem rgb(27 35 45 / 12%);
-}
-.layer_add_menu button {
-  padding: 0.5rem 0.7rem;
-  border: 0;
-  background: transparent;
-  color: var(--heading_color);
-  font-size: 0.72rem;
-  text-align: left;
-  cursor: pointer;
-}
-.layer_add_menu button:hover {
-  background: #f1f4f5;
-  color: var(--accent_color);
 }
 .canvas_shape {
   position: absolute;
