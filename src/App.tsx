@@ -37,6 +37,11 @@ import type { EditorHistorySnapshot } from "./features/history/historyTypes";
 import { loadProject, saveProject } from "./features/project/projectStorage";
 import { exportProject } from "./features/export/exportProject";
 import EditorNotice from "./components/feedback/EditorNotice";
+import ShapeSettingsAccordion from "./components/shapes/ShapeSettingsAccordion";
+import {
+  defaultShapeProperties,
+  type ShapeProperties,
+} from "./features/shapes/shapeTypes";
 
 const isShapeLayer = (
   layer: ObjectLayer,
@@ -98,6 +103,7 @@ function App() {
     null,
   );
   const [initialEffectsOpen, setInitialEffectsOpen] = useState(true);
+  const [shapeSettingsOpen, setShapeSettingsOpen] = useState(true);
   const {
     values: initialEffects,
     update: updateTransform,
@@ -112,6 +118,9 @@ function App() {
   const [shapeType, setShapeType] = useState<
     "rectangle" | "circle" | "triangle" | null
   >(null);
+  const [shapeProperties, setShapeProperties] = useState<ShapeProperties>(
+    defaultShapeProperties,
+  );
   const [objectLayers, setObjectLayers] = useState<ObjectLayer[]>([]);
   const [openEffectMenu, setOpenEffectMenu] = useState<number | null>(null);
   const [draggingEffect, setDraggingEffect] = useState<string | null>(null);
@@ -127,6 +136,7 @@ function App() {
     layerName,
     isLayerVisible,
     shapeType,
+    shapeProperties,
     canvasSize,
     frameOpacity,
     frameThickness,
@@ -145,6 +155,7 @@ function App() {
     setLayerName(snapshot.layerName);
     setIsLayerVisible(snapshot.isLayerVisible);
     setShapeType(snapshot.shapeType);
+    setShapeProperties(snapshot.shapeProperties ?? defaultShapeProperties);
     setCanvasSize(snapshot.canvasSize);
     setFrameOpacity(snapshot.frameOpacity);
     setFrameThickness(snapshot.frameThickness);
@@ -210,6 +221,10 @@ function App() {
           objectLayers.find((layer) => layer.id === selectedObjectId)?.type ??
             "image"
         ];
+  const selectedShapeType =
+    selectedObjectId === "main"
+      ? shapeType
+      : objectLayers.find((layer) => layer.id === selectedObjectId)?.type;
   const currentParameters = (): EffectParameters => ({
     brightness,
     contrast,
@@ -273,6 +288,12 @@ function App() {
       [objectKey]: currentParameters(),
     }));
     setSelectedObjectId(id);
+    setShapeProperties(
+      id === "main"
+        ? shapeProperties
+        : objectLayers.find((layer) => layer.id === id)?.shape ??
+            defaultShapeProperties,
+    );
     setActiveEffects(effectsByObject[String(id)] ?? []);
     if (nextParameters) {
       setBrightness(nextParameters.brightness);
@@ -393,6 +414,7 @@ function App() {
           name: layerName,
           type: shapeType,
           visible: isLayerVisible,
+          shape: shapeProperties,
         },
       ]);
       setTransformForObject(String(previousMainId), initialEffects);
@@ -406,6 +428,7 @@ function App() {
       }));
     }
     setShapeType(type);
+    setShapeProperties(defaultShapeProperties);
     setCanvasSize((size) => size ?? { width: 800, height: 600 });
     if (!imageUrl) {
       setLayerName(name);
@@ -421,7 +444,7 @@ function App() {
     }
     setObjectLayers((layers) => [
       ...layers,
-      { id, name, type, visible: true },
+      { id, name, type, visible: true, shape: defaultShapeProperties },
     ]);
     selectObject(id);
   };
@@ -459,6 +482,20 @@ function App() {
       return;
     }
     selectObject(objectLayers[0].id);
+  };
+  const updateShapeProperty = <K extends keyof ShapeProperties>(
+    key: K,
+    value: ShapeProperties[K],
+  ) => {
+    recordHistory();
+    const nextProperties = { ...shapeProperties, [key]: value };
+    setShapeProperties(nextProperties);
+    if (selectedObjectId === "main") return;
+    setObjectLayers((layers) =>
+      layers.map((layer) =>
+        layer.id === selectedObjectId ? { ...layer, shape: nextProperties } : layer,
+      ),
+    );
   };
   const updateEffectValue = <K extends keyof EffectParameters>(
     effectId: string,
@@ -737,6 +774,7 @@ function App() {
                     name={layerName}
                     transform={selectedObjectTransform}
                     opacity={(100 - initialEffects.opacity) / 100}
+                    properties={shapeProperties}
                   />
                 )}
                 {[...objectLayers].reverse().map((layer) => {
@@ -766,6 +804,7 @@ function App() {
                         name={layer.name}
                         transform={transform}
                         opacity={opacity}
+                        properties={layer.shape}
                       />
                     );
                   }
@@ -1121,6 +1160,17 @@ function App() {
                 onToggle={() => setInitialEffectsOpen((open) => !open)}
                 onChange={handleInitialEffectChange}
               />
+              {selectedShapeType === "rectangle" ||
+              selectedShapeType === "circle" ||
+              selectedShapeType === "triangle" ? (
+                <ShapeSettingsAccordion
+                  shapeType={selectedShapeType}
+                  values={shapeProperties}
+                  isOpen={shapeSettingsOpen}
+                  onToggle={() => setShapeSettingsOpen((open) => !open)}
+                  onChange={updateShapeProperty}
+                />
+              ) : null}
               {activeEffects.map((effect, index) => {
                 const { name } = effect;
                 const definition = effectDefinitions.find(

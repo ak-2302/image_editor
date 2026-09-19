@@ -2,6 +2,7 @@ import type { InitialEffectValues } from "../../components/initial-effects/effec
 import type { EffectParameters } from "../effects/effectParameters";
 import type { ObjectLayer } from "../layers/objectTypes";
 import type { EffectInstance } from "../project/projectTypes";
+import type { ShapeProperties } from "../shapes/shapeTypes";
 
 export type EditorHistorySnapshot = {
   projectName: string;
@@ -9,6 +10,7 @@ export type EditorHistorySnapshot = {
   layerName: string;
   isLayerVisible: boolean;
   shapeType: "rectangle" | "circle" | "triangle" | null;
+  shapeProperties: ShapeProperties;
   canvasSize: { width: number; height: number } | null;
   frameOpacity: number;
   frameThickness: number;

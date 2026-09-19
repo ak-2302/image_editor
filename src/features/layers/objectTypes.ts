@@ -1,9 +1,12 @@
+import type { ShapeProperties } from "../shapes/shapeTypes";
+
 export type ObjectLayer = {
   id: number;
   name: string;
   type: "image" | "rectangle" | "circle" | "triangle" | "text";
   url?: string;
   visible: boolean;
+  shape?: ShapeProperties;
   text?: {
     content: string;
     fontSize: number;

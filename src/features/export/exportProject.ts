@@ -82,8 +82,16 @@ const drawObject = async (
     context.textBaseline = "middle";
     context.fillText(layer.text.content, 0, 0);
   } else if (layer.type === "rectangle" || layer.type === "circle" || layer.type === "triangle") {
-    context.fillStyle = "#d66b4d";
-    drawShape(context, layer.type, canvasWidth * 0.45, canvasHeight * 0.45);
+    const shape = layer.shape;
+    const size = (shape?.size ?? 100) / 100;
+    const aspect = 1 - (shape?.aspectRatio ?? 0) / 100;
+    const shapeWidth = canvasWidth * 0.45 * size;
+    const shapeHeight = canvasHeight * 0.45 * size * aspect;
+    context.fillStyle = shape?.fillColor ?? "#ffffff";
+    context.strokeStyle = shape?.strokeColor ?? "#ffffff";
+    context.lineWidth = shape?.lineWidth ?? 0;
+    drawShape(context, layer.type, shapeWidth, shapeHeight);
+    if ((shape?.lineWidth ?? 0) > 0) context.stroke();
   }
   context.restore();
 };
