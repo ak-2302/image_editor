@@ -8,6 +8,7 @@ import {
 } from "react";
 import "./App.css";
 import EffectValueRow from "./components/effects/EffectValueRow";
+import AdvancedEffectSettings from "./components/effects/AdvancedEffectSettings";
 import FabricCanvas from "./components/canvas/FabricCanvas";
 import LayerPanel from "./components/layers/LayerPanel";
 import TextSettings from "./components/layers/TextSettings";
@@ -1468,6 +1469,23 @@ const isAvailableEffect = (effect: EffectInstance) =>
                             </label>
                           ))}
                         </div>
+                      ) : [
+                        "monochrome",
+                        "gradient",
+                        "glow",
+                        "blur",
+                        "mosaic",
+                        "clipping",
+                        "diagonalClipping",
+                        "mask",
+                        "shadow",
+                        "outline",
+                        "imageLoop",
+                      ].includes(name) ? (
+                        <AdvancedEffectSettings
+                          effect={effect}
+                          onChange={(key, value) => updateEffectValue(effect.id, key, value)}
+                        />
                       ) : (
                         <div className="initial_effect_fields">
                           <EffectValueRow
