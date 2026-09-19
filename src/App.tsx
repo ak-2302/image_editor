@@ -93,7 +93,10 @@ function App() {
   const [activeEffects, setActiveEffects] = useState<EffectInstance[]>([]);
   const [selectedObjectId, setSelectedObjectId] = useState<string | number>(
     "main",
-  );
+);
+
+const isAvailableEffect = (effect: EffectInstance) =>
+  effectDefinitions.some((definition) => definition.name === effect.name);
   const [effectsByObject, setEffectsByObject] = useState<
     Record<string, EffectInstance[]>
   >({ main: [] });
@@ -164,8 +167,15 @@ function App() {
     setFrameThickness(snapshot.frameThickness);
     setObjectLayers(snapshot.objectLayers);
     setSelectedObjectId(snapshot.selectedObjectId);
-    setActiveEffects(snapshot.activeEffects);
-    setEffectsByObject(snapshot.effectsByObject);
+    setActiveEffects(snapshot.activeEffects.filter(isAvailableEffect));
+    setEffectsByObject(
+      Object.fromEntries(
+        Object.entries(snapshot.effectsByObject).map(([id, effects]) => [
+          id,
+          effects.filter(isAvailableEffect),
+        ]),
+      ),
+    );
     setParametersByObject(snapshot.parametersByObject);
     setAllTransforms(snapshot.transformsByObject, String(snapshot.selectedObjectId));
     setBrightness(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.brightness ?? defaultEffectParameters.brightness);
