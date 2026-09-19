@@ -12,6 +12,7 @@ import type { EffectInstance } from "../../features/project/projectTypes";
 import { getFlipScale } from "../../features/effects/processors/flipEffect";
 import { getEffectColor } from "../../features/effects/fabricEffectStyles";
 import { createShapeSvgDataUrl } from "../../features/shapes/svgShapeRenderer";
+import { createRegularPolygon } from "../../features/shapes/polygonRenderer";
 import { defaultObjectTransform } from "../../features/objects/useObjectTransforms";
 
 type FabricCanvasProps = {
@@ -60,6 +61,7 @@ const createShape = async (
   effects: EffectInstance[],
 ): Promise<FabricObject | null> => {
   const dataUrl = createShapeSvgDataUrl(layer, { canvasWidth, effects });
+  if (layer.type === "polygon") return createRegularPolygon(layer, canvasWidth, effects);
   if (!dataUrl) return null;
   if (layer.type === "triangle" && (layer.shape?.lineWidth ?? 0) > 0) {
     const outerUrl = createShapeSvgDataUrl(layer, { canvasWidth, effects }, "outer");

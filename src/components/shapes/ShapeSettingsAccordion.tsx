@@ -13,18 +13,20 @@ type ShapeSettingsAccordionProps = {
   embedded?: boolean;
 };
 
-const labels: Record<"color" | "lineWidth" | "size" | "aspectRatio" | "cornerRadius", string> = {
+const labels: Record<"color" | "lineWidth" | "size" | "aspectRatio" | "cornerRadius" | "polygonSides", string> = {
   color: "色",
   lineWidth: "ライン幅",
   size: "サイズ",
   aspectRatio: "縦横比",
   cornerRadius: "角の丸み",
+  polygonSides: "頂点数",
 };
 
 const shapeLabels: Record<ShapeType, string> = {
   rectangle: "四角形",
   circle: "円形",
   triangle: "三角形",
+  polygon: "正多角形",
 };
 
 function ShapeSettingsAccordion({
@@ -36,14 +38,14 @@ function ShapeSettingsAccordion({
   embedded = false,
 }: ShapeSettingsAccordionProps) {
   const draggingRef = useRef<{
-    key: "lineWidth" | "size" | "aspectRatio" | "cornerRadius";
+    key: "lineWidth" | "size" | "aspectRatio" | "cornerRadius" | "polygonSides";
     startX: number;
     startValue: number;
   } | null>(null);
 
   const handlePointerDown = (
     event: ReactPointerEvent<HTMLDivElement>,
-    key: "lineWidth" | "size" | "aspectRatio" | "cornerRadius",
+    key: "lineWidth" | "size" | "aspectRatio" | "cornerRadius" | "polygonSides",
   ) => {
     draggingRef.current = { key, startX: event.clientX, startValue: values[key] };
     const handlePointerMove = (moveEvent: PointerEvent) => {
@@ -62,7 +64,7 @@ function ShapeSettingsAccordion({
   };
 
   const numericFields: Array<{
-    key: "lineWidth" | "size" | "aspectRatio" | "cornerRadius";
+    key: "lineWidth" | "size" | "aspectRatio" | "cornerRadius" | "polygonSides";
     unit: string;
     initial: number;
   }> = [
@@ -72,6 +74,9 @@ function ShapeSettingsAccordion({
   ];
   if (shapeType === "rectangle") {
     numericFields.push({ key: "cornerRadius", unit: "%", initial: 0 });
+  }
+  if (shapeType === "polygon") {
+    numericFields.push({ key: "polygonSides", unit: "辺", initial: 5 });
   }
 
   const fields = (

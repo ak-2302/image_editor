@@ -9,7 +9,7 @@ export type EditorHistorySnapshot = {
   imageUrl: string | null;
   layerName: string;
   isLayerVisible: boolean;
-  shapeType: "rectangle" | "circle" | "triangle" | null;
+  shapeType: "rectangle" | "circle" | "triangle" | "polygon" | null;
   shapeProperties: ShapeProperties;
   canvasSize: { width: number; height: number } | null;
   frameOpacity: number;

@@ -1,4 +1,4 @@
-export type ShapeType = "rectangle" | "circle" | "triangle";
+export type ShapeType = "rectangle" | "circle" | "triangle" | "polygon";
 
 export type ShapeProperties = {
   color: string;
@@ -9,6 +9,7 @@ export type ShapeProperties = {
   size: number;
   aspectRatio: number;
   cornerRadius: number;
+  polygonSides: number;
 };
 
 export const defaultShapeProperties: ShapeProperties = {
@@ -17,6 +18,7 @@ export const defaultShapeProperties: ShapeProperties = {
   size: 100,
   aspectRatio: 0,
   cornerRadius: 0,
+  polygonSides: 5,
 };
 
 export function normalizeShapeProperties(
@@ -34,5 +36,6 @@ export function normalizeShapeProperties(
       defaultShapeProperties.color,
     lineWidth: Math.max(0, lineWidth),
     cornerRadius: Math.max(0, Math.min(100, cornerRadius)),
+    polygonSides: Math.max(3, Math.round(properties?.polygonSides ?? defaultShapeProperties.polygonSides)),
   };
 }

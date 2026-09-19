@@ -3,7 +3,7 @@ import type { ShapeProperties } from "../shapes/shapeTypes";
 export type ObjectLayer = {
   id: number;
   name: string;
-  type: "image" | "rectangle" | "circle" | "triangle" | "text";
+  type: "image" | "rectangle" | "circle" | "triangle" | "polygon" | "text";
   url?: string;
   visible: boolean;
   shape?: ShapeProperties;

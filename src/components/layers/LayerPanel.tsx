@@ -10,14 +10,14 @@ type LayerPanelProps = {
   isLayerVisible: boolean;
   setIsLayerVisible: (update: (visible: boolean) => boolean) => void;
   canvasSize: { width: number; height: number } | null;
-  shapeType: "rectangle" | "circle" | "triangle" | null;
+  shapeType: "rectangle" | "circle" | "triangle" | "polygon" | null;
   objectLayers: ObjectLayer[];
   selectedObjectId: string | number;
   selectObject: (id: string | number) => void;
   setObjectLayers: (update: (layers: ObjectLayer[]) => ObjectLayer[]) => void;
   recordHistory: () => void;
   clearImage: () => void;
-  addShape: (type: "rectangle" | "circle" | "triangle", name: string) => void;
+  addShape: (type: "rectangle" | "circle" | "triangle" | "polygon", name: string) => void;
   addText: () => void;
 };
 
@@ -74,6 +74,7 @@ function LayerPanel({
                   ["rectangle", "四角形"],
                   ["circle", "円形"],
                   ["triangle", "三角形"],
+                  ["polygon", "正多角形"],
                 ] as const
               ).map(([type, name]) => (
                 <button
