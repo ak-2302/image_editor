@@ -376,6 +376,21 @@ input[type="range"] {
   cursor: pointer;
 }
 
+.reset_object_button {
+  margin-right: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--border_color);
+  background: #fff;
+  color: var(--muted_color);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.reset_object_button:hover {
+  border-color: var(--accent_color);
+  color: var(--accent_color);
+}
+
 .add_effect_button:hover {
   border-color: var(--accent_color);
   color: var(--accent_color);
