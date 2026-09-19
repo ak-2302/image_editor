@@ -667,10 +667,10 @@ function App() {
             )}
           </div>
           <div className="history_controls" aria-label="編集履歴">
-            <button type="button" onClick={undo} disabled={!history.canUndo}>
+            <button type="button" aria-label="操作を元に戻す" onClick={undo} disabled={!history.canUndo}>
               Undo
             </button>
-            <button type="button" onClick={redo} disabled={!history.canRedo}>
+            <button type="button" aria-label="元に戻した操作をやり直す" onClick={redo} disabled={!history.canRedo}>
               Redo
             </button>
           </div>

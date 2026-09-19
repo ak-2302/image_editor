@@ -103,8 +103,16 @@ function LayerPanel({
       <div className="layers_list" role="list">
         <div
           onClick={() => selectObject("main")}
+          onKeyDown={(event) => {
+            if (hasMainObject && (event.key === "Enter" || event.key === " ")) {
+              event.preventDefault();
+              selectObject("main");
+            }
+          }}
           className={`layer_item${selectedObjectId === "main" && hasMainObject ? " is_selected" : !hasMainObject ? " is_empty" : ""}`}
           role="listitem"
+          tabIndex={hasMainObject ? 0 : -1}
+          aria-label={imageUrl || shapeType ? layerName : canvasSize ? "空のキャンバス" : "画像を読み込んでください"}
         >
           <button
             type="button"
@@ -173,8 +181,16 @@ function LayerPanel({
         {objectLayers.map((layer) => (
           <div
             onClick={() => selectObject(layer.id)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                selectObject(layer.id);
+              }
+            }}
             className={`layer_item${selectedObjectId === layer.id ? " is_selected" : ""}`}
             role="listitem"
+            tabIndex={0}
+            aria-label={`${layer.name}レイヤー`}
             key={layer.id}
             draggable
             onDragStart={() => setDraggedLayerId(layer.id)}
