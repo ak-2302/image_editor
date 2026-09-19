@@ -1,4 +1,4 @@
-export type ShapeType = "rectangle" | "circle" | "triangle" | "polygon";
+export type ShapeType = "rectangle" | "circle" | "triangle" | "polygon" | "line";
 
 export type ShapeProperties = {
   color: string;

@@ -1,4 +1,4 @@
-import { Group, Polygon } from "fabric";
+import { Group, Line, Polygon } from "fabric";
 import type { ObjectLayer } from "../layers/objectTypes";
 import type { EffectInstance } from "../project/projectTypes";
 import { getEffectColor } from "../effects/fabricEffectStyles";
@@ -8,6 +8,15 @@ export function createRegularPolygon(
   canvasWidth: number,
   effects: EffectInstance[],
 ) {
+  if (layer.type === "line") {
+    const length = (canvasWidth * 0.45 * (layer.shape?.size ?? 100)) / 100;
+    return new Line([-length / 2, 0, length / 2, 0], {
+      stroke: getEffectColor(layer.shape?.color ?? "#ffffff", effects),
+      strokeWidth: Math.max(1, layer.shape?.lineWidth ?? 0),
+      originX: "center",
+      originY: "center",
+    });
+  }
   const size = (canvasWidth * 0.45 * (layer.shape?.size ?? 100)) / 100;
   const aspect = 1 - (layer.shape?.aspectRatio ?? 0) / 100;
   const sides = Math.max(3, Math.round(layer.shape?.polygonSides ?? 5));

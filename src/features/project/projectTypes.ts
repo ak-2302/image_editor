@@ -8,6 +8,7 @@ export type ProjectObjectType =
   | "circle"
   | "triangle"
   | "polygon"
+  | "line"
   | "text";
 
 export type EffectInstance = {

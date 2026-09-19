@@ -27,6 +27,7 @@ const shapeLabels: Record<ShapeType, string> = {
   circle: "円形",
   triangle: "三角形",
   polygon: "正多角形",
+  line: "線",
 };
 
 function ShapeSettingsAccordion({

@@ -62,7 +62,7 @@ const getEffects = (
 
 const createShape = async (layer: ObjectLayer, canvasWidth: number, effects: EditorHistorySnapshot["activeEffects"]): Promise<FabricObject | null> => {
   const dataUrl = createShapeSvgDataUrl(layer, { canvasWidth, effects });
-  if (layer.type === "polygon") return createRegularPolygon(layer, canvasWidth, effects);
+  if (layer.type === "polygon" || layer.type === "line") return createRegularPolygon(layer, canvasWidth, effects);
   if (!dataUrl) return null;
   if (layer.type === "triangle" && (layer.shape?.lineWidth ?? 0) > 0) {
     const outerUrl = createShapeSvgDataUrl(layer, { canvasWidth, effects }, "outer");

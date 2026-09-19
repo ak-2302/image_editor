@@ -109,7 +109,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
   const [showEffectMenu, setShowEffectMenu] = useState(false);
   const [showObjectMenu, setShowObjectMenu] = useState(false);
   const [shapeType, setShapeType] = useState<
-    "rectangle" | "circle" | "triangle" | "polygon" | null
+    "rectangle" | "circle" | "triangle" | "polygon" | "line" | null
   >(null);
   const [shapeProperties, setShapeProperties] = useState<ShapeProperties>(
     defaultShapeProperties,
@@ -217,6 +217,8 @@ const isAvailableEffect = (effect: EffectInstance) =>
               ? "三角形"
               : shapeType === "polygon"
                 ? "正多角形"
+                : shapeType === "line"
+                  ? "線"
               : canvasSize
                 ? "空のキャンバス"
                 : "未選択"
@@ -226,6 +228,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
             circle: "円形",
             triangle: "三角形",
             polygon: "正多角形",
+            line: "線",
             image: "画像",
             text: "テキスト",
           } as const
@@ -432,7 +435,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     loadFile(event.dataTransfer.files[0]);
   };
   const addShape = (
-    type: "rectangle" | "circle" | "triangle" | "polygon",
+    type: "rectangle" | "circle" | "triangle" | "polygon" | "line",
     name: string,
   ) => {
     recordHistory();
@@ -937,6 +940,15 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     >
                       正多角形
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addShape("line", "線");
+                        setShowObjectMenu(false);
+                      }}
+                    >
+                      線
+                    </button>
                   </div>
                   )}
               </div>
@@ -1160,7 +1172,8 @@ const isAvailableEffect = (effect: EffectInstance) =>
                   selectedShapeType === "rectangle" ||
                   selectedShapeType === "circle" ||
                   selectedShapeType === "triangle" ||
-                  selectedShapeType === "polygon" ? (
+                  selectedShapeType === "polygon" ||
+                  selectedShapeType === "line" ? (
                     <ShapeSettingsAccordion
                       shapeType={selectedShapeType}
                       values={shapeProperties}
