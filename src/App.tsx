@@ -756,6 +756,34 @@ const isAvailableEffect = (effect: EffectInstance) =>
                 >
                   空キャンバスを作成
                 </button>
+                <label htmlFor="canvas_frame_opacity">
+                  枠線の濃さ <output>{frameOpacity}%</output>
+                </label>
+                <input
+                  id="canvas_frame_opacity"
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={frameOpacity}
+                  onChange={(event) => {
+                    recordHistory();
+                    setFrameOpacity(Number(event.target.value));
+                  }}
+                />
+                <label htmlFor="canvas_frame_thickness">
+                  枠線の太さ <output>{frameThickness}px</output>
+                </label>
+                <input
+                  id="canvas_frame_thickness"
+                  type="range"
+                  min="1"
+                  max="8"
+                  value={frameThickness}
+                  onChange={(event) => {
+                    recordHistory();
+                    setFrameThickness(Number(event.target.value));
+                  }}
+                />
               </div>
             )}
           </div>
@@ -780,34 +808,6 @@ const isAvailableEffect = (effect: EffectInstance) =>
                   onChange={(event) => {
                     recordHistory();
                     setProjectName(event.target.value);
-                  }}
-                />
-                <label htmlFor="frame_opacity">
-                  枠線の濃さ <output>{frameOpacity}%</output>
-                </label>
-                <input
-                  id="frame_opacity"
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={frameOpacity}
-                  onChange={(event) => {
-                    recordHistory();
-                    setFrameOpacity(Number(event.target.value));
-                  }}
-                />
-                <label htmlFor="frame_thickness">
-                  枠線の太さ <output>{frameThickness}px</output>
-                </label>
-                <input
-                  id="frame_thickness"
-                  type="range"
-                  min="1"
-                  max="8"
-                  value={frameThickness}
-                  onChange={(event) => {
-                    recordHistory();
-                    setFrameThickness(Number(event.target.value));
                   }}
                 />
               </div>
