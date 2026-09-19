@@ -32,6 +32,20 @@ const getEffects = (
       if (effect.values.invertLuminance) result.push(new filters.Invert({ invert: true, alpha: false }) as never);
       if (effect.values.invertHue) result.push(new filters.HueRotation({ rotation: 1 }) as never);
     }
+    if (effect.name === "transparency") {
+      result.push(
+        new filters.RemoveColor({
+          color: effect.values.chromaKeyColor ?? "#00ff00",
+          distance: (effect.values.chromaKeyTolerance ?? 30) / 100,
+          useAlpha: true,
+        }) as never,
+        new filters.RemoveColor({
+          color: effect.values.colorKeyColor ?? "#ffffff",
+          distance: (effect.values.colorKeyTolerance ?? 10) / 100,
+          useAlpha: true,
+        }) as never,
+      );
+    }
   }
   return result;
 };
