@@ -14,6 +14,7 @@ export type EditorHistorySnapshot = {
   canvasSize: { width: number; height: number } | null;
   frameOpacity: number;
   frameThickness: number;
+  layerRenderOrder?: "top-to-bottom" | "bottom-to-top";
   objectLayers: ObjectLayer[];
   selectedObjectId: string | number;
   activeEffects: EffectInstance[];

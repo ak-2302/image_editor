@@ -82,6 +82,9 @@ function App() {
   const [selectedObjectId, setSelectedObjectId] = useState<string | number>(
     "main",
 );
+  const [layerRenderOrder, setLayerRenderOrder] = useState<
+    "top-to-bottom" | "bottom-to-top"
+  >("top-to-bottom");
 
 const isAvailableEffect = (effect: EffectInstance) =>
   effectDefinitions.some((definition) => definition.name === effect.name);
@@ -133,6 +136,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     canvasSize,
     frameOpacity,
     frameThickness,
+    layerRenderOrder,
     objectLayers,
     selectedObjectId,
     activeEffects,
@@ -153,6 +157,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     setCanvasSize(snapshot.canvasSize);
     setFrameOpacity(snapshot.frameOpacity);
     setFrameThickness(snapshot.frameThickness);
+    setLayerRenderOrder(snapshot.layerRenderOrder ?? "top-to-bottom");
     setObjectLayers(snapshot.objectLayers);
     setSelectedObjectId(snapshot.selectedObjectId);
     setActiveEffects(snapshot.activeEffects.filter(isAvailableEffect));
@@ -818,6 +823,20 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     setProjectName(event.target.value);
                   }}
                 />
+                <label htmlFor="layer_render_order">オブジェクト描画順</label>
+                <select
+                  id="layer_render_order"
+                  value={layerRenderOrder}
+                  onChange={(event) => {
+                    recordHistory();
+                    setLayerRenderOrder(
+                      event.target.value as "top-to-bottom" | "bottom-to-top",
+                    );
+                  }}
+                >
+                  <option value="top-to-bottom">上から下</option>
+                  <option value="bottom-to-top">下から上</option>
+                </select>
               </div>
             )}
           </div>
@@ -862,7 +881,11 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     width={canvasSize.width}
                     height={canvasSize.height}
                     mainLayer={mainFabricLayer}
-                    layers={[...objectLayers].reverse()}
+                    layers={
+                      layerRenderOrder === "top-to-bottom"
+                        ? [...objectLayers].reverse()
+                        : objectLayers
+                    }
                     mainTransform={transformsByObject.main ?? defaultObjectTransform}
                     mainEffects={selectedObjectId === "main" ? activeEffects : effectsByObject.main ?? []}
                     transformsByObject={transformsByObject}

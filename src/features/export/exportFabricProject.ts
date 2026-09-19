@@ -109,7 +109,10 @@ export async function exportFabricProject(
     : snapshot.shapeType
       ? { id: 0, name: snapshot.layerName, type: snapshot.shapeType, visible: snapshot.isLayerVisible, shape: snapshot.shapeProperties }
       : null;
-  const layers = mainLayer ? [mainLayer, ...[...snapshot.objectLayers].reverse()] : [...snapshot.objectLayers].reverse();
+  const orderedObjectLayers = snapshot.layerRenderOrder === "bottom-to-top"
+    ? snapshot.objectLayers
+    : [...snapshot.objectLayers].reverse();
+  const layers = mainLayer ? [mainLayer, ...orderedObjectLayers] : orderedObjectLayers;
 
   for (const layer of layers) {
     if (!layer.visible) continue;
