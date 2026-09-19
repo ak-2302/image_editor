@@ -458,11 +458,12 @@ input[type="range"] {
 }
 
 .effects_toolbar {
-  position: absolute;
-  right: 1.75rem;
+  position: sticky;
   top: 1.5rem;
-  bottom: auto;
+  align-self: flex-end;
   z-index: 3;
+  padding: 0.35rem 0;
+  background: #f7f8f8;
 }
 
 .effect_menu {
