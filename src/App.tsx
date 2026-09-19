@@ -510,6 +510,31 @@ const isAvailableEffect = (effect: EffectInstance) =>
     }
     selectObject(objectLayers[0].id);
   };
+  const resetProject = () => {
+    if (!window.confirm("プロジェクトを初期状態に戻しますか？")) return;
+    recordHistory();
+    setProjectName("image-editor");
+    setImageUrl(null);
+    setLayerName("画像レイヤー");
+    setIsLayerVisible(true);
+    resetCanvas();
+    setFrameOpacity(100);
+    setFrameThickness(1);
+    setShapeType(null);
+    setShapeProperties(defaultShapeProperties);
+    setMainShapeProperties(defaultShapeProperties);
+    setObjectLayers([]);
+    setSelectedObjectId("main");
+    setActiveEffects([]);
+    setEffectsByObject({ main: [] });
+    setParametersByObject({ main: defaultEffectParameters });
+    setAllTransforms({ main: defaultObjectTransform }, "main");
+    setInitialEffectsOpen(true);
+    setExpandedEffectIndex(null);
+    setOpenEffectMenu(null);
+    setShowEffectMenu(false);
+    setOpenMenu(null);
+  };
   const updateShapeProperty = <K extends keyof ShapeProperties>(
     key: K,
     value: ShapeProperties[K],
@@ -700,6 +725,9 @@ const isAvailableEffect = (effect: EffectInstance) =>
                   }}
                 >
                   画像を削除
+                </button>
+                <button type="button" onClick={resetProject}>
+                  プロジェクトをリセット
                 </button>
                 <button type="button" disabled={!hasCanvas} onClick={() => handleExport("png")}>
                   PNGを書き出す
