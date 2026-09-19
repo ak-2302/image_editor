@@ -54,6 +54,7 @@ export type EffectParameters = {
   shadowBlur: number;
   outlineColor: string;
   outlineWidth: number;
+  outlineBlur: number;
   outlineOpacity: number;
   imageLoopX: number;
   imageLoopY: number;
@@ -117,6 +118,7 @@ export const defaultEffectParameters: EffectParameters = {
   shadowBlur: 8,
   outlineColor: "#000000",
   outlineWidth: 0,
+  outlineBlur: 0,
   outlineOpacity: 100,
   imageLoopX: 1,
   imageLoopY: 1,

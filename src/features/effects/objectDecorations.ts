@@ -42,7 +42,7 @@ export function applyObjectDecorations(object: FabricObject, effects: EffectInst
         object.set({
           shadow: new Shadow({
             color,
-            blur: Math.max(1, width * 2),
+            blur: Math.max(0, Number(effect.values.outlineBlur ?? 0)),
             offsetX: 0,
             offsetY: 0,
           }),
