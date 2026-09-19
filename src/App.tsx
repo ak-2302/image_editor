@@ -8,6 +8,7 @@ import {
 } from "react";
 import "./App.css";
 import EffectValueRow from "./components/effects/EffectValueRow";
+import ShapeObject from "./components/canvas/ShapeObject";
 import LayerPanel from "./components/layers/LayerPanel";
 import type {
   InitialEffectKey,
@@ -25,6 +26,12 @@ import {
 import { isSupportedImage, readImageAsDataUrl } from "./features/images/imageUtils";
 import { useCanvasState } from "./features/canvas/useCanvasState";
 import type { ObjectLayer } from "./features/layers/objectTypes";
+
+const isShapeLayer = (
+  layer: ObjectLayer,
+): layer is ObjectLayer & {
+  type: "rectangle" | "circle" | "triangle";
+} => layer.type !== "image";
 
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,6 +90,9 @@ function App() {
     rotation: 0,
     opacity: 0,
   });
+  const [transformByObject, setTransformByObject] = useState<
+    Record<string, InitialEffectValues>
+  >({ main: { x: 0, y: 0, scale: 100, rotation: 0, opacity: 0 } });
   const [openMenu, setOpenMenu] = useState<"file" | "settings" | null>(null);
   const [showEffectMenu, setShowEffectMenu] = useState(false);
   const [showObjectMenu, setShowObjectMenu] = useState(false);
@@ -166,12 +176,20 @@ function App() {
   };
   const selectObject = (id: string | number) => {
     const nextParameters = parametersByObject[String(id)];
+    const nextTransform = transformByObject[String(id)];
+    setTransformByObject((objects) => ({
+      ...objects,
+      [objectKey]: initialEffects,
+    }));
     setParametersByObject((objects) => ({
       ...objects,
       [objectKey]: currentParameters(),
     }));
     setSelectedObjectId(id);
     setActiveEffects(effectsByObject[String(id)] ?? []);
+    setInitialEffects(
+      nextTransform ?? { x: 0, y: 0, scale: 100, rotation: 0, opacity: 0 },
+    );
     if (nextParameters) {
       setBrightness(nextParameters.brightness);
       setContrast(nextParameters.contrast);
@@ -265,11 +283,48 @@ function App() {
   ) => {
     const isEmptyCanvas = !imageUrl && !canvasSize && !shapeType;
     const id = Date.now();
+    if (!imageUrl && shapeType) {
+      const previousMainId = id;
+      setObjectLayers((layers) => [
+        ...layers,
+        {
+          id: previousMainId,
+          name: layerName,
+          type: shapeType,
+          visible: isLayerVisible,
+        },
+      ]);
+      setTransformByObject((objects) => ({
+        ...objects,
+        [String(previousMainId)]: initialEffects,
+      }));
+      setEffectsByObject((effects) => ({
+        ...effects,
+        [String(previousMainId)]: activeEffects,
+      }));
+      setParametersByObject((parameters) => ({
+        ...parameters,
+        [String(previousMainId)]: currentParameters(),
+      }));
+    }
     setShapeType(type);
     setCanvasSize((size) => size ?? { width: 800, height: 600 });
-    if (isEmptyCanvas) {
+    if (!imageUrl) {
       setLayerName(name);
       setSelectedObjectId("main");
+      setInitialEffects({
+        x: 0,
+        y: 0,
+        scale: 100,
+        rotation: 0,
+        opacity: 0,
+      });
+      setActiveEffects([]);
+      setParametersByObject((parameters) => ({
+        ...parameters,
+        main: defaultEffectParameters,
+      }));
+      if (isEmptyCanvas) return;
       return;
     }
     setObjectLayers((layers) => [
@@ -317,8 +372,13 @@ function App() {
         "--frame-thickness": `${frameThickness}px`,
       } as CSSProperties)
     : undefined;
-  const handleInitialEffectChange = (key: InitialEffectKey, value: number) =>
-    setInitialEffects((current) => ({ ...current, [key]: value }));
+  const handleInitialEffectChange = (key: InitialEffectKey, value: number) => {
+    setInitialEffects((current) => {
+      const next = { ...current, [key]: value };
+      setTransformByObject((objects) => ({ ...objects, [objectKey]: next }));
+      return next;
+    });
+  };
   const reorderEffects = (from: EffectName, to: EffectName) => {
     updateActiveEffects((effects) => {
       const fromIndex = effects.indexOf(from);
@@ -481,13 +541,11 @@ function App() {
                   />
                 )}
                 {shapeType && selectedObjectId === "main" && isLayerVisible && (
-                  <div
-                    className={`canvas_shape${shapeType === "circle" ? " canvas_shape_circle" : ""}${shapeType === "triangle" ? " canvas_shape_triangle" : ""}`}
-                    aria-label={layerName}
-                    style={{
-                      transform: selectedObjectTransform,
-                      opacity: (100 - initialEffects.opacity) / 100,
-                    }}
+                  <ShapeObject
+                    type={shapeType}
+                    name={layerName}
+                    transform={selectedObjectTransform}
+                    opacity={(100 - initialEffects.opacity) / 100}
                   />
                 )}
                 {objectLayers
@@ -509,25 +567,23 @@ function App() {
                     />
                   ))}
                 {objectLayers
-                  .filter(
-                    (layer) =>
-                      layer.type !== "image" && layer.visible,
-                  )
+                  .filter(isShapeLayer)
+                  .filter((layer) => layer.visible)
                   .map((layer) => (
-                    <div
-                      className={`canvas_shape${layer.type === "circle" ? " canvas_shape_circle" : ""}${layer.type === "triangle" ? " canvas_shape_triangle" : ""}`}
+                    <ShapeObject
                       key={layer.id}
-                      aria-label={layer.name}
-                      style={{
-                        transform:
-                          selectedObjectId === layer.id
-                            ? selectedObjectTransform
-                            : "none",
-                        opacity:
-                          selectedObjectId === layer.id
-                            ? (100 - initialEffects.opacity) / 100
-                            : 1,
-                      }}
+                      type={layer.type}
+                      name={layer.name}
+                      transform={
+                        selectedObjectId === layer.id
+                          ? selectedObjectTransform
+                          : "none"
+                      }
+                      opacity={
+                        selectedObjectId === layer.id
+                          ? (100 - initialEffects.opacity) / 100
+                          : 1
+                      }
                     />
                   ))}
               </div>
@@ -653,7 +709,7 @@ function App() {
                       三角形
                     </button>
                   </div>
-                )}
+                  )}
               </div>
             </div>
             <div className="layers_list" role="list">
