@@ -102,6 +102,7 @@ function LayerPanel({
       </div>
       <div className="layers_list" role="list">
         <div
+          style={{ display: "none" }}
           onClick={() => selectObject("main")}
           onKeyDown={(event) => {
             if (hasMainObject && (event.key === "Enter" || event.key === " ")) {

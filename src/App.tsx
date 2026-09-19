@@ -404,19 +404,16 @@ const isAvailableEffect = (effect: EffectInstance) =>
       return;
     }
     recordHistory();
-    if (imageUrl)
-      setObjectLayers((layers) => [
-        ...layers,
-        {
-          id: Date.now(),
-          name: layerName,
-          type: "image",
-          url: imageUrl,
-          visible: true,
-        },
-      ]);
+    const imageLayerId = Date.now();
+    setObjectLayers((layers) => [
+      ...layers,
+      { id: imageLayerId, name: file.name, type: "image", url: nextUrl, visible: true },
+    ]);
+    setSelectedObjectId(imageLayerId);
+    setTransformForObject(String(imageLayerId), defaultObjectTransform);
+    setEffectsByObject((effects) => ({ ...effects, [String(imageLayerId)]: [] }));
     setImageUrl(nextUrl);
-    if (!imageUrl) setLayerName(file.name);
+    setLayerName(file.name);
     setShapeType(null);
     setIsLayerVisible(true);
     setCanvasSize(dimensions);
@@ -436,7 +433,6 @@ const isAvailableEffect = (effect: EffectInstance) =>
     name: string,
   ) => {
     recordHistory();
-    const isEmptyCanvas = !imageUrl && !canvasSize && !shapeType;
     const id = Date.now();
     if (!imageUrl && shapeType) {
       const previousMainId = id;
@@ -473,13 +469,19 @@ const isAvailableEffect = (effect: EffectInstance) =>
         ...parameters,
         main: defaultEffectParameters,
       }));
-      if (isEmptyCanvas) return;
-      return;
     }
     setObjectLayers((layers) => [
       ...layers,
       { id, name, type, visible: true, shape: defaultShapeProperties },
     ]);
+    setShapeType(null);
+    setLayerName(name);
+    setTransformForObject(String(id), defaultObjectTransform);
+    setEffectsByObject((effects) => ({ ...effects, [String(id)]: [] }));
+    setParametersByObject((parameters) => ({
+      ...parameters,
+      [String(id)]: defaultEffectParameters,
+    }));
     selectObject(id);
   };
   const addText = () => {
@@ -506,16 +508,38 @@ const isAvailableEffect = (effect: EffectInstance) =>
   };
   const clearImage = () => {
     recordHistory();
+    const currentImageLayer = objectLayers.find(
+      (layer) => layer.type === "image" && layer.url === imageUrl,
+    );
+    const nextLayers = currentImageLayer
+      ? objectLayers.filter((layer) => layer.id !== currentImageLayer.id)
+      : objectLayers;
+    setObjectLayers(nextLayers);
     setImageUrl(null);
     setShapeType(null);
     setLayerName("画像レイヤー");
-    if (objectLayers.length === 0) {
+    if (currentImageLayer) {
+      setEffectsByObject((effects) => {
+        const nextEffects = { ...effects };
+        delete nextEffects[String(currentImageLayer.id)];
+        return nextEffects;
+      });
+      const nextTransforms = { ...transformsByObject };
+      delete nextTransforms[String(currentImageLayer.id)];
+      setAllTransforms(nextTransforms, String(nextLayers[0]?.id ?? "main"));
+      setParametersByObject((parameters) => {
+        const nextParameters = { ...parameters };
+        delete nextParameters[String(currentImageLayer.id)];
+        return nextParameters;
+      });
+    }
+    if (nextLayers.length === 0) {
       resetCanvas();
       setSelectedObjectId("main");
       setActiveEffects([]);
       return;
     }
-    selectObject(objectLayers[0].id);
+    selectObject(nextLayers[0].id);
   };
   const resetProject = () => {
     if (!window.confirm("プロジェクトを初期状態に戻しますか？")) return;
@@ -608,23 +632,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
       : effectDefaultValues[effect.name];
   };
   const hasCanvas = Boolean(imageUrl || canvasSize || shapeType);
-  const mainFabricLayer: ObjectLayer | null = imageUrl
-    ? {
-        id: 0,
-        name: layerName,
-        type: "image",
-        url: imageUrl,
-        visible: isLayerVisible,
-      }
-    : shapeType
-      ? {
-          id: 0,
-          name: layerName,
-          type: shapeType,
-          visible: isLayerVisible,
-          shape: selectedObjectId === "main" ? shapeProperties : mainShapeProperties,
-        }
-      : null;
+  const mainFabricLayer: ObjectLayer | null = null;
   const frameScale = canvasSize
     ? Math.min(800 / canvasSize.width, 560 / canvasSize.height, 1)
     : 1;

@@ -104,7 +104,7 @@ export async function exportFabricProject(
   const canvas = new StaticCanvas(element, { width, height });
   if (format === "jpeg") canvas.backgroundColor = "#ffffff";
 
-  const mainLayer: ObjectLayer | null = snapshot.imageUrl
+  const mainLayer: ObjectLayer | null = snapshot.objectLayers.length > 0 ? null : snapshot.imageUrl
     ? { id: 0, name: snapshot.layerName, type: "image", url: snapshot.imageUrl, visible: snapshot.isLayerVisible }
     : snapshot.shapeType
       ? { id: 0, name: snapshot.layerName, type: snapshot.shapeType, visible: snapshot.isLayerVisible, shape: snapshot.shapeProperties }
