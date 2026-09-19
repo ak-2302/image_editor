@@ -14,7 +14,6 @@ import TextObject from "./components/canvas/TextObject";
 import TextSettings from "./components/layers/TextSettings";
 import type {
   InitialEffectKey,
-  InitialEffectValues,
 } from "./components/initial-effects/effectTypes";
 import InitialEffectsAccordion from "./components/initial-effects/InitialEffectsAccordion";
 import {
@@ -27,6 +26,10 @@ import {
 } from "./features/effects/effectParameters";
 import { isSupportedImage, readImageAsDataUrl } from "./features/images/imageUtils";
 import { useCanvasState } from "./features/canvas/useCanvasState";
+import {
+  defaultObjectTransform,
+  useObjectTransforms,
+} from "./features/objects/useObjectTransforms";
 import type { ObjectLayer } from "./features/layers/objectTypes";
 
 const isShapeLayer = (
@@ -85,16 +88,12 @@ function App() {
     null,
   );
   const [initialEffectsOpen, setInitialEffectsOpen] = useState(true);
-  const [initialEffects, setInitialEffects] = useState<InitialEffectValues>({
-    x: 0,
-    y: 0,
-    scale: 100,
-    rotation: 0,
-    opacity: 0,
-  });
-  const [transformByObject, setTransformByObject] = useState<
-    Record<string, InitialEffectValues>
-  >({ main: { x: 0, y: 0, scale: 100, rotation: 0, opacity: 0 } });
+  const {
+    values: initialEffects,
+    update: updateTransform,
+    select: selectTransform,
+    setForObject: setTransformForObject,
+  } = useObjectTransforms();
   const [openMenu, setOpenMenu] = useState<"file" | "settings" | null>(null);
   const [showEffectMenu, setShowEffectMenu] = useState(false);
   const [showObjectMenu, setShowObjectMenu] = useState(false);
@@ -179,20 +178,17 @@ function App() {
   };
   const selectObject = (id: string | number) => {
     const nextParameters = parametersByObject[String(id)];
-    const nextTransform = transformByObject[String(id)];
-    setTransformByObject((objects) => ({
-      ...objects,
-      [objectKey]: initialEffects,
-    }));
+    selectTransform(
+      objectKey,
+      String(id),
+      initialEffects,
+    );
     setParametersByObject((objects) => ({
       ...objects,
       [objectKey]: currentParameters(),
     }));
     setSelectedObjectId(id);
     setActiveEffects(effectsByObject[String(id)] ?? []);
-    setInitialEffects(
-      nextTransform ?? { x: 0, y: 0, scale: 100, rotation: 0, opacity: 0 },
-    );
     if (nextParameters) {
       setBrightness(nextParameters.brightness);
       setContrast(nextParameters.contrast);
@@ -297,10 +293,7 @@ function App() {
           visible: isLayerVisible,
         },
       ]);
-      setTransformByObject((objects) => ({
-        ...objects,
-        [String(previousMainId)]: initialEffects,
-      }));
+      setTransformForObject(String(previousMainId), initialEffects);
       setEffectsByObject((effects) => ({
         ...effects,
         [String(previousMainId)]: activeEffects,
@@ -315,13 +308,7 @@ function App() {
     if (!imageUrl) {
       setLayerName(name);
       setSelectedObjectId("main");
-      setInitialEffects({
-        x: 0,
-        y: 0,
-        scale: 100,
-        rotation: 0,
-        opacity: 0,
-      });
+      setTransformForObject("main", defaultObjectTransform);
       setActiveEffects([]);
       setParametersByObject((parameters) => ({
         ...parameters,
@@ -397,11 +384,7 @@ function App() {
       } as CSSProperties)
     : undefined;
   const handleInitialEffectChange = (key: InitialEffectKey, value: number) => {
-    setInitialEffects((current) => {
-      const next = { ...current, [key]: value };
-      setTransformByObject((objects) => ({ ...objects, [objectKey]: next }));
-      return next;
-    });
+    updateTransform(key, value);
   };
   const reorderEffects = (from: EffectName, to: EffectName) => {
     updateActiveEffects((effects) => {
