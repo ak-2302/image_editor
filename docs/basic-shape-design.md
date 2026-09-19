@@ -182,8 +182,8 @@ type ShapeLayer = ObjectLayer & {
 ### 8.3 線幅
 
 - `lineWidth = 0`：塗りつぶし
-- `1 <= lineWidth < 50`：輪郭のみ
-- `lineWidth >= 50`：内側が埋まった状態
+- `1 <= lineWidth < 100`：輪郭のみ
+- `lineWidth = 100`：内側が埋まった状態
 - 線は図形の内側へ収める
 - 円形の線幅変更でドーナツ状の表現を作れる
 

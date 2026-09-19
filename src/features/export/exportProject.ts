@@ -89,7 +89,7 @@ const drawObject = async (
     const shapeHeight = canvasHeight * 0.45 * size * aspect;
     const shapeColor = shape?.color ?? shape?.fillColor ?? shape?.strokeColor ?? "#ffffff";
     const lineWidth = shape?.lineWidth ?? 0;
-    const isFilled = lineWidth === 0 || lineWidth >= 50;
+    const isFilled = lineWidth === 0 || lineWidth >= 100;
     context.fillStyle = isFilled ? shapeColor : "transparent";
     context.strokeStyle = shapeColor;
     context.lineWidth = lineWidth;

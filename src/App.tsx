@@ -487,7 +487,10 @@ function App() {
     value: ShapeProperties[K],
   ) => {
     recordHistory();
-    const nextProperties = { ...shapeProperties, [key]: value };
+    const nextProperties = normalizeShapeProperties({
+      ...shapeProperties,
+      [key]: value,
+    });
     setShapeProperties(nextProperties);
     if (selectedObjectId === "main") return;
     setObjectLayers((layers) =>

@@ -16,7 +16,7 @@ type ShapeObjectProps = {
 function ShapeObject({ type, name, transform, opacity, properties }: ShapeObjectProps) {
   const shapeProperties = normalizeShapeProperties(properties);
   const isTriangle = type === "triangle";
-  const isFilled = shapeProperties.lineWidth === 0 || shapeProperties.lineWidth >= 50;
+  const isFilled = shapeProperties.lineWidth === 0 || shapeProperties.lineWidth >= 100;
   const shapeClass = [
     "canvas_shape",
     type === "circle" ? "canvas_shape_circle" : "",
