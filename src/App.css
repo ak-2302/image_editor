@@ -644,7 +644,7 @@ input[type="range"] {
   position: relative;
 }
 
-.header_menu_group:nth-child(2) {
+.settings_menu_group {
   order: 3;
 }
 

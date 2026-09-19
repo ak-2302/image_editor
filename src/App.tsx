@@ -54,8 +54,6 @@ function App() {
   const {
     canvasSize,
     setCanvasSize,
-    showBlankCanvasForm,
-    setShowBlankCanvasForm,
     blankWidth,
     setBlankWidth,
     blankHeight,
@@ -105,7 +103,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     valuesByObject: transformsByObject,
     setAll: setAllTransforms,
   } = useObjectTransforms();
-  const [openMenu, setOpenMenu] = useState<"file" | "settings" | null>(null);
+  const [openMenu, setOpenMenu] = useState<"file" | "canvas" | "settings" | null>(null);
   const [showEffectMenu, setShowEffectMenu] = useState(false);
   const [showObjectMenu, setShowObjectMenu] = useState(false);
   const [shapeType, setShapeType] = useState<
@@ -422,7 +420,6 @@ const isAvailableEffect = (effect: EffectInstance) =>
     setShapeType(null);
     setIsLayerVisible(true);
     setCanvasSize(dimensions);
-    setShowBlankCanvasForm(false);
     setNotice(null);
   };
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -726,6 +723,46 @@ const isAvailableEffect = (effect: EffectInstance) =>
             <button
               type="button"
               className="header_menu_button"
+              aria-expanded={openMenu === "canvas"}
+              onClick={() => setOpenMenu((menu) => (menu === "canvas" ? null : "canvas"))}
+            >
+              キャンバス
+            </button>
+            {openMenu === "canvas" && (
+              <div className="header_dropdown canvas_dropdown">
+                <label htmlFor="canvas_width">幅</label>
+                <input
+                  id="canvas_width"
+                  type="number"
+                  min="1"
+                  value={blankWidth}
+                  onChange={(event) => setBlankWidth(Number(event.target.value))}
+                />
+                <label htmlFor="canvas_height">高さ</label>
+                <input
+                  id="canvas_height"
+                  type="number"
+                  min="1"
+                  value={blankHeight}
+                  onChange={(event) => setBlankHeight(Number(event.target.value))}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    recordHistory();
+                    if (!createBlankCanvas()) setNotice("幅と高さは1以上で指定してください。");
+                    else setOpenMenu(null);
+                  }}
+                >
+                  空キャンバスを作成
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="header_menu_group settings_menu_group">
+            <button
+              type="button"
+              className="header_menu_button"
               aria-expanded={openMenu === "settings"}
               onClick={() =>
                 setOpenMenu((menu) => (menu === "settings" ? null : "settings"))
@@ -838,53 +875,11 @@ const isAvailableEffect = (effect: EffectInstance) =>
                   className="blank_canvas_button"
                   onClick={(event) => {
                     event.stopPropagation();
-                    setShowBlankCanvasForm(true);
+                    setOpenMenu("canvas");
                   }}
                 >
                   画像なしで始める
                 </button>
-                {showBlankCanvasForm && (
-                  <div
-                    className="blank_canvas_form"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    <label>
-                      幅
-                      <input
-                        type="number"
-                        min="1"
-                        value={blankWidth}
-                        onChange={(event) =>
-                          setBlankWidth(Number(event.target.value))
-                        }
-                      />{" "}
-                      px
-                    </label>
-                    <label>
-                      高さ
-                      <input
-                        type="number"
-                        min="1"
-                        value={blankHeight}
-                        onChange={(event) =>
-                          setBlankHeight(Number(event.target.value))
-                        }
-                      />{" "}
-                      px
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        recordHistory();
-                        if (!createBlankCanvas()) {
-                          setNotice("幅と高さは1以上で指定してください。");
-                        }
-                      }}
-                    >
-                      作成
-                    </button>
-                  </div>
-                )}
               </>
             )}
             <input
