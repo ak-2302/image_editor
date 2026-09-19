@@ -638,25 +638,6 @@ const isAvailableEffect = (effect: EffectInstance) =>
     recordHistory();
     updateTransform(key, value);
   };
-  const resetSelectedObject = () => {
-    recordHistory();
-    setTransformForObject(objectKey, defaultObjectTransform);
-    setActiveEffects([]);
-    setEffectsByObject((objects) => ({ ...objects, [objectKey]: [] }));
-    if (selectedObjectId === "main") {
-      setShapeProperties(defaultShapeProperties);
-      setMainShapeProperties(defaultShapeProperties);
-    } else {
-      setObjectLayers((layers) =>
-        layers.map((layer) =>
-          layer.id === selectedObjectId
-            ? { ...layer, shape: defaultShapeProperties }
-            : layer,
-        ),
-      );
-      setShapeProperties(defaultShapeProperties);
-    }
-  };
   const reorderEffects = (from: string, to: string) => {
     updateActiveEffects((effects) => {
       const fromIndex = effects.findIndex((effect) => effect.id === from);
@@ -1103,14 +1084,6 @@ const isAvailableEffect = (effect: EffectInstance) =>
           />
           <section className="effects_section" aria-label="エフェクト設定">
             <div className="effects_toolbar">
-              <button
-                type="button"
-                className="reset_object_button"
-                aria-label="選択中のオブジェクトを初期化"
-                onClick={resetSelectedObject}
-              >
-                初期化
-              </button>
               <button
                 type="button"
                 className="add_effect_button"
