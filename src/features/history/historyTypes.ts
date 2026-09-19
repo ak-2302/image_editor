@@ -15,6 +15,7 @@ export type EditorHistorySnapshot = {
   frameOpacity: number;
   frameThickness: number;
   layerRenderOrder?: "top-to-bottom" | "bottom-to-top";
+  objectInsertPosition?: "above" | "below";
   objectLayers: ObjectLayer[];
   selectedObjectId: string | number;
   activeEffects: EffectInstance[];

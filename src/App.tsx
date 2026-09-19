@@ -118,6 +118,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
   const [mainShapeProperties, setMainShapeProperties] =
     useState<ShapeProperties>(defaultShapeProperties);
   const [objectLayers, setObjectLayers] = useState<ObjectLayer[]>([]);
+  const [objectInsertPosition, setObjectInsertPosition] = useState<"above" | "below">("above");
   const [openEffectMenu, setOpenEffectMenu] = useState<number | null>(null);
   const [draggingEffect, setDraggingEffect] = useState<string | null>(null);
   const [movingEffect, setMovingEffect] = useState<string | null>(null);
@@ -137,6 +138,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     frameOpacity,
     frameThickness,
     layerRenderOrder,
+    objectInsertPosition,
     objectLayers,
     selectedObjectId,
     activeEffects,
@@ -146,6 +148,11 @@ const isAvailableEffect = (effect: EffectInstance) =>
     initialEffects,
   });
   const recordHistory = () => history.push(createHistorySnapshot());
+  const insertObjectLayer = (layer: ObjectLayer) => {
+    setObjectLayers((layers) =>
+      objectInsertPosition === "above" ? [layer, ...layers] : [...layers, layer],
+    );
+  };
   const restoreHistorySnapshot = (snapshot: EditorHistorySnapshot) => {
     setProjectName(snapshot.projectName ?? "image-editor");
     setImageUrl(snapshot.imageUrl);
@@ -158,6 +165,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     setFrameOpacity(snapshot.frameOpacity);
     setFrameThickness(snapshot.frameThickness);
     setLayerRenderOrder(snapshot.layerRenderOrder ?? "top-to-bottom");
+    setObjectInsertPosition(snapshot.objectInsertPosition ?? "above");
     setObjectLayers(snapshot.objectLayers);
     setSelectedObjectId(snapshot.selectedObjectId);
     setActiveEffects(snapshot.activeEffects.filter(isAvailableEffect));
@@ -410,10 +418,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     }
     recordHistory();
     const imageLayerId = Date.now();
-    setObjectLayers((layers) => [
-      ...layers,
-      { id: imageLayerId, name: file.name, type: "image", url: nextUrl, visible: true },
-    ]);
+    insertObjectLayer({ id: imageLayerId, name: file.name, type: "image", url: nextUrl, visible: true });
     setSelectedObjectId(imageLayerId);
     setTransformForObject(String(imageLayerId), defaultObjectTransform);
     setEffectsByObject((effects) => ({ ...effects, [String(imageLayerId)]: [] }));
@@ -441,16 +446,13 @@ const isAvailableEffect = (effect: EffectInstance) =>
     const id = Date.now();
     if (!imageUrl && shapeType) {
       const previousMainId = id;
-      setObjectLayers((layers) => [
-        ...layers,
-        {
+      insertObjectLayer({
           id: previousMainId,
           name: layerName,
           type: shapeType,
           visible: isLayerVisible,
           shape: mainShapeProperties,
-        },
-      ]);
+        });
       setTransformForObject(String(previousMainId), initialEffects);
       setEffectsByObject((effects) => ({
         ...effects,
@@ -475,10 +477,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
         main: defaultEffectParameters,
       }));
     }
-    setObjectLayers((layers) => [
-      ...layers,
-      { id, name, type, visible: true, shape: defaultShapeProperties },
-    ]);
+    insertObjectLayer({ id, name, type, visible: true, shape: defaultShapeProperties });
     setShapeType(null);
     setLayerName(name);
     setTransformForObject(String(id), defaultObjectTransform);
@@ -493,9 +492,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     recordHistory();
     const id = Date.now();
     setCanvasSize((size) => size ?? { width: 800, height: 600 });
-    setObjectLayers((layers) => [
-      ...layers,
-      {
+    insertObjectLayer({
         id,
         name: "テキスト",
         type: "text",
@@ -509,8 +506,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
           underline: false,
           linethrough: false,
         },
-      },
-    ]);
+      });
     selectObject(id);
   };
   const clearImage = () => {
@@ -863,6 +859,18 @@ const isAvailableEffect = (effect: EffectInstance) =>
                 >
                   <option value="top-to-bottom">上から下</option>
                   <option value="bottom-to-top">下から上</option>
+                </select>
+                <label htmlFor="object_insert_position">新規オブジェクトを追加するレイヤー</label>
+                <select
+                  id="object_insert_position"
+                  value={objectInsertPosition}
+                  onChange={(event) => {
+                    recordHistory();
+                    setObjectInsertPosition(event.target.value as "above" | "below");
+                  }}
+                >
+                  <option value="above">上に挿入</option>
+                  <option value="below">下に挿入</option>
                 </select>
               </div>
             )}
