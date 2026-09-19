@@ -34,6 +34,7 @@ import type { EffectInstance } from "./features/project/projectTypes";
 import type { ObjectLayer } from "./features/layers/objectTypes";
 import { useUndoRedo } from "./features/history/useUndoRedo";
 import type { EditorHistorySnapshot } from "./features/history/historyTypes";
+import { loadProject, saveProject } from "./features/project/projectStorage";
 
 const isShapeLayer = (
   layer: ObjectLayer,
@@ -113,6 +114,7 @@ function App() {
   const [draggingEffect, setDraggingEffect] = useState<string | null>(null);
   const [movingEffect, setMovingEffect] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [isPersistenceReady, setIsPersistenceReady] = useState(false);
   const history = useUndoRedo<EditorHistorySnapshot>();
 
   const objectKey = String(selectedObjectId);
@@ -172,6 +174,18 @@ function App() {
   useEffect(() => {
     historyActionsRef.current = { undo, redo };
   }, [redo, undo]);
+  useEffect(() => {
+    const savedProject = loadProject();
+    if (savedProject) restoreHistorySnapshot(savedProject);
+    setIsPersistenceReady(true);
+  }, []);
+  const persistencePayload = JSON.stringify(createHistorySnapshot());
+  useEffect(() => {
+    if (!isPersistenceReady) return;
+    if (!saveProject(JSON.parse(persistencePayload) as EditorHistorySnapshot)) {
+      setNotice("編集状態を保存できませんでした。");
+    }
+  }, [isPersistenceReady, persistencePayload]);
   const selectedObjectLabel =
     selectedObjectId === "main"
       ? imageUrl
