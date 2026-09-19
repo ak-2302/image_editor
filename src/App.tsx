@@ -9,6 +9,7 @@ import {
 import "./App.css";
 import EffectValueRow from "./components/effects/EffectValueRow";
 import ShapeObject from "./components/canvas/ShapeObject";
+import FabricCanvas from "./components/canvas/FabricCanvas";
 import LayerPanel from "./components/layers/LayerPanel";
 import TextObject from "./components/canvas/TextObject";
 import TextSettings from "./components/layers/TextSettings";
@@ -625,6 +626,23 @@ const isAvailableEffect = (effect: EffectInstance) =>
       selectedObjectId === "main" ? activeEffects : effectsByObject.main ?? [],
     );
   const hasCanvas = Boolean(imageUrl || canvasSize || shapeType);
+  const mainFabricLayer: ObjectLayer | null = imageUrl
+    ? {
+        id: 0,
+        name: layerName,
+        type: "image",
+        url: imageUrl,
+        visible: isLayerVisible,
+      }
+    : shapeType
+      ? {
+          id: 0,
+          name: layerName,
+          type: shapeType,
+          visible: isLayerVisible,
+          shape: shapeProperties,
+        }
+      : null;
   const frameScale = canvasSize
     ? Math.min(800 / canvasSize.width, 560 / canvasSize.height, 1)
     : 1;
@@ -828,6 +846,20 @@ const isAvailableEffect = (effect: EffectInstance) =>
           >
             {hasCanvas ? (
               <div className="output_frame" style={frameStyle}>
+                {canvasSize && (
+                  <FabricCanvas
+                    width={canvasSize.width}
+                    height={canvasSize.height}
+                    mainLayer={mainFabricLayer}
+                    layers={[...objectLayers].reverse()}
+                    mainTransform={mainObjectTransform}
+                    mainEffects={selectedObjectId === "main" ? activeEffects : effectsByObject.main ?? []}
+                    transformsByObject={transformsByObject}
+                    effectsByObject={effectsByObject}
+                    onSelect={selectObject}
+                  />
+                )}
+                <div style={{ display: "none" }}>
                 {imageUrl && isLayerVisible && (
                   <img
                     className="canvas_image"
@@ -916,6 +948,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                   }
                   return null;
                 })}
+                </div>
               </div>
             ) : (
               <>

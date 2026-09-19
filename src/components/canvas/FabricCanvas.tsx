@@ -15,7 +15,10 @@ import { defaultObjectTransform } from "../../features/objects/useObjectTransfor
 type FabricCanvasProps = {
   width: number;
   height: number;
+  mainLayer: ObjectLayer | null;
   layers: ObjectLayer[];
+  mainTransform: typeof defaultObjectTransform;
+  mainEffects: { name: string; values: Record<string, unknown> }[];
   transformsByObject: Record<string, typeof defaultObjectTransform>;
   effectsByObject: Record<string, { name: string; values: Record<string, unknown> }[]>;
   onSelect?: (id: string | number) => void;
@@ -23,6 +26,8 @@ type FabricCanvasProps = {
 
 const getTransform = (
   layer: ObjectLayer,
+  width: number,
+  height: number,
   transformsByObject: FabricCanvasProps["transformsByObject"],
   effectsByObject: FabricCanvasProps["effectsByObject"],
 ) => {
@@ -32,8 +37,8 @@ const getTransform = (
   )?.values ?? {};
   const flipScale = getFlipScale(flip);
   return {
-    left: transform.x + 100,
-    top: transform.y + 100,
+    left: width / 2 + transform.x,
+    top: height / 2 + transform.y,
     angle: transform.rotation,
     scaleX: (transform.scale / 100) * flipScale.x,
     scaleY: (transform.scale / 100) * flipScale.y,
@@ -56,7 +61,10 @@ const createShape = (layer: ObjectLayer): FabricObject | null => {
 function FabricCanvas({
   width,
   height,
+  mainLayer,
   layers,
+  mainTransform,
+  mainEffects,
   transformsByObject,
   effectsByObject,
   onSelect,
@@ -85,7 +93,8 @@ function FabricCanvas({
     let cancelled = false;
     const renderLayers = async () => {
       canvas.clear();
-      for (const layer of layers) {
+      const renderableLayers = mainLayer ? [mainLayer, ...layers] : layers;
+      for (const layer of renderableLayers) {
         if (cancelled || !layer.visible) continue;
         let object: FabricObject | null = null;
         if (layer.type === "image" && layer.url) {
@@ -101,8 +110,17 @@ function FabricCanvas({
           object = createShape(layer);
         }
         if (!object || cancelled) continue;
+        const isMainLayer = layer.id === 0;
         object.set({
-          ...getTransform(layer, transformsByObject, effectsByObject),
+          ...getTransform(
+            layer,
+            width,
+            height,
+            isMainLayer
+              ? { main: mainTransform }
+              : transformsByObject,
+            isMainLayer ? { main: mainEffects } : effectsByObject,
+          ),
           originX: "center",
           originY: "center",
           selectable: true,
