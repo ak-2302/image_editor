@@ -458,7 +458,7 @@ input[type="range"] {
   z-index: 30;
   display: grid;
   max-width: calc(100vw - 2rem);
-  max-height: calc(100vh - 2rem);
+  max-height: min(17rem, calc(100vh - 2rem));
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
