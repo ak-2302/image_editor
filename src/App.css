@@ -634,6 +634,14 @@ input[type="range"] {
   position: relative;
 }
 
+.header_menu_group:nth-child(2) {
+  order: 3;
+}
+
+.history_controls {
+  order: 2;
+}
+
 .header_menu_button {
   padding: 0.4rem 0.7rem;
   border: 0;
