@@ -16,6 +16,7 @@ import { createShapeSvgDataUrl } from "../../features/shapes/svgShapeRenderer";
 import { createRegularPolygon } from "../../features/shapes/polygonRenderer";
 import { defaultObjectTransform } from "../../features/objects/useObjectTransforms";
 import { applyImageGradient, applyObjectClipping, applyObjectDecorations, createImageLoopCopies, rasterizeObjectForEffects } from "../../features/effects/objectDecorations";
+import { createMonochromeFilter } from "../../features/effects/processors/monochromeEffect";
 
 type FabricCanvasProps = {
   width: number;
@@ -147,8 +148,7 @@ const getFabricFilters = (
     }
     if (effect.name === "monochrome") {
       const strength = Number(effect.values.monochromeStrength ?? 0) / 100;
-      if (strength >= 1) result.push(new filters.BlackWhite({ threshold: 0.5 }) as never);
-      else result.push(new filters.Grayscale() as never);
+      result.push(createMonochromeFilter(strength) as never);
     }
   }
   return result;

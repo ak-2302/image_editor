@@ -14,6 +14,7 @@ import { getEffectColor } from "../effects/fabricEffectStyles";
 import { createShapeSvgDataUrl } from "../shapes/svgShapeRenderer";
 import { createRegularPolygon } from "../shapes/polygonRenderer";
 import { applyImageGradient, applyObjectClipping, applyObjectDecorations, createImageLoopCopies, rasterizeObjectForEffects } from "../effects/objectDecorations";
+import { createMonochromeFilter } from "../effects/processors/monochromeEffect";
 
 type ExportFormat = "png" | "jpeg";
 
@@ -69,8 +70,7 @@ const getEffects = (
     }
     if (effect.name === "monochrome") {
       const strength = Number(effect.values.monochromeStrength ?? 0) / 100;
-      if (strength >= 1) result.push(new filters.BlackWhite({ threshold: 0.5 }) as never);
-      else result.push(new filters.Grayscale() as never);
+      result.push(createMonochromeFilter(strength) as never);
     }
   }
   return result;
