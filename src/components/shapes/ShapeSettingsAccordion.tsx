@@ -91,7 +91,7 @@ function ShapeSettingsAccordion({
         />
         <span className="effect_unit">{values.color}</span>
       </div>
-      {numericFields.map(({ key, unit, initial }) => (
+      {numericFields.map(({ key, unit }) => (
         <div
           className="initial_effect_row"
           key={key}
@@ -107,9 +107,6 @@ function ShapeSettingsAccordion({
             onChange={(event) => onChange(key, Number(event.target.value))}
           />
           <span className="effect_unit">{key === "lineWidth" ? "px" : unit}</span>
-          <button type="button" className="reset_effect_button" onClick={() => onChange(key, initial)}>
-            初期値にリセット
-          </button>
         </div>
       ))}
     </div>

@@ -82,7 +82,7 @@ function InitialEffectsAccordion({
       {isOpen && (
         <div className="initial_effect_fields">
           {initialEffectFields.map(
-            ({ key, label, min, max, unit, initial }) => (
+            ({ key, label, min, max, unit }) => (
               <div
                 className="initial_effect_row"
                 key={key}
@@ -109,13 +109,6 @@ function InitialEffectsAccordion({
                   }
                 />
                 <span className="effect_unit">{unit}</span>
-                <button
-                  type="button"
-                  className="reset_effect_button"
-                  onClick={() => onChange(key, initial)}
-                >
-                  初期値にリセット
-                </button>
               </div>
             ),
           )}

@@ -16,7 +16,6 @@ export default function EffectValueRow({
   min,
   max,
   unit,
-  initial,
   onChange,
 }: Props) {
   const start = useRef<{ x: number; value: number } | null>(null);
@@ -60,13 +59,6 @@ export default function EffectValueRow({
         onChange={(event) => onChange(Number(event.target.value))}
       />
       <span className="effect_unit">{unit}</span>
-      <button
-        type="button"
-        className="reset_effect_button"
-        onClick={() => onChange(initial)}
-      >
-        初期値にリセット
-      </button>
     </div>
   );
 }
