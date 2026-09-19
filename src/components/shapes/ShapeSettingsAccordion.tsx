@@ -97,11 +97,11 @@ function ShapeSettingsAccordion({
                 id={`shape_${key}`}
                 type="number"
                 min={key === "lineWidth" || key === "cornerRadius" ? 0 : undefined}
-                max={key === "lineWidth" || key === "cornerRadius" ? 100 : undefined}
+                max={key === "cornerRadius" ? 100 : undefined}
                 value={values[key]}
             onChange={(event) => onChange(key, Number(event.target.value))}
           />
-          <span className="effect_unit">{unit}</span>
+          <span className="effect_unit">{key === "lineWidth" ? "px" : unit}</span>
           <button type="button" className="reset_effect_button" onClick={() => onChange(key, initial)}>
             初期値にリセット
           </button>

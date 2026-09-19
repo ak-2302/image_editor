@@ -32,7 +32,7 @@ export function normalizeShapeProperties(
       properties?.fillColor ??
       properties?.strokeColor ??
       defaultShapeProperties.color,
-    lineWidth: Math.max(0, Math.min(100, lineWidth)),
+    lineWidth: Math.max(0, lineWidth),
     cornerRadius: Math.max(0, Math.min(100, cornerRadius)),
   };
 }
