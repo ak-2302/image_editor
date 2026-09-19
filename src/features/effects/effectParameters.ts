@@ -16,6 +16,44 @@ export type EffectParameters = {
   invertLuminance: boolean;
   invertHue: boolean;
   invertAlpha: boolean;
+  monochromeColor: string;
+  monochromeStrength: number;
+  gradientStartColor: string;
+  gradientEndColor: string;
+  gradientAngle: number;
+  gradientStrength: number;
+  glowColor: string;
+  glowStrength: number;
+  glowRadius: number;
+  blurRadius: number;
+  mosaicSize: number;
+  mosaicStrength: number;
+  clipTop: number;
+  clipBottom: number;
+  clipLeft: number;
+  clipRight: number;
+  diagonalClipAngle: number;
+  maskShape: "circle" | "rectangle" | "ellipse";
+  maskX: number;
+  maskY: number;
+  maskWidth: number;
+  maskHeight: number;
+  maskBlur: number;
+  maskInvert: boolean;
+  shadowColor: string;
+  shadowOpacity: number;
+  shadowDistance: number;
+  shadowAngle: number;
+  shadowBlur: number;
+  outlineColor: string;
+  outlineWidth: number;
+  outlineOpacity: number;
+  imageLoopX: number;
+  imageLoopY: number;
+  imageLoopOffsetX: number;
+  imageLoopOffsetY: number;
+  imageLoopMirror: boolean;
+  imageLoopOpacity: number;
 };
 
 export const defaultEffectParameters: EffectParameters = {
@@ -36,4 +74,42 @@ export const defaultEffectParameters: EffectParameters = {
   invertLuminance: false,
   invertHue: false,
   invertAlpha: false,
+  monochromeColor: "#ffffff",
+  monochromeStrength: 100,
+  gradientStartColor: "#ffffff",
+  gradientEndColor: "#000000",
+  gradientAngle: 0,
+  gradientStrength: 0,
+  glowColor: "#ffffff",
+  glowStrength: 0,
+  glowRadius: 8,
+  blurRadius: 0,
+  mosaicSize: 8,
+  mosaicStrength: 0,
+  clipTop: 0,
+  clipBottom: 0,
+  clipLeft: 0,
+  clipRight: 0,
+  diagonalClipAngle: 45,
+  maskShape: "rectangle",
+  maskX: 0,
+  maskY: 0,
+  maskWidth: 100,
+  maskHeight: 100,
+  maskBlur: 0,
+  maskInvert: false,
+  shadowColor: "#000000",
+  shadowOpacity: 0,
+  shadowDistance: 8,
+  shadowAngle: 45,
+  shadowBlur: 8,
+  outlineColor: "#000000",
+  outlineWidth: 0,
+  outlineOpacity: 100,
+  imageLoopX: 1,
+  imageLoopY: 1,
+  imageLoopOffsetX: 0,
+  imageLoopOffsetY: 0,
+  imageLoopMirror: false,
+  imageLoopOpacity: 100,
 };

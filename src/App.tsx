@@ -251,6 +251,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
       ? shapeType
       : objectLayers.find((layer) => layer.id === selectedObjectId)?.type;
   const currentParameters = (): EffectParameters => ({
+    ...defaultEffectParameters,
     brightness,
     contrast,
     grayscale,
@@ -642,6 +643,17 @@ const isAvailableEffect = (effect: EffectInstance) =>
     colorAdjust: 0,
     transparency: 0,
     flip: 0,
+    monochrome: 100,
+    gradient: 0,
+    glow: 0,
+    blur: 0,
+    mosaic: 0,
+    clipping: 0,
+    diagonalClipping: 0,
+    mask: 0,
+    shadow: 0,
+    outline: 0,
+    imageLoop: 0,
   };
   const effectParameterKeys: Record<EffectName, keyof EffectParameters> = {
     brightness: "brightness",
@@ -651,6 +663,17 @@ const isAvailableEffect = (effect: EffectInstance) =>
     colorAdjust: "hue",
     transparency: "luminanceKey",
     flip: "flipHorizontal",
+    monochrome: "monochromeStrength",
+    gradient: "gradientStrength",
+    glow: "glowStrength",
+    blur: "blurRadius",
+    mosaic: "mosaicStrength",
+    clipping: "clipTop",
+    diagonalClipping: "diagonalClipAngle",
+    mask: "maskWidth",
+    shadow: "shadowOpacity",
+    outline: "outlineWidth",
+    imageLoop: "imageLoopX",
   };
   const getEffectValue = (effect: EffectInstance) => {
     const value = effect.values[effectParameterKeys[effect.name]];
