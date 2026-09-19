@@ -206,9 +206,15 @@ function App() {
     selectedObjectId === "main"
       ? imageUrl
         ? "画像"
-        : canvasSize
-          ? "空のキャンバス"
-          : "未選択"
+        : shapeType === "rectangle"
+          ? "四角形"
+          : shapeType === "circle"
+            ? "円形"
+            : shapeType === "triangle"
+              ? "三角形"
+              : canvasSize
+                ? "空のキャンバス"
+                : "未選択"
       : (
           {
             rectangle: "四角形",
