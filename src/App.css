@@ -1182,11 +1182,15 @@ input[type="range"] {
   cursor: pointer;
 }
 
-.effect_bypass_button:hover,
 .effect_bypass_button.is_bypassed {
   border-color: var(--border_color);
   color: var(--muted_color);
   opacity: 0.65;
+}
+
+.effect_bypass_button:hover {
+  border-color: var(--accent_color);
+  background: #fff1ed;
 }
 .effect_accordion_header .effect_accordion_trigger {
   flex: 1;
