@@ -150,7 +150,7 @@ export async function exportProject(
   if (!blob) throw new Error("画像を書き出せませんでした。");
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `${snapshot.layerName || "image-editor"}.${format}`;
+  link.download = `${snapshot.projectName || "image-editor"}.${format}`;
   link.click();
   URL.revokeObjectURL(link.href);
 }

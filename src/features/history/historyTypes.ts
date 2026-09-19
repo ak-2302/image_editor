@@ -4,6 +4,7 @@ import type { ObjectLayer } from "../layers/objectTypes";
 import type { EffectInstance } from "../project/projectTypes";
 
 export type EditorHistorySnapshot = {
+  projectName: string;
   imageUrl: string | null;
   layerName: string;
   isLayerVisible: boolean;

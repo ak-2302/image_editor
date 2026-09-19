@@ -50,6 +50,7 @@ function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyLayerPanelEnabled = import.meta.env.VITE_LEGACY_LAYER_PANEL === "true";
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [projectName, setProjectName] = useState("image-editor");
   const [layerName, setLayerName] = useState("画像レイヤー");
   const [isLayerVisible, setIsLayerVisible] = useState(true);
   const [isRenamingLayer, setIsRenamingLayer] = useState(false);
@@ -120,6 +121,7 @@ function App() {
 
   const objectKey = String(selectedObjectId);
   const createHistorySnapshot = (): EditorHistorySnapshot => ({
+    projectName,
     imageUrl,
     layerName,
     isLayerVisible,
@@ -137,6 +139,7 @@ function App() {
   });
   const recordHistory = () => history.push(createHistorySnapshot());
   const restoreHistorySnapshot = (snapshot: EditorHistorySnapshot) => {
+    setProjectName(snapshot.projectName ?? "image-editor");
     setImageUrl(snapshot.imageUrl);
     setLayerName(snapshot.layerName);
     setIsLayerVisible(snapshot.isLayerVisible);
@@ -622,6 +625,16 @@ function App() {
             </button>
             {openMenu === "settings" && (
               <div className="header_dropdown settings_dropdown">
+                <label htmlFor="project_name">プロジェクト名</label>
+                <input
+                  id="project_name"
+                  type="text"
+                  value={projectName}
+                  onChange={(event) => {
+                    recordHistory();
+                    setProjectName(event.target.value);
+                  }}
+                />
                 <label htmlFor="frame_opacity">
                   枠線の濃さ <output>{frameOpacity}%</output>
                 </label>
