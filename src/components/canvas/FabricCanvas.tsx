@@ -73,6 +73,7 @@ const createShape = (
     fill: fillsShape ? getEffectColor(color, effects) : "transparent",
     stroke: fillsShape ? undefined : lineWidth > 0 ? color : undefined,
     strokeWidth: lineWidth,
+    strokeLineJoin: "bevel" as const,
     width: pathWidth,
     height: pathHeight,
   };

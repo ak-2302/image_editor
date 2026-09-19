@@ -75,6 +75,7 @@ const createShape = (layer: ObjectLayer, canvasWidth: number, effects: EditorHis
     fill: fillsShape ? getEffectColor(color, effects) : "transparent",
     stroke: fillsShape ? undefined : lineWidth > 0 ? color : undefined,
     strokeWidth: lineWidth,
+    strokeLineJoin: "bevel" as const,
     width: pathWidth,
     height: pathHeight,
     originX: "center" as const,
