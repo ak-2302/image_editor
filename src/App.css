@@ -451,6 +451,21 @@ input[type="range"] {
 
 .effect_menu {
   display: grid;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border_color) transparent;
+}
+
+.effect_menu::-webkit-scrollbar {
+  width: 0.35rem;
+}
+
+.effect_menu::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--border_color);
 }
 
 .effect_controls {
