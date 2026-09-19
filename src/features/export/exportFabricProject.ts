@@ -170,7 +170,7 @@ export async function exportFabricProject(
     });
     applyObjectDecorations(object, effects);
     applyObjectClipping(object, effects);
-    if (layer.type === "image" && object instanceof FabricImage) {
+    if (object instanceof FabricImage) {
       object.filters = getEffects(effects);
       object.applyFilters();
       await applyImageGradient(object, effects);

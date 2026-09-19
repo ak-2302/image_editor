@@ -215,7 +215,7 @@ function FabricCanvas({
           );
         }
         if (!object || cancelled) continue;
-        if (layer.type === "image" && object instanceof FabricImage) {
+        if (object instanceof FabricImage) {
           object.filters = getFabricFilters(
             isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
           );
