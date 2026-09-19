@@ -37,7 +37,10 @@ const isShapeLayer = (
   layer: ObjectLayer,
 ): layer is ObjectLayer & {
   type: "rectangle" | "circle" | "triangle";
-} => layer.type !== "image";
+} =>
+  layer.type === "rectangle" ||
+  layer.type === "circle" ||
+  layer.type === "triangle";
 
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -352,21 +355,67 @@ function App() {
     resetCanvas();
     setObjectLayers([]);
   };
-  const updateEffect = (name: EffectName, value: number) => {
-    if (name === "brightness") updateParameter("brightness", value);
-    if (name === "contrast") updateParameter("contrast", value);
-    if (name === "grayscale") updateParameter("grayscale", value);
-    if (name === "sepia") updateParameter("sepia", value);
+  const updateEffectValue = <K extends keyof EffectParameters>(
+    effectId: string,
+    key: K,
+    value: EffectParameters[K],
+  ) => {
+    updateActiveEffects((effects) =>
+      effects.map((effect) =>
+        effect.id === effectId
+          ? { ...effect, values: { ...effect.values, [key]: value } }
+          : effect,
+      ),
+    );
+    updateParameter(key, value);
   };
-  const effectValues: Record<EffectName, number> = {
-    brightness,
-    contrast,
-    grayscale,
-    sepia,
-    colorAdjust: hue,
+  const effectDefaultValues: Record<EffectName, number> = {
+    brightness: 100,
+    contrast: 100,
+    grayscale: 0,
+    sepia: 0,
+    colorAdjust: 0,
     transparency: 0,
   };
-  const filter = `brightness(${brightness}%) contrast(${contrast}%) grayscale(${grayscale}%) sepia(${sepia}%) hue-rotate(${hue}deg) saturate(${saturation}%) brightness(${lightness}%)`;
+  const effectParameterKeys: Record<EffectName, keyof EffectParameters> = {
+    brightness: "brightness",
+    contrast: "contrast",
+    grayscale: "grayscale",
+    sepia: "sepia",
+    colorAdjust: "hue",
+    transparency: "luminanceKey",
+  };
+  const getEffectValue = (effect: EffectInstance) => {
+    const value = effect.values[effectParameterKeys[effect.name]];
+    return typeof value === "number"
+      ? value
+      : effectDefaultValues[effect.name];
+  };
+  const filter = activeEffects
+    .map((effect) => {
+      switch (effect.name) {
+        case "brightness":
+          return `brightness(${getEffectValue(effect)}%)`;
+        case "contrast":
+          return `contrast(${getEffectValue(effect)}%)`;
+        case "grayscale":
+          return `grayscale(${getEffectValue(effect)}%)`;
+        case "sepia":
+          return `sepia(${getEffectValue(effect)}%)`;
+        case "colorAdjust": {
+          const hueValue = effect.values.hue ?? 0;
+          const saturationValue = effect.values.saturation ?? 100;
+          const lightnessValue = effect.values.lightness ?? 100;
+          return `hue-rotate(${hueValue}deg) saturate(${saturationValue}%) brightness(${lightnessValue}%)`;
+        }
+        case "transparency":
+          return "";
+        default:
+          return "";
+      }
+    })
+    .filter(Boolean)
+    .join(" ") || "none";
   const imageTransform =
     selectedObjectId === "main"
       ? `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`
@@ -1024,7 +1073,9 @@ function App() {
                             max={180}
                             unit="°"
                             initial={0}
-                            onChange={(value) => updateParameter("hue", value)}
+                            onChange={(value) =>
+                              updateEffectValue(effect.id, "hue", value)
+                            }
                           />
                           <EffectValueRow
                             label="彩度"
@@ -1034,7 +1085,7 @@ function App() {
                             unit="%"
                             initial={100}
                             onChange={(value) =>
-                              updateParameter("saturation", value)
+                              updateEffectValue(effect.id, "saturation", value)
                             }
                           />
                           <EffectValueRow
@@ -1045,7 +1096,7 @@ function App() {
                             unit="%"
                             initial={100}
                             onChange={(value) =>
-                              updateParameter("lightness", value)
+                              updateEffectValue(effect.id, "lightness", value)
                             }
                           />
                         </div>
@@ -1058,7 +1109,8 @@ function App() {
                               type="color"
                               value={chromaKeyColor}
                               onChange={(event) =>
-                                updateParameter(
+                                updateEffectValue(
+                                  effect.id,
                                   "chromaKeyColor",
                                   event.target.value,
                                 )
@@ -1072,7 +1124,8 @@ function App() {
                               value={chromaKeyTolerance}
                               aria-label="クロマキー許容値"
                               onChange={(event) =>
-                                updateParameter(
+                                updateEffectValue(
+                                  effect.id,
                                   "chromaKeyTolerance",
                                   Number(event.target.value),
                                 )
@@ -1086,7 +1139,8 @@ function App() {
                               type="color"
                               value={colorKeyColor}
                               onChange={(event) =>
-                                updateParameter(
+                                updateEffectValue(
+                                  effect.id,
                                   "colorKeyColor",
                                   event.target.value,
                                 )
@@ -1100,7 +1154,8 @@ function App() {
                               value={colorKeyTolerance}
                               aria-label="カラーキー許容値"
                               onChange={(event) =>
-                                updateParameter(
+                                updateEffectValue(
+                                  effect.id,
                                   "colorKeyTolerance",
                                   Number(event.target.value),
                                 )
@@ -1115,7 +1170,11 @@ function App() {
                             unit="%"
                             initial={0}
                             onChange={(value) =>
-                              updateParameter("luminanceKey", value)
+                              updateEffectValue(
+                                effect.id,
+                                "luminanceKey",
+                                value,
+                              )
                             }
                           />
                         </div>
@@ -1123,12 +1182,18 @@ function App() {
                         <div className="initial_effect_fields">
                           <EffectValueRow
                             label="強度"
-                            value={effectValues[effect.name]}
+                            value={getEffectValue(effect)}
                             min={definition.min}
                             max={definition.max}
                             unit="%"
                             initial={definition.initial}
-                            onChange={(value) => updateEffect(name, value)}
+                            onChange={(value) =>
+                              updateEffectValue(
+                                effect.id,
+                                effectParameterKeys[effect.name],
+                                value,
+                              )
+                            }
                           />
                         </div>
                       ))}
