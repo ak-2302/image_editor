@@ -69,10 +69,7 @@ const getEffects = (
     }
     if (effect.name === "monochrome") {
       const strength = Number(effect.values.monochromeStrength ?? 0) / 100;
-      if (strength > 0) {
-        result.push(new filters.Grayscale() as never);
-        if (strength < 1) result.push(new filters.BlendColor({ color: effect.values.monochromeColor ?? "#ffffff", mode: "tint", alpha: strength }) as never);
-      }
+      if (strength > 0) result.push(new filters.Grayscale() as never);
     }
   }
   return result;
