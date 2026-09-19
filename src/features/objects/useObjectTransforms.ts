@@ -52,5 +52,14 @@ export function useObjectTransforms() {
     if (objectId === currentObjectId) setValues(nextValues);
   };
 
-  return { values, update, select, setForObject };
+  const setAll = (
+    nextValuesByObject: Record<string, InitialEffectValues>,
+    objectId: string,
+  ) => {
+    setValuesByObject(nextValuesByObject);
+    setCurrentObjectId(objectId);
+    setValues(nextValuesByObject[objectId] ?? defaultObjectTransform);
+  };
+
+  return { values, valuesByObject, update, select, setForObject, setAll };
 }

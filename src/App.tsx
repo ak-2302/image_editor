@@ -32,6 +32,8 @@ import {
 } from "./features/objects/useObjectTransforms";
 import type { EffectInstance } from "./features/project/projectTypes";
 import type { ObjectLayer } from "./features/layers/objectTypes";
+import { useUndoRedo } from "./features/history/useUndoRedo";
+import type { EditorHistorySnapshot } from "./features/history/historyTypes";
 
 const isShapeLayer = (
   layer: ObjectLayer,
@@ -97,6 +99,8 @@ function App() {
     update: updateTransform,
     select: selectTransform,
     setForObject: setTransformForObject,
+    valuesByObject: transformsByObject,
+    setAll: setAllTransforms,
   } = useObjectTransforms();
   const [openMenu, setOpenMenu] = useState<"file" | "settings" | null>(null);
   const [showEffectMenu, setShowEffectMenu] = useState(false);
@@ -109,8 +113,65 @@ function App() {
   const [draggingEffect, setDraggingEffect] = useState<string | null>(null);
   const [movingEffect, setMovingEffect] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const history = useUndoRedo<EditorHistorySnapshot>();
 
   const objectKey = String(selectedObjectId);
+  const createHistorySnapshot = (): EditorHistorySnapshot => ({
+    imageUrl,
+    layerName,
+    isLayerVisible,
+    shapeType,
+    canvasSize,
+    frameOpacity,
+    frameThickness,
+    objectLayers,
+    selectedObjectId,
+    activeEffects,
+    effectsByObject,
+    parametersByObject,
+    transformsByObject,
+    initialEffects,
+  });
+  const recordHistory = () => history.push(createHistorySnapshot());
+  const restoreHistorySnapshot = (snapshot: EditorHistorySnapshot) => {
+    setImageUrl(snapshot.imageUrl);
+    setLayerName(snapshot.layerName);
+    setIsLayerVisible(snapshot.isLayerVisible);
+    setShapeType(snapshot.shapeType);
+    setCanvasSize(snapshot.canvasSize);
+    setFrameOpacity(snapshot.frameOpacity);
+    setFrameThickness(snapshot.frameThickness);
+    setObjectLayers(snapshot.objectLayers);
+    setSelectedObjectId(snapshot.selectedObjectId);
+    setActiveEffects(snapshot.activeEffects);
+    setEffectsByObject(snapshot.effectsByObject);
+    setParametersByObject(snapshot.parametersByObject);
+    setAllTransforms(snapshot.transformsByObject, String(snapshot.selectedObjectId));
+    setBrightness(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.brightness ?? defaultEffectParameters.brightness);
+    setContrast(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.contrast ?? defaultEffectParameters.contrast);
+    setGrayscale(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.grayscale ?? defaultEffectParameters.grayscale);
+    setSepia(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.sepia ?? defaultEffectParameters.sepia);
+    setHue(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.hue ?? defaultEffectParameters.hue);
+    setSaturation(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.saturation ?? defaultEffectParameters.saturation);
+    setLightness(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.lightness ?? defaultEffectParameters.lightness);
+    setChromaKeyColor(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.chromaKeyColor ?? defaultEffectParameters.chromaKeyColor);
+    setChromaKeyTolerance(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.chromaKeyTolerance ?? defaultEffectParameters.chromaKeyTolerance);
+    setColorKeyColor(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.colorKeyColor ?? defaultEffectParameters.colorKeyColor);
+    setColorKeyTolerance(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.colorKeyTolerance ?? defaultEffectParameters.colorKeyTolerance);
+    setLuminanceKey(snapshot.parametersByObject[String(snapshot.selectedObjectId)]?.luminanceKey ?? defaultEffectParameters.luminanceKey);
+  };
+  const undo = () => {
+    const previous = history.undo(createHistorySnapshot());
+    if (previous) restoreHistorySnapshot(previous);
+  };
+  const redo = () => {
+    const next = history.redo(createHistorySnapshot());
+    if (next) restoreHistorySnapshot(next);
+  };
+  const historyActionsRef = useRef({ undo, redo });
+  useEffect(() => {
+    historyActionsRef.current = { undo, redo };
+  }, [redo, undo]);
   const selectedObjectLabel =
     selectedObjectId === "main"
       ? imageUrl
@@ -174,6 +235,7 @@ function App() {
   const updateActiveEffects = (
     updater: (effects: EffectInstance[]) => EffectInstance[],
   ) => {
+    recordHistory();
     setActiveEffects((current) => {
       const next = updater(current);
       setEffectsByObject((objects) => ({ ...objects, [objectKey]: next }));
@@ -242,6 +304,21 @@ function App() {
     document.addEventListener("pointerdown", closeMenus);
     return () => document.removeEventListener("pointerdown", closeMenus);
   }, []);
+  useEffect(() => {
+    const handleHistoryKey = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      if (event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        if (event.shiftKey) historyActionsRef.current.redo();
+        else historyActionsRef.current.undo();
+      } else if (event.key.toLowerCase() === "y") {
+        event.preventDefault();
+        historyActionsRef.current.redo();
+      }
+    };
+    document.addEventListener("keydown", handleHistoryKey);
+    return () => document.removeEventListener("keydown", handleHistoryKey);
+  }, []);
   const loadFile = async (file?: File) => {
     if (!file) return;
     if (!isSupportedImage(file)) {
@@ -253,6 +330,7 @@ function App() {
       setNotice("画像を読み込めませんでした。");
       return;
     }
+    recordHistory();
     if (imageUrl)
       setObjectLayers((layers) => [
         ...layers,
@@ -284,6 +362,7 @@ function App() {
     type: "rectangle" | "circle" | "triangle",
     name: string,
   ) => {
+    recordHistory();
     const isEmptyCanvas = !imageUrl && !canvasSize && !shapeType;
     const id = Date.now();
     if (!imageUrl && shapeType) {
@@ -328,6 +407,7 @@ function App() {
     selectObject(id);
   };
   const addText = () => {
+    recordHistory();
     const id = Date.now();
     setCanvasSize((size) => size ?? { width: 800, height: 600 });
     setObjectLayers((layers) => [
@@ -349,6 +429,7 @@ function App() {
     selectObject(id);
   };
   const clearImage = () => {
+    recordHistory();
     setImageUrl(null);
     setShapeType(null);
     setLayerName("画像レイヤー");
@@ -434,6 +515,7 @@ function App() {
       } as CSSProperties)
     : undefined;
   const handleInitialEffectChange = (key: InitialEffectKey, value: number) => {
+    recordHistory();
     updateTransform(key, value);
   };
   const reorderEffects = (from: string, to: string) => {
@@ -519,9 +601,10 @@ function App() {
                   min="0"
                   max="100"
                   value={frameOpacity}
-                  onChange={(event) =>
-                    setFrameOpacity(Number(event.target.value))
-                  }
+                  onChange={(event) => {
+                    recordHistory();
+                    setFrameOpacity(Number(event.target.value));
+                  }}
                 />
                 <label htmlFor="frame_thickness">
                   枠線の太さ <output>{frameThickness}px</output>
@@ -532,12 +615,21 @@ function App() {
                   min="1"
                   max="8"
                   value={frameThickness}
-                  onChange={(event) =>
-                    setFrameThickness(Number(event.target.value))
-                  }
+                  onChange={(event) => {
+                    recordHistory();
+                    setFrameThickness(Number(event.target.value));
+                  }}
                 />
               </div>
             )}
+          </div>
+          <div className="history_controls" aria-label="編集履歴">
+            <button type="button" onClick={undo} disabled={!history.canUndo}>
+              Undo
+            </button>
+            <button type="button" onClick={redo} disabled={!history.canRedo}>
+              Redo
+            </button>
           </div>
         </nav>
       </header>
@@ -695,6 +787,7 @@ function App() {
                     <button
                       type="button"
                       onClick={() => {
+                        recordHistory();
                         if (!createBlankCanvas()) {
                           setNotice("幅と高さは1以上で指定してください。");
                         }
@@ -906,6 +999,7 @@ function App() {
             selectedObjectId={selectedObjectId}
             selectObject={selectObject}
             setObjectLayers={setObjectLayers}
+            recordHistory={recordHistory}
             clearImage={clearImage}
             addShape={addShape}
             addText={addText}

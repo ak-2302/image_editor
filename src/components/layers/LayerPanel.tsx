@@ -15,6 +15,7 @@ type LayerPanelProps = {
   selectedObjectId: string | number;
   selectObject: (id: string | number) => void;
   setObjectLayers: (update: (layers: ObjectLayer[]) => ObjectLayer[]) => void;
+  recordHistory: () => void;
   clearImage: () => void;
   addShape: (type: "rectangle" | "circle" | "triangle", name: string) => void;
   addText: () => void;
@@ -33,6 +34,7 @@ function LayerPanel({
   selectedObjectId,
   selectObject,
   setObjectLayers,
+  recordHistory,
   clearImage,
   addShape,
   addText,
@@ -179,6 +181,7 @@ function LayerPanel({
             onDragOver={(event) => event.preventDefault()}
             onDrop={() => {
               if (draggedLayerId === null || draggedLayerId === layer.id) return;
+              recordHistory();
               setObjectLayers((layers) =>
                 reorderLayers(layers, draggedLayerId, layer.id),
               );
@@ -192,6 +195,7 @@ function LayerPanel({
               aria-label={layer.visible ? "レイヤーを非表示" : "レイヤーを表示"}
               onClick={(event) => {
                 event.stopPropagation();
+                recordHistory();
                 setObjectLayers((layers) =>
                   layers.map((item) =>
                     item.id === layer.id
@@ -216,11 +220,12 @@ function LayerPanel({
                 type="button"
                 className="layer_icon_button layer_delete_button"
                 aria-label="レイヤーを削除"
-                onClick={() =>
+                onClick={() => {
+                  recordHistory();
                   setObjectLayers((layers) =>
                     layers.filter((item) => item.id !== layer.id),
-                  )
-                }
+                  );
+                }}
               >
                 ×
               </button>
