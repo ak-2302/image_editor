@@ -191,7 +191,7 @@ function FabricCanvas({
     if (!canvas) return;
     let cancelled = false;
     const renderLayers = async () => {
-      canvas.clear();
+      const nextObjects: FabricObject[] = [];
       const renderableLayers = mainLayer ? [mainLayer, ...layers] : layers;
       for (const layer of renderableLayers) {
         if (cancelled || !layer.visible) continue;
@@ -257,9 +257,11 @@ function FabricCanvas({
           object,
           objectEffects,
         );
-        copies.forEach((copy) => canvas.add(copy));
+        nextObjects.push(...copies);
       }
       if (!cancelled) {
+        canvas.remove(...canvas.getObjects());
+        canvas.add(...nextObjects);
         canvas.on("selection:created", handleSelection);
         canvas.on("selection:updated", handleSelection);
         canvas.on("object:modified", handleObjectModified);
