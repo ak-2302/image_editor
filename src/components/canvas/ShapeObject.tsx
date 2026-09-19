@@ -37,27 +37,49 @@ function ShapeObject({
   ]
     .filter(Boolean)
     .join(" ");
+  const shapeStyle = {
+    transform,
+    opacity,
+    zIndex,
+    filter,
+    boxSizing: "border-box",
+    width: `${45 * (shapeProperties.size / 100)}%`,
+    height: "auto",
+    aspectRatio: `${1 / heightRatio}`,
+  } satisfies CSSProperties;
+
+  if (isTriangle) {
+    return (
+      <svg
+        className={shapeClass}
+        aria-label={name}
+        viewBox="0 0 100 86.6025"
+        preserveAspectRatio="none"
+        style={shapeStyle}
+      >
+        <polygon
+          points="50,0 100,86.6025 0,86.6025"
+          fill={isFilled ? shapeProperties.color : "none"}
+          stroke={isFilled ? "none" : shapeProperties.color}
+          strokeWidth={shapeProperties.lineWidth}
+          vectorEffect="non-scaling-stroke"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
 
   return (
     <div
       className={shapeClass}
       aria-label={name}
       style={{
-        transform,
-        opacity,
-        zIndex,
-        filter,
-        boxSizing: "border-box",
+        ...shapeStyle,
         backgroundColor: isFilled ? shapeProperties.color : "transparent",
-        boxShadow:
-          !isTriangle && !isFilled
-            ? `inset 0 0 0 ${shapeProperties.lineWidth}px ${shapeProperties.color}`
-            : undefined,
+        boxShadow: !isFilled
+          ? `inset 0 0 0 ${shapeProperties.lineWidth}px ${shapeProperties.color}`
+          : undefined,
         borderRadius: type === "rectangle" ? `${shapeProperties.cornerRadius}%` : undefined,
-        width: `${45 * (shapeProperties.size / 100)}%`,
-        height: "auto",
-        aspectRatio: `${1 / heightRatio}`,
-        clipPath: isTriangle ? "polygon(50% 0%, 100% 100%, 0% 100%)" : undefined,
       } satisfies CSSProperties}
     />
   );
