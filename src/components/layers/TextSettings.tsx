@@ -1,10 +1,10 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import EffectValueRow from "../effects/EffectValueRow";
-import InitialEffectsAccordion from "../initial-effects/InitialEffectsAccordion";
 import type {
   InitialEffectKey,
   InitialEffectValues,
 } from "../initial-effects/effectTypes";
+import { initialEffectFields } from "../initial-effects/effectTypes";
 
 type TextSettingsProps = {
   content: string;
@@ -78,13 +78,20 @@ function TextSettings({
         </button>
       </div>
       {isOpen && <div className="text_settings">
-        <InitialEffectsAccordion
-          values={initialEffects}
-          title="座標・変形"
-          isOpen
-          onToggle={() => undefined}
-          onChange={onInitialEffectChange}
-        />
+        <div className="initial_effect_fields text_transform_fields">
+          {initialEffectFields.map(({ key, label, min, max, unit, initial }) => (
+            <EffectValueRow
+              key={key}
+              label={label}
+              value={initialEffects[key]}
+              min={min}
+              max={max}
+              unit={unit}
+              initial={initial}
+              onChange={(value) => onInitialEffectChange(key, value)}
+            />
+          ))}
+        </div>
         <label htmlFor="text_content">文字列</label>
         <textarea
           id="text_content"
