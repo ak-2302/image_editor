@@ -384,6 +384,19 @@ const isAvailableEffect = (effect: EffectInstance) =>
       setNotice("画像を読み込めませんでした。");
       return;
     }
+    const dimensions = await new Promise<{ width: number; height: number } | null>(
+      (resolve) => {
+        const image = new Image();
+        image.onload = () =>
+          resolve({ width: image.naturalWidth, height: image.naturalHeight });
+        image.onerror = () => resolve(null);
+        image.src = nextUrl;
+      },
+    );
+    if (!dimensions) {
+      setNotice("画像サイズを取得できませんでした。");
+      return;
+    }
     recordHistory();
     if (imageUrl)
       setObjectLayers((layers) => [
@@ -400,7 +413,8 @@ const isAvailableEffect = (effect: EffectInstance) =>
     if (!imageUrl) setLayerName(file.name);
     setShapeType(null);
     setIsLayerVisible(true);
-    resetCanvas();
+    setCanvasSize(dimensions);
+    setShowBlankCanvasForm(false);
     setNotice(null);
   };
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
