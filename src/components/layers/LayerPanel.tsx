@@ -17,6 +17,7 @@ type LayerPanelProps = {
   setObjectLayers: (update: (layers: ObjectLayer[]) => ObjectLayer[]) => void;
   recordHistory: () => void;
   clearImage: () => void;
+  deleteObject: (id: number) => void;
   addShape: (type: "rectangle" | "circle" | "triangle" | "polygon" | "line", name: string) => void;
   addText: () => void;
 };
@@ -36,6 +37,7 @@ function LayerPanel({
   setObjectLayers,
   recordHistory,
   clearImage,
+  deleteObject,
   addShape,
   addText,
 }: LayerPanelProps) {
@@ -241,11 +243,9 @@ function LayerPanel({
                 type="button"
                 className="layer_icon_button layer_delete_button"
                 aria-label="レイヤーを削除"
-                onClick={() => {
-                  recordHistory();
-                  setObjectLayers((layers) =>
-                    layers.filter((item) => item.id !== layer.id),
-                  );
+                onClick={(event) => {
+                  event.stopPropagation();
+                  deleteObject(layer.id);
                 }}
               >
                 ×

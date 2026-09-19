@@ -548,6 +548,31 @@ const isAvailableEffect = (effect: EffectInstance) =>
     }
     selectObject(nextLayers[0].id);
   };
+  const deleteObject = (id: number) => {
+    recordHistory();
+    const nextLayers = objectLayers.filter((layer) => layer.id !== id);
+    setObjectLayers(nextLayers);
+    setEffectsByObject((effects) => {
+      const nextEffects = { ...effects };
+      delete nextEffects[String(id)];
+      return nextEffects;
+    });
+    setParametersByObject((parameters) => {
+      const nextParameters = { ...parameters };
+      delete nextParameters[String(id)];
+      return nextParameters;
+    });
+    const nextTransforms = { ...transformsByObject };
+    delete nextTransforms[String(id)];
+    setAllTransforms(nextTransforms, String(nextLayers[0]?.id ?? "main"));
+    if (selectedObjectId === id) {
+      if (nextLayers[0]) selectObject(nextLayers[0].id);
+      else {
+        setSelectedObjectId("main");
+        setActiveEffects([]);
+      }
+    }
+  };
   const resetProject = () => {
     if (!window.confirm("プロジェクトを初期状態に戻しますか？")) return;
     recordHistory();
@@ -1121,6 +1146,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
             setObjectLayers={setObjectLayers}
             recordHistory={recordHistory}
             clearImage={clearImage}
+            deleteObject={deleteObject}
             addShape={addShape}
             addText={addText}
           />
