@@ -14,7 +14,7 @@ import { getEffectColor } from "../../features/effects/fabricEffectStyles";
 import { createShapeSvgDataUrl } from "../../features/shapes/svgShapeRenderer";
 import { createRegularPolygon } from "../../features/shapes/polygonRenderer";
 import { defaultObjectTransform } from "../../features/objects/useObjectTransforms";
-import { applyObjectDecorations } from "../../features/effects/objectDecorations";
+import { applyObjectClipping, applyObjectDecorations } from "../../features/effects/objectDecorations";
 
 type FabricCanvasProps = {
   width: number;
@@ -223,6 +223,10 @@ function FabricCanvas({
           data: { objectId: layer.id },
         });
         applyObjectDecorations(
+          object,
+          isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+        );
+        applyObjectClipping(
           object,
           isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
         );
