@@ -24,16 +24,16 @@ function InitialEffectsAccordion({
     key: InitialEffectKey;
     startX: number;
     startValue: number;
-    min: number;
-    max: number;
+    min?: number;
+    max?: number;
   } | null>(null);
   const draggedRef = useRef(false);
 
   const handlePointerDown = (
     event: ReactPointerEvent<HTMLDivElement>,
     key: InitialEffectKey,
-    min: number,
-    max: number,
+    min: number | undefined,
+    max: number | undefined,
   ) => {
     draggingRef.current = {
       key,
@@ -49,13 +49,11 @@ function InitialEffectsAccordion({
       if (!drag) return;
       if (Math.abs(moveEvent.clientX - drag.startX) > 2)
         draggedRef.current = true;
-      const nextValue = Math.min(
-        drag.max,
-        Math.max(
-          drag.min,
-          Math.round(drag.startValue + (moveEvent.clientX - drag.startX) / 2),
-        ),
+      const rawValue = Math.round(
+        drag.startValue + (moveEvent.clientX - drag.startX) / 2,
       );
+      const minValue = drag.min === undefined ? rawValue : Math.max(drag.min, rawValue);
+      const nextValue = drag.max === undefined ? minValue : Math.min(drag.max, minValue);
       onChange(drag.key, nextValue);
     };
     const handlePointerUp = () => {

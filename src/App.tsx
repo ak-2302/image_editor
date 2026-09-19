@@ -17,22 +17,11 @@ import {
   effectDefinitions,
   type EffectName,
 } from "./features/effects/effectDefinitions";
+import {
+  defaultEffectParameters,
+  type EffectParameters,
+} from "./features/effects/effectParameters";
 import type { ObjectLayer } from "./features/layers/objectTypes";
-
-type EffectParameters = {
-  brightness: number;
-  contrast: number;
-  grayscale: number;
-  sepia: number;
-  hue: number;
-  saturation: number;
-  lightness: number;
-  chromaKeyColor: string;
-  chromaKeyTolerance: number;
-  colorKeyColor: string;
-  colorKeyTolerance: number;
-  luminanceKey: number;
-};
 
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -185,18 +174,18 @@ function App() {
       setColorKeyTolerance(nextParameters.colorKeyTolerance);
       setLuminanceKey(nextParameters.luminanceKey);
     } else {
-      setBrightness(100);
-      setContrast(100);
-      setGrayscale(0);
-      setSepia(0);
-      setHue(0);
-      setSaturation(100);
-      setLightness(100);
-      setChromaKeyColor("#00ff00");
-      setChromaKeyTolerance(30);
-      setColorKeyColor("#ffffff");
-      setColorKeyTolerance(10);
-      setLuminanceKey(0);
+      setBrightness(defaultEffectParameters.brightness);
+      setContrast(defaultEffectParameters.contrast);
+      setGrayscale(defaultEffectParameters.grayscale);
+      setSepia(defaultEffectParameters.sepia);
+      setHue(defaultEffectParameters.hue);
+      setSaturation(defaultEffectParameters.saturation);
+      setLightness(defaultEffectParameters.lightness);
+      setChromaKeyColor(defaultEffectParameters.chromaKeyColor);
+      setChromaKeyTolerance(defaultEffectParameters.chromaKeyTolerance);
+      setColorKeyColor(defaultEffectParameters.colorKeyColor);
+      setColorKeyTolerance(defaultEffectParameters.colorKeyTolerance);
+      setLuminanceKey(defaultEffectParameters.luminanceKey);
     }
     setExpandedEffectIndex(null);
     setOpenEffectMenu(null);
