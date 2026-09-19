@@ -8,6 +8,7 @@ import {
 } from "react";
 import "./App.css";
 import EffectValueRow from "./components/effects/EffectValueRow";
+import LayerPanel from "./components/layers/LayerPanel";
 import type {
   InitialEffectKey,
   InitialEffectValues,
@@ -25,6 +26,7 @@ import type { ObjectLayer } from "./features/layers/objectTypes";
 
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showLegacyLayerPanel] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [layerName, setLayerName] = useState("画像レイヤー");
   const [isLayerVisible, setIsLayerVisible] = useState(true);
@@ -578,7 +580,8 @@ function App() {
           </div>
         </section>
         <aside className="effects_panel" aria-label="レイヤーとエフェクト">
-          <section className="layers_section" aria-label="オブジェクトレイヤー">
+          {showLegacyLayerPanel && (
+            <section className="layers_section" aria-label="オブジェクトレイヤー">
             <div className="layers_section_header">
               <span>オブジェクト</span>
               <div className="layer_add_menu_wrap">
@@ -652,7 +655,7 @@ function App() {
                 <span className="layer_thumbnail">
                   {imageUrl ? (
                     <img
-                      src={imageUrl}
+                      src={imageUrl ?? undefined}
                       alt=""
                       style={{ opacity: isLayerVisible ? 1 : 0.35 }}
                     />
@@ -752,7 +755,24 @@ function App() {
                 </div>
               ))}
             </div>
-          </section>
+            </section>
+          )}
+          <LayerPanel
+            fileInputRef={fileInputRef}
+            imageUrl={imageUrl}
+            layerName={layerName}
+            setLayerName={setLayerName}
+            isLayerVisible={isLayerVisible}
+            setIsLayerVisible={setIsLayerVisible}
+            canvasSize={canvasSize}
+            shapeType={shapeType}
+            objectLayers={objectLayers}
+            selectedObjectId={selectedObjectId}
+            selectObject={selectObject}
+            setObjectLayers={setObjectLayers}
+            clearImage={clearImage}
+            addShape={addShape}
+          />
           <section className="effects_section" aria-label="エフェクト設定">
             <div className="effects_toolbar">
               <button
