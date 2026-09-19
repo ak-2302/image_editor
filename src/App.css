@@ -451,13 +451,14 @@ input[type="range"] {
 .effects_toolbar {
   position: absolute;
   right: 1.75rem;
-  bottom: 1.5rem;
+  top: 1.5rem;
+  bottom: auto;
   z-index: 3;
 }
 
 .effect_menu {
-  top: auto;
-  bottom: 2.5rem;
+  top: 2.5rem;
+  bottom: auto;
 }
 
 .effects_section {
