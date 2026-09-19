@@ -32,6 +32,7 @@ function ShapeObject({ type, name, transform, opacity, properties }: ShapeObject
       style={{
         transform,
         opacity,
+        boxSizing: "border-box",
         backgroundColor: isTriangle || !isFilled ? "transparent" : shapeProperties.color,
         border: isTriangle
           ? undefined
