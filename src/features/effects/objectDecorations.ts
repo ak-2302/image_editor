@@ -127,7 +127,7 @@ export async function createImageLoopCopies(
         left: baseLeft + x * tileWidth + offsetX,
         top: baseTop + y * tileHeight + offsetY,
         scaleX: mirrored ? -(copy.scaleX ?? 1) : copy.scaleX,
-        opacity: (copy.opacity ?? 1) * opacity,
+        opacity: object.opacity,
       });
       result.push(copy);
     }

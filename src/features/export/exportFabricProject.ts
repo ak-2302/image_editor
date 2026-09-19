@@ -3,6 +3,7 @@ import {
   Group,
   StaticCanvas,
   Textbox,
+  Gradient,
   filters,
   type FabricObject,
 } from "fabric";
@@ -92,6 +93,20 @@ const createShape = async (layer: ObjectLayer, canvasWidth: number, effects: Edi
   return FabricImage.fromURL(dataUrl);
 };
 
+const getTextFill = (color: string, effects: EditorHistorySnapshot["activeEffects"]) => {
+  const gradient = effects.find((effect) => effect.name === "gradient");
+  if (!gradient || Number(gradient.values.gradientStrength ?? 0) <= 0) return getEffectColor(color, effects);
+  const angle = (Number(gradient.values.gradientAngle ?? 0) * Math.PI) / 180;
+  return new Gradient({
+    type: "linear",
+    coords: { x1: 0, y1: 0, x2: Math.cos(angle) * 200, y2: Math.sin(angle) * 200 },
+    colorStops: [
+      { offset: 0, color: gradient.values.gradientStartColor ?? color },
+      { offset: 1, color: gradient.values.gradientEndColor ?? color },
+    ],
+  });
+};
+
 const createObject = async (
   layer: ObjectLayer,
   canvasWidth: number,
@@ -100,7 +115,7 @@ const createObject = async (
   if (layer.type === "image" && layer.url) return FabricImage.fromURL(layer.url);
   if (layer.type === "text" && layer.text) {
     return new Textbox(layer.text.content, {
-      fill: getEffectColor(layer.text.color, effects),
+      fill: getTextFill(layer.text.color, effects),
       fontSize: layer.text.fontSize,
       fontWeight: layer.text.bold ? "700" : "400",
       fontStyle: layer.text.italic ? "italic" : "normal",

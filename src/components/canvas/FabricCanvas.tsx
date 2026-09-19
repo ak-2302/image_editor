@@ -4,6 +4,7 @@ import {
   FabricImage,
   Group,
   Textbox,
+  Gradient,
   filters,
   type FabricObject,
 } from "fabric";
@@ -73,6 +74,20 @@ const createShape = async (
     return new Group([outer, hole], { originX: "center", originY: "center" });
   }
   return FabricImage.fromURL(dataUrl);
+};
+
+const getTextFill = (color: string, effects: EffectInstance[]) => {
+  const gradient = effects.find((effect) => effect.name === "gradient");
+  if (!gradient || Number(gradient.values.gradientStrength ?? 0) <= 0) return getEffectColor(color, effects);
+  const angle = (Number(gradient.values.gradientAngle ?? 0) * Math.PI) / 180;
+  return new Gradient({
+    type: "linear",
+    coords: { x1: 0, y1: 0, x2: Math.cos(angle) * 200, y2: Math.sin(angle) * 200 },
+    colorStops: [
+      { offset: 0, color: gradient.values.gradientStartColor ?? color },
+      { offset: 1, color: gradient.values.gradientEndColor ?? color },
+    ],
+  });
 };
 
 const getFabricFilters = (
@@ -182,7 +197,7 @@ function FabricCanvas({
           object = await FabricImage.fromURL(layer.url);
         } else if (layer.type === "text" && layer.text) {
           object = new Textbox(layer.text.content, {
-            fill: getEffectColor(
+            fill: getTextFill(
               layer.text.color,
               isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
             ),
