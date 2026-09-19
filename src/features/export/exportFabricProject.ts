@@ -158,9 +158,10 @@ export async function exportFabricProject(
     if (!layer.visible) continue;
     const id = layer.id === 0 ? "main" : String(layer.id);
     const transform = snapshot.transformsByObject[id] ?? defaultObjectTransform;
-    const effects = layer.id === 0
+    const effects = (layer.id === 0
       ? snapshot.activeEffects
-      : snapshot.effectsByObject[String(layer.id)] ?? [];
+      : snapshot.effectsByObject[String(layer.id)] ?? [])
+      .filter((effect) => effect.enabled !== false);
     let object = await createObject(layer, width, effects);
     if (!object) continue;
     object = await rasterizeObjectForEffects(object, effects);

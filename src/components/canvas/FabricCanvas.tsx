@@ -42,7 +42,7 @@ const getTransform = (
 ) => {
   const transform = transformsByObject[String(layer.id)] ?? defaultObjectTransform;
   const flip = effectsByObject[String(layer.id)]?.find(
-    (effect) => effect.name === "flip",
+    (effect) => effect.name === "flip" && effect.enabled !== false,
   )?.values ?? {};
   const flipScale = getFlipScale(flip);
   return {
@@ -221,7 +221,8 @@ function FabricCanvas({
           );
         }
         if (!object || cancelled) continue;
-        const objectEffects = isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [];
+        const objectEffects = (isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [])
+          .filter((effect) => effect.enabled !== false);
         object = await rasterizeObjectForEffects(object, objectEffects);
         if (cancelled) continue;
         if (object instanceof FabricImage) {

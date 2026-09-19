@@ -15,6 +15,7 @@ export type EffectInstance = {
   id: string;
   name: EffectName;
   expanded: boolean;
+  enabled?: boolean;
   values: Partial<EffectParameters>;
 };
 

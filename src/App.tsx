@@ -1275,6 +1275,24 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     >
                       <button
                         type="button"
+                        className={`effect_bypass_button${effect.enabled === false ? " is_bypassed" : ""}`}
+                        aria-label={effect.enabled === false ? `${definition.label}を有効化` : `${definition.label}を一時無効化`}
+                        aria-pressed={effect.enabled === false}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          updateActiveEffects((effects) =>
+                            effects.map((item) =>
+                              item.id === effect.id
+                                ? { ...item, enabled: item.enabled === false }
+                                : item,
+                            ),
+                          );
+                        }}
+                      >
+                        ◉
+                      </button>
+                      <button
+                        type="button"
                         className="effect_accordion_trigger"
                         aria-expanded={isExpanded}
                         onClick={() =>
