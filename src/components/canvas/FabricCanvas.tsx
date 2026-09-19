@@ -196,6 +196,8 @@ function FabricCanvas({
       for (const layer of renderableLayers) {
         if (cancelled || !layer.visible) continue;
         const isMainLayer = layer.id === 0;
+        const objectEffects = (isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [])
+          .filter((effect) => effect.enabled !== false);
         let object: FabricObject | null = null;
         if (layer.type === "image" && layer.url) {
           object = await FabricImage.fromURL(layer.url);
@@ -203,7 +205,7 @@ function FabricCanvas({
           object = new Textbox(layer.text.content, {
             fill: getTextFill(
               layer.text.color,
-              isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+              objectEffects,
             ),
             fontSize: layer.text.fontSize,
             fontWeight: layer.text.bold ? "700" : "400",
@@ -217,12 +219,10 @@ function FabricCanvas({
           object = await createShape(
             layer,
             width,
-            isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+            objectEffects,
           );
         }
         if (!object || cancelled) continue;
-        const objectEffects = (isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [])
-          .filter((effect) => effect.enabled !== false);
         object = await rasterizeObjectForEffects(object, objectEffects);
         if (cancelled) continue;
         if (object instanceof FabricImage) {
