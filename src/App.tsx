@@ -40,6 +40,7 @@ import EditorNotice from "./components/feedback/EditorNotice";
 import ShapeSettingsAccordion from "./components/shapes/ShapeSettingsAccordion";
 import {
   defaultShapeProperties,
+  normalizeShapeProperties,
   type ShapeProperties,
 } from "./features/shapes/shapeTypes";
 
@@ -154,7 +155,7 @@ function App() {
     setLayerName(snapshot.layerName);
     setIsLayerVisible(snapshot.isLayerVisible);
     setShapeType(snapshot.shapeType);
-    setShapeProperties(snapshot.shapeProperties ?? defaultShapeProperties);
+    setShapeProperties(normalizeShapeProperties(snapshot.shapeProperties));
     setCanvasSize(snapshot.canvasSize);
     setFrameOpacity(snapshot.frameOpacity);
     setFrameThickness(snapshot.frameThickness);
@@ -290,8 +291,7 @@ function App() {
     setShapeProperties(
       id === "main"
         ? shapeProperties
-        : objectLayers.find((layer) => layer.id === id)?.shape ??
-            defaultShapeProperties,
+        : normalizeShapeProperties(objectLayers.find((layer) => layer.id === id)?.shape),
     );
     setActiveEffects(effectsByObject[String(id)] ?? []);
     if (nextParameters) {

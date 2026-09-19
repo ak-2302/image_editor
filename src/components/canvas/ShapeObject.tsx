@@ -1,5 +1,9 @@
 import type { CSSProperties } from "react";
-import type { ShapeProperties, ShapeType } from "../../features/shapes/shapeTypes";
+import {
+  normalizeShapeProperties,
+  type ShapeProperties,
+  type ShapeType,
+} from "../../features/shapes/shapeTypes";
 
 type ShapeObjectProps = {
   type: ShapeType;
@@ -10,15 +14,9 @@ type ShapeObjectProps = {
 };
 
 function ShapeObject({ type, name, transform, opacity, properties }: ShapeObjectProps) {
-  const shapeProperties = properties ?? {
-    fillColor: "#ffffff",
-    strokeColor: "#ffffff",
-    lineWidth: 0,
-    size: 100,
-    aspectRatio: 0,
-    cornerRadius: 0,
-  } satisfies ShapeProperties;
+  const shapeProperties = normalizeShapeProperties(properties);
   const isTriangle = type === "triangle";
+  const isFilled = shapeProperties.lineWidth === 0 || shapeProperties.lineWidth >= 50;
   const shapeClass = [
     "canvas_shape",
     type === "circle" ? "canvas_shape_circle" : "",
@@ -34,16 +32,18 @@ function ShapeObject({ type, name, transform, opacity, properties }: ShapeObject
       style={{
         transform,
         opacity,
-        backgroundColor: isTriangle ? "transparent" : shapeProperties.fillColor,
-        border: isTriangle ? undefined : shapeProperties.lineWidth > 0
-          ? `${shapeProperties.lineWidth}px solid ${shapeProperties.strokeColor}`
-          : "none",
+        backgroundColor: isTriangle || !isFilled ? "transparent" : shapeProperties.color,
+        border: isTriangle
+          ? undefined
+          : isFilled
+            ? "none"
+            : `${shapeProperties.lineWidth}px solid ${shapeProperties.color}`,
         borderRadius: type === "rectangle" ? `${shapeProperties.cornerRadius}%` : undefined,
         width: isTriangle ? 0 : `${45 * (shapeProperties.size / 100)}%`,
         height: isTriangle ? 0 : `${45 * (shapeProperties.size / 100) * (1 - shapeProperties.aspectRatio / 100)}%`,
         borderLeftColor: isTriangle ? "transparent" : undefined,
         borderRightColor: isTriangle ? "transparent" : undefined,
-        borderBottomColor: isTriangle ? shapeProperties.fillColor : undefined,
+        borderBottomColor: isTriangle && isFilled ? shapeProperties.color : "transparent",
       } satisfies CSSProperties}
     />
   );

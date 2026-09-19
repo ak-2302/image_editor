@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, type PointerEvent as ReactPointerEvent } from "react";
 import type { ShapeProperties, ShapeType } from "../../features/shapes/shapeTypes";
 
 type ShapeSettingsAccordionProps = {
@@ -13,9 +13,8 @@ type ShapeSettingsAccordionProps = {
   embedded?: boolean;
 };
 
-const labels: Record<keyof ShapeProperties, string> = {
-  fillColor: "図形色",
-  strokeColor: "線色",
+const labels: Record<"color" | "lineWidth" | "size" | "aspectRatio" | "cornerRadius", string> = {
+  color: "色",
   lineWidth: "ライン幅",
   size: "サイズ",
   aspectRatio: "縦横比",
@@ -75,31 +74,17 @@ function ShapeSettingsAccordion({
     numericFields.push({ key: "cornerRadius", unit: "%", initial: 0 });
   }
 
-  const handleColorChange =
-    (key: "fillColor" | "strokeColor") =>
-    (event: ChangeEvent<HTMLInputElement>) => onChange(key, event.target.value);
-
   const fields = (
     <div className="initial_effect_fields">
       <div className="initial_effect_row">
-        <label htmlFor="shape_fill_color">{labels.fillColor}</label>
+        <label htmlFor="shape_color">{labels.color}</label>
         <input
-          id="shape_fill_color"
+          id="shape_color"
           type="color"
-          value={values.fillColor}
-          onChange={handleColorChange("fillColor")}
+          value={values.color}
+          onChange={(event) => onChange("color", event.target.value)}
         />
-        <span className="effect_unit">{values.fillColor}</span>
-      </div>
-      <div className="initial_effect_row">
-        <label htmlFor="shape_stroke_color">{labels.strokeColor}</label>
-        <input
-          id="shape_stroke_color"
-          type="color"
-          value={values.strokeColor}
-          onChange={handleColorChange("strokeColor")}
-        />
-        <span className="effect_unit">{values.strokeColor}</span>
+        <span className="effect_unit">{values.color}</span>
       </div>
       {numericFields.map(({ key, unit, initial }) => (
         <div
@@ -108,10 +93,12 @@ function ShapeSettingsAccordion({
           onPointerDown={(event) => handlePointerDown(event, key)}
         >
           <label htmlFor={`shape_${key}`}>{labels[key]}</label>
-          <input
-            id={`shape_${key}`}
-            type="number"
-            value={values[key]}
+              <input
+                id={`shape_${key}`}
+                type="number"
+                min={key === "lineWidth" || key === "cornerRadius" ? 0 : undefined}
+                max={key === "lineWidth" || key === "cornerRadius" ? 100 : undefined}
+                value={values[key]}
             onChange={(event) => onChange(key, Number(event.target.value))}
           />
           <span className="effect_unit">{unit}</span>
