@@ -7,15 +7,19 @@ import {
   type DragEvent,
 } from "react";
 import "./App.css";
-import EffectValueRow from "./components/effects/EffectValueRow";
-import AdvancedEffectSettings from "./components/effects/AdvancedEffectSettings";
 import FabricCanvas from "./components/canvas/FabricCanvas";
-import LayerPanel from "./components/layers/LayerPanel";
-import TextSettings from "./components/layers/TextSettings";
+import AdvancedEffectSettings from "./components/effects/AdvancedEffectSettings";
+import EffectValueRow from "./components/effects/EffectValueRow";
+import EditorNotice from "./components/feedback/EditorNotice";
 import type {
   InitialEffectKey,
 } from "./components/initial-effects/effectTypes";
 import InitialEffectsAccordion from "./components/initial-effects/InitialEffectsAccordion";
+import LayerPanel from "./components/layers/LayerPanel";
+import TextSettings from "./components/layers/TextSettings";
+import ShapeSettingsAccordion from "./components/shapes/ShapeSettingsAccordion";
+import MenuPopover from "./components/ui/MenuPopover";
+import { useCanvasState } from "./features/canvas/useCanvasState";
 import {
   effectDefinitions,
   type EffectName,
@@ -25,22 +29,18 @@ import {
   normalizeEffect,
   type EffectParameters,
 } from "./features/effects/effectParameters";
+import { exportProject } from "./features/export/exportProject";
+import type { EditorHistorySnapshot } from "./features/history/historyTypes";
+import { useUndoRedo } from "./features/history/useUndoRedo";
 import { isSupportedImage, readImageAsDataUrl } from "./features/images/imageUtils";
-import { useCanvasState } from "./features/canvas/useCanvasState";
 import { insertObjectLayer, type ObjectInsertPosition } from "./features/layers/insertObjectLayer";
+import type { ObjectLayer } from "./features/layers/objectTypes";
 import {
   defaultObjectTransform,
   useObjectTransforms,
 } from "./features/objects/useObjectTransforms";
-import type { EffectInstance } from "./features/project/projectTypes";
-import type { ObjectLayer } from "./features/layers/objectTypes";
-import { useUndoRedo } from "./features/history/useUndoRedo";
-import type { EditorHistorySnapshot } from "./features/history/historyTypes";
 import { loadProject, saveProject } from "./features/project/projectStorage";
-import { exportProject } from "./features/export/exportProject";
-import EditorNotice from "./components/feedback/EditorNotice";
-import ShapeSettingsAccordion from "./components/shapes/ShapeSettingsAccordion";
-import MenuPopover from "./components/ui/MenuPopover";
+import type { EffectInstance } from "./features/project/projectTypes";
 import {
   defaultShapeProperties,
   normalizeShapeProperties,
@@ -85,13 +85,13 @@ function App() {
   const [activeEffects, setActiveEffects] = useState<EffectInstance[]>([]);
   const [selectedObjectId, setSelectedObjectId] = useState<string | number>(
     "main",
-);
+  );
   const [layerRenderOrder, setLayerRenderOrder] = useState<
     "top-to-bottom" | "bottom-to-top"
   >("top-to-bottom");
 
-const isAvailableEffect = (effect: EffectInstance) =>
-  effectDefinitions.some((definition) => definition.name === effect.name);
+  const isAvailableEffect = (effect: EffectInstance) =>
+    effectDefinitions.some((definition) => definition.name === effect.name);
   const [effectsByObject, setEffectsByObject] = useState<
     Record<string, EffectInstance[]>
   >({ main: [] });
@@ -234,23 +234,23 @@ const isAvailableEffect = (effect: EffectInstance) =>
                 ? "正多角形"
                 : shapeType === "line"
                   ? "線"
-              : canvasSize
-                ? "空のキャンバス"
-                : "未選択"
+                  : canvasSize
+                    ? "空のキャンバス"
+                    : "未選択"
       : (
-          {
-            rectangle: "四角形",
-            circle: "円形",
-            triangle: "三角形",
-            polygon: "正多角形",
-            line: "線",
-            image: "画像",
-            text: "テキスト",
-          } as const
-        )[
-          objectLayers.find((layer) => layer.id === selectedObjectId)?.type ??
-            "image"
-        ];
+        {
+          rectangle: "四角形",
+          circle: "円形",
+          triangle: "三角形",
+          polygon: "正多角形",
+          line: "線",
+          image: "画像",
+          text: "テキスト",
+        } as const
+      )[
+      objectLayers.find((layer) => layer.id === selectedObjectId)?.type ??
+      "image"
+      ];
   const selectedShapeType =
     selectedObjectId === "main"
       ? shapeType
@@ -452,12 +452,12 @@ const isAvailableEffect = (effect: EffectInstance) =>
     if (!imageUrl && shapeType) {
       const previousMainId = id;
       addObjectLayer({
-          id: previousMainId,
-          name: layerName,
-          type: shapeType,
-          visible: isLayerVisible,
-          shape: mainShapeProperties,
-        });
+        id: previousMainId,
+        name: layerName,
+        type: shapeType,
+        visible: isLayerVisible,
+        shape: mainShapeProperties,
+      });
       setTransformForObject(String(previousMainId), initialEffects);
       setEffectsByObject((effects) => ({
         ...effects,
@@ -498,21 +498,21 @@ const isAvailableEffect = (effect: EffectInstance) =>
     const id = Date.now();
     setCanvasSize((size) => size ?? { width: 800, height: 600 });
     addObjectLayer({
-        id,
-        name: "テキスト",
-        type: "text",
-        visible: true,
-        text: {
-          content: "テキスト",
-          fontFamily: "sans-serif",
-          fontSize: 48,
-          color: "#222222",
-          bold: false,
-          italic: false,
-          underline: false,
-          linethrough: false,
-        },
-      });
+      id,
+      name: "テキスト",
+      type: "text",
+      visible: true,
+      text: {
+        content: "テキスト",
+        fontFamily: "sans-serif",
+        fontSize: 48,
+        color: "#222222",
+        bold: false,
+        italic: false,
+        underline: false,
+        linethrough: false,
+      },
+    });
     selectObject(id);
   };
   const clearImage = () => {
@@ -694,11 +694,11 @@ const isAvailableEffect = (effect: EffectInstance) =>
     : 1;
   const frameStyle = canvasSize
     ? ({
-        width: `${canvasSize.width * frameScale}px`,
-        height: `${canvasSize.height * frameScale}px`,
-        "--frame-opacity": frameOpacity / 100,
-        "--frame-thickness": `${frameThickness}px`,
-      } as CSSProperties)
+      width: `${canvasSize.width * frameScale}px`,
+      height: `${canvasSize.height * frameScale}px`,
+      "--frame-opacity": frameOpacity / 100,
+      "--frame-thickness": `${frameThickness}px`,
+    } as CSSProperties)
     : undefined;
   const handleInitialEffectChange = (key: InitialEffectKey, value: number) => {
     recordHistory();
@@ -736,7 +736,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
             <span />
             <span />
           </div>
-          <span>Image Editor</span>
+          <span>画像編集</span>
         </div>
         <nav className="header_menu" aria-label="アプリメニュー">
           <MenuPopover
@@ -746,34 +746,34 @@ const isAvailableEffect = (effect: EffectInstance) =>
             trigger={<button type="button" className="header_menu_button" aria-expanded={openMenu === "file"}>ファイル</button>}
             menuClassName="header_dropdown"
           >
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenMenu(null);
-                    fileInputRef.current?.click();
-                  }}
-                >
-                  画像を読み込む
-                </button>
-                <button
-                  type="button"
-                  disabled={!imageUrl}
-                  onClick={() => {
-                    clearImage();
-                    setOpenMenu(null);
-                  }}
-                >
-                  画像を削除
-                </button>
-                <button type="button" onClick={resetProject}>
-                  プロジェクトをリセット
-                </button>
-                <button type="button" disabled={!hasCanvas} onClick={() => handleExport("png")}>
-                  PNGを書き出す
-                </button>
-                <button type="button" disabled={!hasCanvas} onClick={() => handleExport("jpeg")}>
-                  JPEGを書き出す
-                </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOpenMenu(null);
+                fileInputRef.current?.click();
+              }}
+            >
+              画像を読み込む
+            </button>
+            <button
+              type="button"
+              disabled={!imageUrl}
+              onClick={() => {
+                clearImage();
+                setOpenMenu(null);
+              }}
+            >
+              画像を削除
+            </button>
+            <button type="button" onClick={resetProject}>
+              プロジェクトをリセット
+            </button>
+            <button type="button" disabled={!hasCanvas} onClick={() => handleExport("png")}>
+              PNGを書き出す
+            </button>
+            <button type="button" disabled={!hasCanvas} onClick={() => handleExport("jpeg")}>
+              JPEGを書き出す
+            </button>
           </MenuPopover>
           <MenuPopover
             className="header_menu_group"
@@ -782,75 +782,75 @@ const isAvailableEffect = (effect: EffectInstance) =>
             trigger={<button type="button" className="header_menu_button" aria-expanded={openMenu === "canvas"}>キャンバス</button>}
             menuClassName="header_dropdown canvas_dropdown"
           >
-                <label htmlFor="canvas_width">幅</label>
-                <input
-                  id="canvas_width"
-                  type="number"
-                  min="1"
-                  value={blankWidth}
-                  onChange={(event) => setBlankWidth(Number(event.target.value))}
-                />
-                <label htmlFor="canvas_height">高さ</label>
-                <input
-                  id="canvas_height"
-                  type="number"
-                  min="1"
-                  value={blankHeight}
-                  onChange={(event) => setBlankHeight(Number(event.target.value))}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    recordHistory();
-                    if (!createBlankCanvas()) setNotice("幅と高さは1以上で指定してください。");
-                    else setOpenMenu(null);
-                  }}
-                >
-                  空キャンバスを作成
-                </button>
-                <button
-                  type="button"
-                  disabled={!canvasSize}
-                  onClick={() => {
-                    if (blankWidth < 1 || blankHeight < 1) {
-                      setNotice("幅と高さは1以上で指定してください。");
-                      return;
-                    }
-                    recordHistory();
-                    setCanvasSize({ width: blankWidth, height: blankHeight });
-                    setOpenMenu(null);
-                  }}
-                >
-                  キャンバスサイズを更新
-                </button>
-                <label htmlFor="canvas_frame_opacity">
-                  枠線の濃さ <output>{frameOpacity}%</output>
-                </label>
-                <input
-                  id="canvas_frame_opacity"
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={frameOpacity}
-                  onChange={(event) => {
-                    recordHistory();
-                    setFrameOpacity(Number(event.target.value));
-                  }}
-                />
-                <label htmlFor="canvas_frame_thickness">
-                  枠線の太さ <output>{frameThickness}px</output>
-                </label>
-                <input
-                  id="canvas_frame_thickness"
-                  type="range"
-                  min="1"
-                  max="8"
-                  value={frameThickness}
-                  onChange={(event) => {
-                    recordHistory();
-                    setFrameThickness(Number(event.target.value));
-                  }}
-                />
+            <label htmlFor="canvas_width">幅</label>
+            <input
+              id="canvas_width"
+              type="number"
+              min="1"
+              value={blankWidth}
+              onChange={(event) => setBlankWidth(Number(event.target.value))}
+            />
+            <label htmlFor="canvas_height">高さ</label>
+            <input
+              id="canvas_height"
+              type="number"
+              min="1"
+              value={blankHeight}
+              onChange={(event) => setBlankHeight(Number(event.target.value))}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                recordHistory();
+                if (!createBlankCanvas()) setNotice("幅と高さは1以上で指定してください。");
+                else setOpenMenu(null);
+              }}
+            >
+              空キャンバスを作成
+            </button>
+            <button
+              type="button"
+              disabled={!canvasSize}
+              onClick={() => {
+                if (blankWidth < 1 || blankHeight < 1) {
+                  setNotice("幅と高さは1以上で指定してください。");
+                  return;
+                }
+                recordHistory();
+                setCanvasSize({ width: blankWidth, height: blankHeight });
+                setOpenMenu(null);
+              }}
+            >
+              キャンバスサイズを更新
+            </button>
+            <label htmlFor="canvas_frame_opacity">
+              枠線の濃さ <output>{frameOpacity}%</output>
+            </label>
+            <input
+              id="canvas_frame_opacity"
+              type="range"
+              min="0"
+              max="100"
+              value={frameOpacity}
+              onChange={(event) => {
+                recordHistory();
+                setFrameOpacity(Number(event.target.value));
+              }}
+            />
+            <label htmlFor="canvas_frame_thickness">
+              枠線の太さ <output>{frameThickness}px</output>
+            </label>
+            <input
+              id="canvas_frame_thickness"
+              type="range"
+              min="1"
+              max="8"
+              value={frameThickness}
+              onChange={(event) => {
+                recordHistory();
+                setFrameThickness(Number(event.target.value));
+              }}
+            />
           </MenuPopover>
           <MenuPopover
             className="header_menu_group settings_menu_group"
@@ -859,42 +859,42 @@ const isAvailableEffect = (effect: EffectInstance) =>
             trigger={<button type="button" className="header_menu_button" aria-expanded={openMenu === "settings"}>設定</button>}
             menuClassName="header_dropdown settings_dropdown"
           >
-                <label htmlFor="project_name">プロジェクト名</label>
-                <input
-                  id="project_name"
-                  type="text"
-                  value={projectName}
-                  onChange={(event) => {
-                    recordHistory();
-                    setProjectName(event.target.value);
-                  }}
-                />
-                <label htmlFor="layer_render_order">オブジェクト描画順</label>
-                <select
-                  id="layer_render_order"
-                  value={layerRenderOrder}
-                  onChange={(event) => {
-                    recordHistory();
-                    setLayerRenderOrder(
-                      event.target.value as "top-to-bottom" | "bottom-to-top",
-                    );
-                  }}
-                >
-                  <option value="top-to-bottom">上から下</option>
-                  <option value="bottom-to-top">下から上</option>
-                </select>
-                <label htmlFor="object_insert_position">新規オブジェクトを追加するレイヤー</label>
-                <select
-                  id="object_insert_position"
-                  value={objectInsertPosition}
-                  onChange={(event) => {
-                    recordHistory();
-                    setObjectInsertPosition(event.target.value as "above" | "below");
-                  }}
-                >
-                  <option value="above">上に挿入</option>
-                  <option value="below">下に挿入</option>
-                </select>
+            <label htmlFor="project_name">プロジェクト名</label>
+            <input
+              id="project_name"
+              type="text"
+              value={projectName}
+              onChange={(event) => {
+                recordHistory();
+                setProjectName(event.target.value);
+              }}
+            />
+            <label htmlFor="layer_render_order">オブジェクト描画順</label>
+            <select
+              id="layer_render_order"
+              value={layerRenderOrder}
+              onChange={(event) => {
+                recordHistory();
+                setLayerRenderOrder(
+                  event.target.value as "top-to-bottom" | "bottom-to-top",
+                );
+              }}
+            >
+              <option value="top-to-bottom">上から下</option>
+              <option value="bottom-to-top">下から上</option>
+            </select>
+            <label htmlFor="object_insert_position">新規オブジェクトを追加するレイヤー</label>
+            <select
+              id="object_insert_position"
+              value={objectInsertPosition}
+              onChange={(event) => {
+                recordHistory();
+                setObjectInsertPosition(event.target.value as "above" | "below");
+              }}
+            >
+              <option value="above">上に挿入</option>
+              <option value="below">下に挿入</option>
+            </select>
           </MenuPopover>
           <div className="history_controls" aria-label="編集履歴">
             <button type="button" aria-label="操作を元に戻す" onClick={undo} disabled={!history.canUndo}>
@@ -981,183 +981,183 @@ const isAvailableEffect = (effect: EffectInstance) =>
         <aside className="effects_panel" aria-label="レイヤーとエフェクト">
           {legacyLayerPanelEnabled && (
             <section className="layers_section" aria-label="オブジェクトレイヤー">
-            <div className="layers_section_header">
-              <span>オブジェクト</span>
-              <div className="layer_add_menu_wrap">
-                <button
-                  type="button"
-                  className="layer_add_button"
-                  aria-label="オブジェクトを追加"
-                  aria-expanded={showObjectMenu}
-                  onClick={() => setShowObjectMenu((visible) => !visible)}
-                >
-                  ＋
-                </button>
-                {showObjectMenu && (
-                  <div className="layer_add_menu">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowObjectMenu(false);
-                        fileInputRef.current?.click();
-                      }}
-                    >
-                      画像
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        addShape("circle", "円形");
-                        setShowObjectMenu(false);
-                      }}
-                    >
-                      円形
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        addShape("polygon", "正多角形");
-                        setShowObjectMenu(false);
-                      }}
-                    >
-                      正多角形
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        addShape("line", "線");
-                        setShowObjectMenu(false);
-                      }}
-                    >
-                      線
-                    </button>
-                  </div>
+              <div className="layers_section_header">
+                <span>オブジェクト</span>
+                <div className="layer_add_menu_wrap">
+                  <button
+                    type="button"
+                    className="layer_add_button"
+                    aria-label="オブジェクトを追加"
+                    aria-expanded={showObjectMenu}
+                    onClick={() => setShowObjectMenu((visible) => !visible)}
+                  >
+                    ＋
+                  </button>
+                  {showObjectMenu && (
+                    <div className="layer_add_menu">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowObjectMenu(false);
+                          fileInputRef.current?.click();
+                        }}
+                      >
+                        画像
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          addShape("circle", "円形");
+                          setShowObjectMenu(false);
+                        }}
+                      >
+                        円形
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          addShape("polygon", "正多角形");
+                          setShowObjectMenu(false);
+                        }}
+                      >
+                        正多角形
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          addShape("line", "線");
+                          setShowObjectMenu(false);
+                        }}
+                      >
+                        線
+                      </button>
+                    </div>
                   )}
+                </div>
               </div>
-            </div>
-            <div className="layers_list" role="list">
-              <div
-                onClick={() => selectObject("main")}
-                className={`layer_item${selectedObjectId === "main" && (imageUrl || canvasSize || shapeType) ? " is_selected" : !imageUrl && !canvasSize && !shapeType ? " is_empty" : ""}`}
-                role="listitem"
-              >
-                <button
-                  type="button"
-                  className="layer_icon_button"
-                  aria-label={
-                    isLayerVisible ? "レイヤーを非表示" : "レイヤーを表示"
-                  }
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    recordHistory();
-                    setIsLayerVisible((visible) => !visible);
-                  }}
-                >
-                  {isLayerVisible ? "◉" : "○"}
-                </button>
-                <span className="layer_thumbnail">
-                  {imageUrl ? (
-                    <img
-                      src={imageUrl ?? undefined}
-                      alt=""
-                      style={{ opacity: isLayerVisible ? 1 : 0.35 }}
-                    />
-                  ) : shapeType ? (
-                    "◇"
-                  ) : canvasSize ? (
-                    "□"
-                  ) : (
-                    "＋"
-                  )}
-                </span>
-                {isRenamingLayer && (imageUrl || canvasSize || shapeType) ? (
-                  <input
-                    className="layer_name_input"
-                    value={layerName}
-                    autoFocus
-                    onChange={(event) => setLayerName(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") setIsRenamingLayer(false);
-                    }}
-                    onBlur={() => setIsRenamingLayer(false)}
-                  />
-                ) : (
-                  <span className="layer_name">
-                    {imageUrl || shapeType
-                      ? layerName
-                      : canvasSize
-                        ? "空のキャンバス"
-                        : "画像を読み込んでください"}
-                  </span>
-                )}
-                {(imageUrl || canvasSize || shapeType) && (
-                  <span className="layer_actions">
-                    <button
-                      type="button"
-                      className="layer_icon_button"
-                      aria-label="レイヤー名を変更"
-                      onClick={() => setIsRenamingLayer(true)}
-                    >
-                      ✎
-                    </button>
-                    <button
-                      type="button"
-                      className="layer_icon_button layer_delete_button"
-                      aria-label="画像を削除"
-                      onClick={clearImage}
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-              </div>
-              {objectLayers.map((layer) => (
+              <div className="layers_list" role="list">
                 <div
-                  onClick={() => selectObject(layer.id)}
-                  className={`layer_item${selectedObjectId === layer.id ? " is_selected" : ""}`}
+                  onClick={() => selectObject("main")}
+                  className={`layer_item${selectedObjectId === "main" && (imageUrl || canvasSize || shapeType) ? " is_selected" : !imageUrl && !canvasSize && !shapeType ? " is_empty" : ""}`}
                   role="listitem"
-                  key={layer.id}
                 >
                   <button
                     type="button"
                     className="layer_icon_button"
                     aria-label={
-                      layer.visible ? "レイヤーを非表示" : "レイヤーを表示"
+                      isLayerVisible ? "レイヤーを非表示" : "レイヤーを表示"
                     }
                     onClick={(event) => {
                       event.stopPropagation();
-                      setObjectLayers((layers) =>
-                        layers.map((item) =>
-                          item.id === layer.id
-                            ? { ...item, visible: !item.visible }
-                            : item,
-                        ),
-                      );
+                      recordHistory();
+                      setIsLayerVisible((visible) => !visible);
                     }}
                   >
-                    {layer.visible ? "◉" : "○"}
+                    {isLayerVisible ? "◉" : "○"}
                   </button>
                   <span className="layer_thumbnail">
-                    {layer.type === "image" ? "▧" : "◇"}
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl ?? undefined}
+                        alt=""
+                        style={{ opacity: isLayerVisible ? 1 : 0.35 }}
+                      />
+                    ) : shapeType ? (
+                      "◇"
+                    ) : canvasSize ? (
+                      "□"
+                    ) : (
+                      "＋"
+                    )}
                   </span>
-                  <span className="layer_name">{layer.name}</span>
-                  <span className="layer_actions">
+                  {isRenamingLayer && (imageUrl || canvasSize || shapeType) ? (
+                    <input
+                      className="layer_name_input"
+                      value={layerName}
+                      autoFocus
+                      onChange={(event) => setLayerName(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") setIsRenamingLayer(false);
+                      }}
+                      onBlur={() => setIsRenamingLayer(false)}
+                    />
+                  ) : (
+                    <span className="layer_name">
+                      {imageUrl || shapeType
+                        ? layerName
+                        : canvasSize
+                          ? "空のキャンバス"
+                          : "画像を読み込んでください"}
+                    </span>
+                  )}
+                  {(imageUrl || canvasSize || shapeType) && (
+                    <span className="layer_actions">
+                      <button
+                        type="button"
+                        className="layer_icon_button"
+                        aria-label="レイヤー名を変更"
+                        onClick={() => setIsRenamingLayer(true)}
+                      >
+                        ✎
+                      </button>
+                      <button
+                        type="button"
+                        className="layer_icon_button layer_delete_button"
+                        aria-label="画像を削除"
+                        onClick={clearImage}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
+                {objectLayers.map((layer) => (
+                  <div
+                    onClick={() => selectObject(layer.id)}
+                    className={`layer_item${selectedObjectId === layer.id ? " is_selected" : ""}`}
+                    role="listitem"
+                    key={layer.id}
+                  >
                     <button
                       type="button"
-                      className="layer_icon_button layer_delete_button"
-                      aria-label={`を削除`}
-                      onClick={() =>
-                        setObjectLayers((layers) =>
-                          layers.filter((item) => item.id !== layer.id),
-                        )
+                      className="layer_icon_button"
+                      aria-label={
+                        layer.visible ? "レイヤーを非表示" : "レイヤーを表示"
                       }
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setObjectLayers((layers) =>
+                          layers.map((item) =>
+                            item.id === layer.id
+                              ? { ...item, visible: !item.visible }
+                              : item,
+                          ),
+                        );
+                      }}
                     >
-                      ×
+                      {layer.visible ? "◉" : "○"}
                     </button>
-                  </span>
-                </div>
-              ))}
-            </div>
+                    <span className="layer_thumbnail">
+                      {layer.type === "image" ? "▧" : "◇"}
+                    </span>
+                    <span className="layer_name">{layer.name}</span>
+                    <span className="layer_actions">
+                      <button
+                        type="button"
+                        className="layer_icon_button layer_delete_button"
+                        aria-label={`を削除`}
+                        onClick={() =>
+                          setObjectLayers((layers) =>
+                            layers.filter((item) => item.id !== layer.id),
+                          )
+                        }
+                      >
+                        ×
+                      </button>
+                    </span>
+                  </div>
+                ))}
+              </div>
             </section>
           )}
           <LayerPanel
@@ -1188,77 +1188,77 @@ const isAvailableEffect = (effect: EffectInstance) =>
                 trigger={<button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu}>＋</button>}
                 menuClassName="header_dropdown effect_menu"
               >
-                  {effectDefinitions.map(({ name, label }) => (
-                    <button
-                      type="button"
-                      key={name}
-                      onClick={() => {
-                        updateActiveEffects((effects) => [
-                          ...effects,
-                          {
-                            id: `effect-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-                            name,
-                            expanded: true,
-                            values: { ...defaultEffectParameters },
-                          },
-                        ]);
-                        setExpandedEffectIndex(activeEffects.length);
-                        setShowEffectMenu(false);
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
+                {effectDefinitions.map(({ name, label }) => (
+                  <button
+                    type="button"
+                    key={name}
+                    onClick={() => {
+                      updateActiveEffects((effects) => [
+                        ...effects,
+                        {
+                          id: `effect-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                          name,
+                          expanded: true,
+                          values: { ...defaultEffectParameters },
+                        },
+                      ]);
+                      setExpandedEffectIndex(activeEffects.length);
+                      setShowEffectMenu(false);
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
               </MenuPopover>
             </div>
             <div
               className={`effect_controls${movingEffect ? " effect_reordering" : ""}`}
             >
               <InitialEffectsAccordion
-                  values={initialEffects}
-                  title={selectedObjectLabel}
-                  isOpen={initialEffectsOpen}
-                  onToggle={() => setInitialEffectsOpen((open) => !open)}
-                  onChange={handleInitialEffectChange}
-                  extraContent={
-                    selectedObjectId !== "main" &&
+                values={initialEffects}
+                title={selectedObjectLabel}
+                isOpen={initialEffectsOpen}
+                onToggle={() => setInitialEffectsOpen((open) => !open)}
+                onChange={handleInitialEffectChange}
+                extraContent={
+                  selectedObjectId !== "main" &&
                     objectLayers.find((layer) => layer.id === selectedObjectId)?.type === "text" ? (
-                      (() => {
-                        const textLayer = objectLayers.find(
-                          (layer) => layer.id === selectedObjectId,
-                        );
-                        return textLayer?.text ? (
-                          <TextSettings
-                            {...textLayer.text}
-                            onChange={(changes) =>
-                              setObjectLayers((layers) =>
-                                layers.map((layer) =>
-                                  layer.id === selectedObjectId
-                                    ? {
-                                        ...layer,
-                                        text: { ...layer.text!, ...changes },
-                                      }
-                                    : layer,
-                                ),
-                              )
-                            }
-                          />
-                        ) : null;
-                      })()
-                    ) : selectedShapeType === "rectangle" ||
+                    (() => {
+                      const textLayer = objectLayers.find(
+                        (layer) => layer.id === selectedObjectId,
+                      );
+                      return textLayer?.text ? (
+                        <TextSettings
+                          {...textLayer.text}
+                          onChange={(changes) =>
+                            setObjectLayers((layers) =>
+                              layers.map((layer) =>
+                                layer.id === selectedObjectId
+                                  ? {
+                                    ...layer,
+                                    text: { ...layer.text!, ...changes },
+                                  }
+                                  : layer,
+                              ),
+                            )
+                          }
+                        />
+                      ) : null;
+                    })()
+                  ) : selectedShapeType === "rectangle" ||
                     selectedShapeType === "circle" ||
                     selectedShapeType === "triangle" ||
                     selectedShapeType === "polygon" ||
                     selectedShapeType === "line" ? (
-                      <ShapeSettingsAccordion
-                        shapeType={selectedShapeType}
-                        values={shapeProperties}
-                        onChange={updateShapeProperty}
-                        embedded
-                      />
-                    ) : null
-                  }
-                />
+                    <ShapeSettingsAccordion
+                      shapeType={selectedShapeType}
+                      values={shapeProperties}
+                      onChange={updateShapeProperty}
+                      embedded
+                    />
+                  ) : null
+                }
+              />
               {activeEffects.map((effect, index) => {
                 const { name } = effect;
                 const definition = effectDefinitions.find(
