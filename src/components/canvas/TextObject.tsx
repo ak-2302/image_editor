@@ -8,6 +8,7 @@ type TextObjectProps = {
   italic: boolean;
   transform: string;
   opacity: number;
+  zIndex?: number;
   name: string;
 };
 
@@ -19,6 +20,7 @@ function TextObject({
   italic,
   transform,
   opacity,
+  zIndex = 1,
   name,
 }: TextObjectProps) {
   return (
@@ -32,6 +34,7 @@ function TextObject({
         fontStyle: italic ? "italic" : "normal",
         transform,
         opacity,
+        zIndex,
       } satisfies CSSProperties}
     >
       {content}

@@ -10,10 +10,11 @@ type ShapeObjectProps = {
   name: string;
   transform: string;
   opacity: number;
+  zIndex?: number;
   properties?: ShapeProperties;
 };
 
-function ShapeObject({ type, name, transform, opacity, properties }: ShapeObjectProps) {
+function ShapeObject({ type, name, transform, opacity, zIndex = 1, properties }: ShapeObjectProps) {
   const shapeProperties = normalizeShapeProperties(properties);
   const isTriangle = type === "triangle";
   const isFilled = shapeProperties.lineWidth === 0;
@@ -35,6 +36,7 @@ function ShapeObject({ type, name, transform, opacity, properties }: ShapeObject
       style={{
         transform,
         opacity,
+        zIndex,
         boxSizing: "border-box",
         backgroundColor: isFilled ? shapeProperties.color : "transparent",
         boxShadow:

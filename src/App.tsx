@@ -121,6 +121,8 @@ function App() {
   const [shapeProperties, setShapeProperties] = useState<ShapeProperties>(
     defaultShapeProperties,
   );
+  const [mainShapeProperties, setMainShapeProperties] =
+    useState<ShapeProperties>(defaultShapeProperties);
   const [objectLayers, setObjectLayers] = useState<ObjectLayer[]>([]);
   const [openEffectMenu, setOpenEffectMenu] = useState<number | null>(null);
   const [draggingEffect, setDraggingEffect] = useState<string | null>(null);
@@ -136,7 +138,7 @@ function App() {
     layerName,
     isLayerVisible,
     shapeType,
-    shapeProperties,
+    shapeProperties: selectedObjectId === "main" ? shapeProperties : mainShapeProperties,
     canvasSize,
     frameOpacity,
     frameThickness,
@@ -156,6 +158,7 @@ function App() {
     setIsLayerVisible(snapshot.isLayerVisible);
     setShapeType(snapshot.shapeType);
     setShapeProperties(normalizeShapeProperties(snapshot.shapeProperties));
+    setMainShapeProperties(normalizeShapeProperties(snapshot.shapeProperties));
     setCanvasSize(snapshot.canvasSize);
     setFrameOpacity(snapshot.frameOpacity);
     setFrameThickness(snapshot.frameThickness);
@@ -296,7 +299,7 @@ function App() {
     setSelectedObjectId(id);
     setShapeProperties(
       id === "main"
-        ? shapeProperties
+        ? mainShapeProperties
         : normalizeShapeProperties(objectLayers.find((layer) => layer.id === id)?.shape),
     );
     setActiveEffects(effectsByObject[String(id)] ?? []);
@@ -419,7 +422,7 @@ function App() {
           name: layerName,
           type: shapeType,
           visible: isLayerVisible,
-          shape: shapeProperties,
+          shape: mainShapeProperties,
         },
       ]);
       setTransformForObject(String(previousMainId), initialEffects);
@@ -434,6 +437,7 @@ function App() {
     }
     setShapeType(type);
     setShapeProperties(defaultShapeProperties);
+    setMainShapeProperties(defaultShapeProperties);
     setCanvasSize((size) => size ?? { width: 800, height: 600 });
     if (!imageUrl) {
       setLayerName(name);
@@ -498,7 +502,10 @@ function App() {
       [key]: value,
     });
     setShapeProperties(nextProperties);
-    if (selectedObjectId === "main") return;
+    if (selectedObjectId === "main") {
+      setMainShapeProperties(nextProperties);
+      return;
+    }
     setObjectLayers((layers) =>
       layers.map((layer) =>
         layer.id === selectedObjectId ? { ...layer, shape: nextProperties } : layer,
@@ -571,6 +578,17 @@ function App() {
       ? `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`
       : "none";
   const selectedObjectTransform = `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`;
+  const mainObjectTransform = transformsByObject.main ?? defaultObjectTransform;
+  const mainShapeTransform =
+    selectedObjectId === "main"
+      ? selectedObjectTransform
+      : `translate(${mainObjectTransform.x}px, ${mainObjectTransform.y}px) scale(${mainObjectTransform.scale / 100}) rotate(${mainObjectTransform.rotation}deg)`;
+  const mainShapeOpacity =
+    (100 -
+      (selectedObjectId === "main"
+        ? initialEffects.opacity
+        : mainObjectTransform.opacity)) /
+    100;
   const hasCanvas = Boolean(imageUrl || canvasSize || shapeType);
   const frameScale = canvasSize
     ? Math.min(800 / canvasSize.width, 560 / canvasSize.height, 1)
@@ -776,22 +794,24 @@ function App() {
                     }}
                   />
                 )}
-                {shapeType && selectedObjectId === "main" && isLayerVisible && (
+                {shapeType && isLayerVisible && (
                   <ShapeObject
                     type={shapeType}
                     name={layerName}
-                    transform={selectedObjectTransform}
-                    opacity={(100 - initialEffects.opacity) / 100}
+                    transform={mainShapeTransform}
+                    opacity={mainShapeOpacity}
+                    zIndex={0}
                     properties={shapeProperties}
                   />
                 )}
-                {[...objectLayers].reverse().map((layer) => {
+                {[...objectLayers].reverse().map((layer, renderIndex) => {
                   if (!layer.visible) return null;
                   const isSelected = selectedObjectId === layer.id;
                   const transform = isSelected ? selectedObjectTransform : "none";
                   const opacity = isSelected
                     ? (100 - initialEffects.opacity) / 100
                     : 1;
+                  const zIndex = renderIndex + 1;
                   if (layer.type === "image" && layer.url) {
                     return (
                       <img
@@ -800,7 +820,7 @@ function App() {
                         src={layer.url}
                         alt={layer.name}
                         onError={() => setNotice(`${layer.name}を表示できませんでした。`)}
-                        style={{ filter, transform, opacity }}
+                        style={{ filter, transform, opacity, zIndex }}
                       />
                     );
                   }
@@ -812,6 +832,7 @@ function App() {
                         name={layer.name}
                         transform={transform}
                         opacity={opacity}
+                        zIndex={zIndex}
                         properties={layer.shape}
                       />
                     );
@@ -824,6 +845,7 @@ function App() {
                         name={layer.name}
                         transform={transform}
                         opacity={opacity}
+                        zIndex={zIndex}
                       />
                     );
                   }
