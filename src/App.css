@@ -425,6 +425,7 @@ input[type="range"] {
   background: #fff;
   color: var(--heading_color);
   font-size: 1.25rem;
+  font-weight: 400;
   line-height: 1;
   cursor: pointer;
 }
@@ -1264,6 +1265,7 @@ input[type="range"] {
   background: #fff;
   color: var(--heading_color);
   font-size: 1.15rem;
+  font-weight: 400;
   line-height: 1;
   cursor: pointer;
 }
@@ -1277,6 +1279,11 @@ input[type="range"] {
 }
 .layer_add_menu {
   display: grid;
+}
+
+.layer_add_menu button,
+.effect_menu button {
+  font-weight: 400;
 }
 .canvas_shape {
   position: absolute;
