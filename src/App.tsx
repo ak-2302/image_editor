@@ -22,6 +22,7 @@ import {
   defaultEffectParameters,
   type EffectParameters,
 } from "./features/effects/effectParameters";
+import { isSupportedImage, readImageAsDataUrl } from "./features/images/imageUtils";
 import type { ObjectLayer } from "./features/layers/objectTypes";
 
 function App() {
@@ -84,6 +85,7 @@ function App() {
   const [movingEffect, setMovingEffect] = useState<EffectName | null>(null);
   const [frameOpacity, setFrameOpacity] = useState(100);
   const [frameThickness, setFrameThickness] = useState(1);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const objectKey = String(selectedObjectId);
   const selectedObjectLabel =
@@ -211,9 +213,17 @@ function App() {
     document.addEventListener("pointerdown", closeMenus);
     return () => document.removeEventListener("pointerdown", closeMenus);
   }, []);
-  const loadFile = (file?: File) => {
-    if (!file || !file.type.startsWith("image/")) return;
-    const nextUrl = URL.createObjectURL(file);
+  const loadFile = async (file?: File) => {
+    if (!file) return;
+    if (!isSupportedImage(file)) {
+      setNotice("PNG、JPEG、WebPの画像を選択してください。");
+      return;
+    }
+    const nextUrl = await readImageAsDataUrl(file).catch(() => null);
+    if (!nextUrl) {
+      setNotice("画像を読み込めませんでした。");
+      return;
+    }
     if (imageUrl)
       setObjectLayers((layers) => [
         ...layers,
@@ -225,15 +235,13 @@ function App() {
           visible: true,
         },
       ]);
-    setImageUrl((currentUrl) => {
-      if (currentUrl && !imageUrl) URL.revokeObjectURL(currentUrl);
-      return nextUrl;
-    });
+    setImageUrl(nextUrl);
     if (!imageUrl) setLayerName(file.name);
     setShapeType(null);
     setIsLayerVisible(true);
     setCanvasSize(null);
     setShowBlankCanvasForm(false);
+    setNotice(null);
   };
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     loadFile(event.target.files?.[0]);
@@ -264,7 +272,6 @@ function App() {
     selectObject(id);
   };
   const clearImage = () => {
-    if (imageUrl) URL.revokeObjectURL(imageUrl);
     setImageUrl(null);
     setShapeType(null);
     setLayerName("画像レイヤー");
@@ -411,6 +418,14 @@ function App() {
           </div>
         </nav>
       </header>
+      {notice && (
+        <div className="editor_notice" role="status" aria-live="polite">
+          {notice}
+          <button type="button" onClick={() => setNotice(null)}>
+            閉じる
+          </button>
+        </div>
+      )}
       <div className="editor_layout">
         <section className="canvas_panel" aria-label="編集キャンバス">
           <div
