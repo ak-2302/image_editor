@@ -815,6 +815,15 @@ input[type="range"] {
   text-transform: uppercase;
 }
 
+.shape_color_picker {
+  width: 2rem;
+  height: 1.7rem;
+  padding: 0.1rem;
+  border: 1px solid var(--border_color);
+  background: #fff;
+  cursor: pointer;
+}
+
 .effect_unit {
   color: var(--muted_color);
 }
