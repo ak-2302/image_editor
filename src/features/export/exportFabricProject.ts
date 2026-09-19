@@ -1,11 +1,8 @@
 import {
-  Circle,
   FabricImage,
   Group,
-  Rect,
   StaticCanvas,
   Textbox,
-  Triangle,
   filters,
   type FabricObject,
 } from "fabric";
@@ -13,6 +10,7 @@ import type { EditorHistorySnapshot } from "../history/historyTypes";
 import type { ObjectLayer } from "../layers/objectTypes";
 import { defaultObjectTransform } from "../objects/useObjectTransforms";
 import { getEffectColor } from "../effects/fabricEffectStyles";
+import { createShapeSvgDataUrl } from "../shapes/svgShapeRenderer";
 
 type ExportFormat = "png" | "jpeg";
 
@@ -61,38 +59,18 @@ const getEffects = (
   return result;
 };
 
-const createShape = (layer: ObjectLayer, canvasWidth: number, effects: EditorHistorySnapshot["activeEffects"]): FabricObject | null => {
-  const shape = layer.shape;
-  const color = shape?.color ?? "#ffffff";
-  const size = (canvasWidth * 0.45 * (shape?.size ?? 100)) / 100;
-  const aspect = 1 - (shape?.aspectRatio ?? 0) / 100;
-  const height = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
-  const requestedLineWidth = shape?.lineWidth ?? 0;
-  const fillsShape = requestedLineWidth * 2 >= Math.min(size, height);
-  const lineWidth = fillsShape ? 0 : requestedLineWidth;
-  const pathWidth = lineWidth > 0 ? size - lineWidth : size;
-  const pathHeight = lineWidth > 0 ? height - lineWidth : height;
-  const options = {
-    fill: fillsShape ? getEffectColor(color, effects) : "transparent",
-    stroke: fillsShape ? undefined : lineWidth > 0 ? color : undefined,
-    strokeWidth: lineWidth,
-    strokeLineJoin: "bevel" as const,
-    width: pathWidth,
-    height: pathHeight,
-    originX: "center" as const,
-    originY: "center" as const,
-  };
-  if (layer.type === "rectangle") return new Rect(options);
-  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(pathWidth, pathHeight) / 2 });
-  if (layer.type === "triangle" && !fillsShape && lineWidth > 0) {
-    const innerWidth = Math.max(0, size - lineWidth * 2);
-    const innerHeight = Math.max(0, height - lineWidth * 2);
-    const outer = new Triangle({ fill: color, width: size, height, originX: "center", originY: "center" });
-    const inner = new Triangle({ fill: "#000000", width: innerWidth, height: innerHeight, originX: "center", originY: "center", globalCompositeOperation: "destination-out" });
-    return new Group([outer, inner], { originX: "center", originY: "center" });
+const createShape = async (layer: ObjectLayer, canvasWidth: number, effects: EditorHistorySnapshot["activeEffects"]): Promise<FabricObject | null> => {
+  const dataUrl = createShapeSvgDataUrl(layer, { canvasWidth, effects });
+  if (!dataUrl) return null;
+  if (layer.type === "triangle" && (layer.shape?.lineWidth ?? 0) > 0) {
+    const outerUrl = createShapeSvgDataUrl(layer, { canvasWidth, effects }, "outer");
+    const holeUrl = createShapeSvgDataUrl(layer, { canvasWidth, effects }, "hole");
+    if (!outerUrl || !holeUrl) return null;
+    const [outer, hole] = await Promise.all([FabricImage.fromURL(outerUrl), FabricImage.fromURL(holeUrl)]);
+    hole.set({ globalCompositeOperation: "destination-out" });
+    return new Group([outer, hole], { originX: "center", originY: "center" });
   }
-  if (layer.type === "triangle") return new Triangle(options);
-  return null;
+  return FabricImage.fromURL(dataUrl);
 };
 
 const createObject = async (

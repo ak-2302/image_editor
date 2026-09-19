@@ -1,11 +1,8 @@
 import { useEffect, useRef } from "react";
 import {
   Canvas,
-  Circle,
   FabricImage,
   Group,
-  Rect,
-  Triangle,
   Textbox,
   filters,
   type FabricObject,
@@ -14,6 +11,7 @@ import type { ObjectLayer } from "../../features/layers/objectTypes";
 import type { EffectInstance } from "../../features/project/projectTypes";
 import { getFlipScale } from "../../features/effects/processors/flipEffect";
 import { getEffectColor } from "../../features/effects/fabricEffectStyles";
+import { createShapeSvgDataUrl } from "../../features/shapes/svgShapeRenderer";
 import { defaultObjectTransform } from "../../features/objects/useObjectTransforms";
 
 type FabricCanvasProps = {
@@ -56,39 +54,22 @@ const getTransform = (
   };
 };
 
-const createShape = (
+const createShape = async (
   layer: ObjectLayer,
   canvasWidth: number,
   effects: EffectInstance[],
-): FabricObject | null => {
-  const color = layer.shape?.color ?? "#ffffff";
-  const size = (canvasWidth * 0.45 * (layer.shape?.size ?? 100)) / 100;
-  const aspect = 1 - (layer.shape?.aspectRatio ?? 0) / 100;
-  const shapeHeight = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
-  const requestedLineWidth = layer.shape?.lineWidth ?? 0;
-  const fillsShape = requestedLineWidth * 2 >= Math.min(size, shapeHeight);
-  const lineWidth = fillsShape ? 0 : requestedLineWidth;
-  const pathWidth = lineWidth > 0 ? size - lineWidth : size;
-  const pathHeight = lineWidth > 0 ? shapeHeight - lineWidth : shapeHeight;
-  const options = {
-    fill: fillsShape ? getEffectColor(color, effects) : "transparent",
-    stroke: fillsShape ? undefined : lineWidth > 0 ? color : undefined,
-    strokeWidth: lineWidth,
-    strokeLineJoin: "bevel" as const,
-    width: pathWidth,
-    height: pathHeight,
-  };
-  if (layer.type === "rectangle") return new Rect(options);
-  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(pathWidth, pathHeight) / 2 });
-  if (layer.type === "triangle" && !fillsShape && lineWidth > 0) {
-    const innerWidth = Math.max(0, size - lineWidth * 2);
-    const innerHeight = Math.max(0, shapeHeight - lineWidth * 2);
-    const outer = new Triangle({ fill: color, width: size, height: shapeHeight, originX: "center", originY: "center" });
-    const inner = new Triangle({ fill: "#000000", width: innerWidth, height: innerHeight, originX: "center", originY: "center", globalCompositeOperation: "destination-out" });
-    return new Group([outer, inner], { originX: "center", originY: "center" });
+): Promise<FabricObject | null> => {
+  const dataUrl = createShapeSvgDataUrl(layer, { canvasWidth, effects });
+  if (!dataUrl) return null;
+  if (layer.type === "triangle" && (layer.shape?.lineWidth ?? 0) > 0) {
+    const outerUrl = createShapeSvgDataUrl(layer, { canvasWidth, effects }, "outer");
+    const holeUrl = createShapeSvgDataUrl(layer, { canvasWidth, effects }, "hole");
+    if (!outerUrl || !holeUrl) return null;
+    const [outer, hole] = await Promise.all([FabricImage.fromURL(outerUrl), FabricImage.fromURL(holeUrl)]);
+    hole.set({ globalCompositeOperation: "destination-out" });
+    return new Group([outer, hole], { originX: "center", originY: "center" });
   }
-  if (layer.type === "triangle") return new Triangle(options);
-  return null;
+  return FabricImage.fromURL(dataUrl);
 };
 
 const getFabricFilters = (
@@ -191,7 +172,7 @@ function FabricCanvas({
             fontStyle: layer.text.italic ? "italic" : "normal",
           });
         } else {
-          object = createShape(
+          object = await createShape(
             layer,
             width,
             isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
