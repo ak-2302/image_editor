@@ -191,6 +191,16 @@
   border: 1px solid transparent;
   background: #e5e9ec;
   font-size: 0.75rem;
+  cursor: grab;
+  transition: transform 160ms ease, background-color 160ms ease, opacity 160ms ease;
+}
+
+.layer_item:active {
+  cursor: grabbing;
+}
+
+.layer_item[draggable="true"]:hover {
+  background: #dce5e8;
 }
 
 .layer_item.is_selected {

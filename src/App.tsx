@@ -604,65 +604,48 @@ function App() {
                     opacity={(100 - initialEffects.opacity) / 100}
                   />
                 )}
-                {objectLayers
-                  .filter(
-                    (layer) =>
-                      layer.type === "image" && layer.url && layer.visible,
-                  )
-                  .map((layer) => (
-                    <img
-                      className="canvas_image"
-                      key={layer.id}
-                      src={layer.url}
-                      alt={layer.name}
-                      style={{
-                        filter,
-                        transform: imageTransform,
-                        opacity: (100 - initialEffects.opacity) / 100,
-                      }}
-                    />
-                  ))}
-                {objectLayers
-                  .filter(isShapeLayer)
-                  .filter((layer) => layer.visible)
-                  .map((layer) => (
-                    <ShapeObject
-                      key={layer.id}
-                      type={layer.type}
-                      name={layer.name}
-                      transform={
-                        selectedObjectId === layer.id
-                          ? selectedObjectTransform
-                          : "none"
-                      }
-                      opacity={
-                        selectedObjectId === layer.id
-                          ? (100 - initialEffects.opacity) / 100
-                          : 1
-                      }
-                    />
-                  ))}
-                {objectLayers
-                  .filter((layer) => layer.type === "text" && layer.visible)
-                  .map((layer) =>
-                    layer.text ? (
+                {[...objectLayers].reverse().map((layer) => {
+                  if (!layer.visible) return null;
+                  const isSelected = selectedObjectId === layer.id;
+                  const transform = isSelected ? selectedObjectTransform : "none";
+                  const opacity = isSelected
+                    ? (100 - initialEffects.opacity) / 100
+                    : 1;
+                  if (layer.type === "image" && layer.url) {
+                    return (
+                      <img
+                        className="canvas_image"
+                        key={layer.id}
+                        src={layer.url}
+                        alt={layer.name}
+                        style={{ filter, transform, opacity }}
+                      />
+                    );
+                  }
+                  if (isShapeLayer(layer)) {
+                    return (
+                      <ShapeObject
+                        key={layer.id}
+                        type={layer.type}
+                        name={layer.name}
+                        transform={transform}
+                        opacity={opacity}
+                      />
+                    );
+                  }
+                  if (layer.type === "text" && layer.text) {
+                    return (
                       <TextObject
                         key={layer.id}
                         {...layer.text}
                         name={layer.name}
-                        transform={
-                          selectedObjectId === layer.id
-                            ? selectedObjectTransform
-                            : "none"
-                        }
-                        opacity={
-                          selectedObjectId === layer.id
-                            ? (100 - initialEffects.opacity) / 100
-                            : 1
-                        }
+                        transform={transform}
+                        opacity={opacity}
                       />
-                    ) : null,
-                  )}
+                    );
+                  }
+                  return null;
+                })}
               </div>
             ) : (
               <>

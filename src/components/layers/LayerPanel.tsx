@@ -1,5 +1,6 @@
 import { useState, type RefObject } from "react";
 import type { ObjectLayer } from "../../features/layers/objectTypes";
+import { reorderLayers } from "../../features/layers/useLayerOrdering";
 
 type LayerPanelProps = {
   fileInputRef: RefObject<HTMLInputElement | null>;
@@ -38,6 +39,7 @@ function LayerPanel({
 }: LayerPanelProps) {
   const [showObjectMenu, setShowObjectMenu] = useState(false);
   const [isRenamingLayer, setIsRenamingLayer] = useState(false);
+  const [draggedLayerId, setDraggedLayerId] = useState<number | null>(null);
   const hasMainObject = Boolean(imageUrl || canvasSize || shapeType);
 
   return (
@@ -172,6 +174,17 @@ function LayerPanel({
             className={`layer_item${selectedObjectId === layer.id ? " is_selected" : ""}`}
             role="listitem"
             key={layer.id}
+            draggable
+            onDragStart={() => setDraggedLayerId(layer.id)}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={() => {
+              if (draggedLayerId === null || draggedLayerId === layer.id) return;
+              setObjectLayers((layers) =>
+                reorderLayers(layers, draggedLayerId, layer.id),
+              );
+              setDraggedLayerId(null);
+            }}
+            onDragEnd={() => setDraggedLayerId(null)}
           >
             <button
               type="button"
