@@ -1275,8 +1275,7 @@ input[type="range"] {
 .text_settings {
   display: grid;
   gap: 0.45rem;
-  padding: 0.85rem 1.5rem;
-  border-bottom: 1px solid var(--line_color);
+  padding: 0.5rem 0 0.75rem;
   font-size: 0.76rem;
 }
 
