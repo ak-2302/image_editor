@@ -2,11 +2,28 @@ import type { EditorHistorySnapshot } from "../history/historyTypes";
 
 const STORAGE_KEY = "image-editor-project-v1";
 
+const isStoredProject = (value: unknown): value is EditorHistorySnapshot => {
+  if (!value || typeof value !== "object") return false;
+  const project = value as Partial<EditorHistorySnapshot>;
+  return (
+    typeof project.projectName === "string" &&
+    Array.isArray(project.objectLayers) &&
+    Array.isArray(project.activeEffects) &&
+    project.effectsByObject !== null &&
+    typeof project.effectsByObject === "object" &&
+    project.parametersByObject !== null &&
+    typeof project.parametersByObject === "object" &&
+    project.transformsByObject !== null &&
+    typeof project.transformsByObject === "object"
+  );
+};
+
 export function loadProject(): EditorHistorySnapshot | null {
   try {
     const serialized = window.localStorage.getItem(STORAGE_KEY);
     if (!serialized) return null;
-    return JSON.parse(serialized) as EditorHistorySnapshot;
+    const parsed: unknown = JSON.parse(serialized);
+    return isStoredProject(parsed) ? parsed : null;
   } catch {
     return null;
   }

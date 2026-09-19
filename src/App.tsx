@@ -36,6 +36,7 @@ import { useUndoRedo } from "./features/history/useUndoRedo";
 import type { EditorHistorySnapshot } from "./features/history/historyTypes";
 import { loadProject, saveProject } from "./features/project/projectStorage";
 import { exportProject } from "./features/export/exportProject";
+import EditorNotice from "./components/feedback/EditorNotice";
 
 const isShapeLayer = (
   layer: ObjectLayer,
@@ -676,14 +677,7 @@ function App() {
           </div>
         </nav>
       </header>
-      {notice && (
-        <div className="editor_notice" role="status" aria-live="polite">
-          {notice}
-          <button type="button" onClick={() => setNotice(null)}>
-            閉じる
-          </button>
-        </div>
-      )}
+      <EditorNotice message={notice} onClose={() => setNotice(null)} />
       <div className="editor_layout">
         <section className="canvas_panel" aria-label="編集キャンバス">
           <div
@@ -714,6 +708,7 @@ function App() {
                     className="canvas_image"
                     src={imageUrl}
                     alt="編集キャンバスの画像"
+                    onError={() => setNotice("画像を表示できませんでした。")}
                     onLoad={(event) => {
                       const image = event.currentTarget;
                       setCanvasSize(
@@ -753,6 +748,7 @@ function App() {
                         key={layer.id}
                         src={layer.url}
                         alt={layer.name}
+                        onError={() => setNotice(`${layer.name}を表示できませんでした。`)}
                         style={{ filter, transform, opacity }}
                       />
                     );
