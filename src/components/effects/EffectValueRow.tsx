@@ -55,6 +55,7 @@ export default function EffectValueRow({
       <label>{label}</label>
       <input
         type="number"
+        onPointerDown={(event) => event.stopPropagation()}
         {...(min === undefined ? {} : { min })}
         {...(max === undefined ? {} : { max })}
         value={value}

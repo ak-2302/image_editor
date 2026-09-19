@@ -101,6 +101,7 @@ function InitialEffectsAccordion({
                 <input
                   id={`initial_${key}`}
                   type="number"
+                  onPointerDown={(event) => event.stopPropagation()}
                   min={min}
                   max={max}
                   value={values[key]}

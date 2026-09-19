@@ -94,6 +94,7 @@ function ShapeSettingsAccordion({
               <input
                 id={`shape_${key}`}
                 type="number"
+                onPointerDown={(event) => event.stopPropagation()}
                 min={key === "lineWidth" || key === "cornerRadius" ? 0 : undefined}
                 max={key === "cornerRadius" ? 100 : undefined}
                 value={values[key]}
