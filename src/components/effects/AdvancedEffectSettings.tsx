@@ -32,7 +32,7 @@ export default function AdvancedEffectSettings({ effect, onChange }: Props) {
     case "glow":
       return <div className="initial_effect_fields"><ColorRow label="色" value={color("glowColor", "#ffffff")} onChange={(next) => onChange("glowColor", next)} />{row("強度", "glowStrength", 0, "%")}{row("半径", "glowRadius", 8, "px")}</div>;
     case "blur":
-      return <div className="initial_effect_fields">{row("半径", "blurRadius", 0, "px")}</div>;
+      return <div className="initial_effect_fields">{row("半径", "blurRadius", 0, "px", 0)}</div>;
     case "mosaic":
       return <div className="initial_effect_fields">{row("サイズ", "mosaicSize", 8, "px")}{row("強度", "mosaicStrength", 0, "%")}</div>;
     case "clipping":

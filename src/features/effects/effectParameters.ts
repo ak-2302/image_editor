@@ -121,5 +121,11 @@ export const normalizeEffect = (effect: EffectInstance): EffectInstance => ({
   values: {
     ...defaultEffectParameters,
     ...effect.values,
+    blurRadius: Math.max(
+      0,
+      Number.isFinite(Number(effect.values.blurRadius))
+        ? Number(effect.values.blurRadius)
+        : defaultEffectParameters.blurRadius,
+    ),
   },
 });

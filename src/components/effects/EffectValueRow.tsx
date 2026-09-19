@@ -18,6 +18,8 @@ export default function EffectValueRow({
   unit,
   onChange,
 }: Props) {
+  const clampValue = (next: number) =>
+    Math.min(max ?? next, Math.max(min ?? next, next));
   const start = useRef<{ x: number; value: number } | null>(null);
   const dragged = useRef(false);
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -56,7 +58,7 @@ export default function EffectValueRow({
         {...(min === undefined ? {} : { min })}
         {...(max === undefined ? {} : { max })}
         value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
+      onChange={(event) => onChange(clampValue(Number(event.target.value)))}
       />
       <span className="effect_unit">{unit}</span>
     </div>
