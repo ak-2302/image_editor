@@ -124,24 +124,18 @@ export async function createImageLoopCopies(
   if (!effect) return [object];
   const countX = Math.max(1, Math.floor(Number(effect.values.imageLoopX ?? 1)));
   const countY = Math.max(1, Math.floor(Number(effect.values.imageLoopY ?? 1)));
-  const offsetX = Number(effect.values.imageLoopOffsetX ?? 0);
-  const offsetY = Number(effect.values.imageLoopOffsetY ?? 0);
-  const opacity = Math.max(0, Math.min(100, Number(effect.values.imageLoopOpacity ?? 100))) / 100;
   const tileWidth = object.getScaledWidth();
   const tileHeight = object.getScaledHeight();
   const baseLeft = object.left ?? 0;
   const baseTop = object.top ?? 0;
-  object.set({ opacity: (object.opacity ?? 1) * opacity });
   const result = [object];
   for (let y = 0; y < countY; y += 1) {
     for (let x = 0; x < countX; x += 1) {
       if (x === 0 && y === 0) continue;
       const copy = await object.clone();
-      const mirrored = Boolean(effect.values.imageLoopMirror) && (x + y) % 2 === 1;
       copy.set({
-        left: baseLeft + x * tileWidth + offsetX,
-        top: baseTop + y * tileHeight + offsetY,
-        scaleX: mirrored ? -(copy.scaleX ?? 1) : copy.scaleX,
+        left: baseLeft + x * tileWidth,
+        top: baseTop + y * tileHeight,
         opacity: object.opacity,
       });
       result.push(copy);

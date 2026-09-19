@@ -46,7 +46,7 @@ export default function AdvancedEffectSettings({ effect, onChange }: Props) {
     case "outline":
       return <div className="initial_effect_fields"><ColorRow label="色" value={color("outlineColor", "#000000")} onChange={(next) => onChange("outlineColor", next)} />{row("太さ", "outlineWidth", 0, "px", 0)}{row("ぼかし", "outlineBlur", 0, "px", 0)}{row("濃さ", "outlineOpacity", 100, "%", 0, 100)}</div>;
     case "imageLoop":
-      return <div className="initial_effect_fields">{row("X繰り返し", "imageLoopX", 1, "回", 1)}{row("Y繰り返し", "imageLoopY", 1, "回", 1)}{row("Xオフセット", "imageLoopOffsetX", 0, "px")}{row("Yオフセット", "imageLoopOffsetY", 0, "px")}{row("透明度", "imageLoopOpacity", 100, "%", 0, 100)}<label className="initial_effect_row"><span>ミラー</span><input type="checkbox" checked={Boolean(effect.values.imageLoopMirror)} onChange={(event) => onChange("imageLoopMirror", event.target.checked)} /></label></div>;
+      return <div className="initial_effect_fields">{row("X繰り返し", "imageLoopX", 1, "回", 1)}{row("Y繰り返し", "imageLoopY", 1, "回", 1)}</div>;
     default:
       return null;
   }
