@@ -172,6 +172,8 @@ function FabricCanvas({
             fontSize: layer.text.fontSize,
             fontWeight: layer.text.bold ? "700" : "400",
             fontStyle: layer.text.italic ? "italic" : "normal",
+            underline: layer.text.underline,
+            linethrough: layer.text.linethrough,
           });
         } else {
           object = await createShape(

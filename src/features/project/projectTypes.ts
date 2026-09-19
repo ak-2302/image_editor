@@ -39,6 +39,8 @@ export type EditorObject = {
     color: string;
     bold: boolean;
     italic: boolean;
+    underline?: boolean;
+    linethrough?: boolean;
   };
 };
 

@@ -12,6 +12,8 @@ type TextSettingsProps = {
   color: string;
   bold: boolean;
   italic: boolean;
+  underline?: boolean;
+  linethrough?: boolean;
   initialEffects: InitialEffectValues;
   onInitialEffectChange: (key: InitialEffectKey, value: number) => void;
   onChange: (changes: {
@@ -20,6 +22,8 @@ type TextSettingsProps = {
     color?: string;
     bold?: boolean;
     italic?: boolean;
+    underline?: boolean;
+    linethrough?: boolean;
   }) => void;
 };
 
@@ -29,6 +33,8 @@ function TextSettings({
   color,
   bold,
   italic,
+  underline = false,
+  linethrough = false,
   initialEffects,
   onInitialEffectChange,
   onChange,
@@ -134,6 +140,22 @@ function TextSettings({
             onChange={(event) => onChange({ italic: event.target.checked })}
           />
           斜体
+        </label>
+        <label className="text_setting_check">
+          <input
+            type="checkbox"
+            checked={underline}
+            onChange={(event) => onChange({ underline: event.target.checked })}
+          />
+          下線
+        </label>
+        <label className="text_setting_check">
+          <input
+            type="checkbox"
+            checked={linethrough}
+            onChange={(event) => onChange({ linethrough: event.target.checked })}
+          />
+          取消線
         </label>
       </div>}
     </section>

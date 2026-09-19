@@ -506,6 +506,8 @@ const isAvailableEffect = (effect: EffectInstance) =>
           color: "#222222",
           bold: false,
           italic: false,
+          underline: false,
+          linethrough: false,
         },
       },
     ]);

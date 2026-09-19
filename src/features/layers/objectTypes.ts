@@ -13,5 +13,7 @@ export type ObjectLayer = {
     color: string;
     bold: boolean;
     italic: boolean;
+    underline: boolean;
+    linethrough: boolean;
   };
 };
