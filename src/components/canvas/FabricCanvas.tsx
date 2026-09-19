@@ -14,7 +14,7 @@ import { getEffectColor } from "../../features/effects/fabricEffectStyles";
 import { createShapeSvgDataUrl } from "../../features/shapes/svgShapeRenderer";
 import { createRegularPolygon } from "../../features/shapes/polygonRenderer";
 import { defaultObjectTransform } from "../../features/objects/useObjectTransforms";
-import { applyObjectClipping, applyObjectDecorations } from "../../features/effects/objectDecorations";
+import { applyObjectClipping, applyObjectDecorations, createImageLoopCopies } from "../../features/effects/objectDecorations";
 
 type FabricCanvasProps = {
   width: number;
@@ -230,7 +230,11 @@ function FabricCanvas({
           object,
           isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
         );
-        canvas.add(object);
+        const copies = await createImageLoopCopies(
+          object,
+          isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+        );
+        copies.forEach((copy) => canvas.add(copy));
       }
       if (!cancelled) {
         canvas.on("selection:created", handleSelection);

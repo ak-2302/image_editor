@@ -12,7 +12,7 @@ import { defaultObjectTransform } from "../objects/useObjectTransforms";
 import { getEffectColor } from "../effects/fabricEffectStyles";
 import { createShapeSvgDataUrl } from "../shapes/svgShapeRenderer";
 import { createRegularPolygon } from "../shapes/polygonRenderer";
-import { applyObjectClipping, applyObjectDecorations } from "../effects/objectDecorations";
+import { applyObjectClipping, applyObjectDecorations, createImageLoopCopies } from "../effects/objectDecorations";
 
 type ExportFormat = "png" | "jpeg";
 
@@ -159,7 +159,8 @@ export async function exportFabricProject(
       object.filters = getEffects(effects);
       object.applyFilters();
     }
-    canvas.add(object);
+    const copies = await createImageLoopCopies(object, effects);
+    copies.forEach((copy) => canvas.add(copy));
   }
   canvas.renderAll();
   const dataUrl = canvas.toDataURL({ format, quality: 0.92, multiplier: 1 });

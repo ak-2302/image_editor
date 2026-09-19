@@ -1,4 +1,4 @@
-import { Circle, Ellipse, Rect, Shadow, type FabricObject } from "fabric";
+import { Circle, Ellipse, Polygon, Rect, Shadow, type FabricObject } from "fabric";
 import type { EffectInstance } from "../project/projectTypes";
 
 const withOpacity = (color: string, opacity: number) => {
@@ -50,6 +50,7 @@ export function applyObjectClipping(object: FabricObject, effects: EffectInstanc
   let top = 0;
   let bottom = 0;
   let mask: EffectInstance["values"] | undefined;
+  let diagonalAngle: number | undefined;
   for (const effect of effects) {
     if (effect.name === "clipping") {
       top += Number(effect.values.clipTop ?? 0);
@@ -57,7 +58,8 @@ export function applyObjectClipping(object: FabricObject, effects: EffectInstanc
       left += Number(effect.values.clipLeft ?? 0);
       right += Number(effect.values.clipRight ?? 0);
     }
-    if (effect.name === "diagonalClipping" || effect.name === "mask") mask = effect.values;
+    if (effect.name === "diagonalClipping") diagonalAngle = Number(effect.values.diagonalClipAngle ?? 0);
+    if (effect.name === "mask") mask = effect.values;
   }
   if (mask && (mask.maskWidth !== undefined || mask.maskHeight !== undefined)) {
     const maskWidth = Math.min(width, Number(mask.maskWidth ?? width));
@@ -84,4 +86,51 @@ export function applyObjectClipping(object: FabricObject, effects: EffectInstanc
       }),
     });
   }
+  if (diagonalAngle !== undefined) {
+    const radians = (diagonalAngle * Math.PI) / 180;
+    object.set({
+      clipPath: new Polygon(
+        [
+          { x: -width / 2, y: -height / 2 },
+          { x: width / 2, y: -height / 2 },
+          { x: -width / 2, y: height / 2 },
+        ],
+        { left: 0, top: 0, angle: radians * 180 / Math.PI, originX: "center", originY: "center" },
+      ),
+    });
+  }
+}
+
+export async function createImageLoopCopies(
+  object: FabricObject,
+  effects: EffectInstance[],
+): Promise<FabricObject[]> {
+  const effect = effects.find((item) => item.name === "imageLoop");
+  if (!effect) return [object];
+  const countX = Math.max(1, Math.floor(Number(effect.values.imageLoopX ?? 1)));
+  const countY = Math.max(1, Math.floor(Number(effect.values.imageLoopY ?? 1)));
+  const offsetX = Number(effect.values.imageLoopOffsetX ?? 0);
+  const offsetY = Number(effect.values.imageLoopOffsetY ?? 0);
+  const opacity = Math.max(0, Math.min(100, Number(effect.values.imageLoopOpacity ?? 100))) / 100;
+  const tileWidth = object.getScaledWidth();
+  const tileHeight = object.getScaledHeight();
+  const baseLeft = object.left ?? 0;
+  const baseTop = object.top ?? 0;
+  object.set({ opacity: (object.opacity ?? 1) * opacity });
+  const result = [object];
+  for (let y = 0; y < countY; y += 1) {
+    for (let x = 0; x < countX; x += 1) {
+      if (x === 0 && y === 0) continue;
+      const copy = await object.clone();
+      const mirrored = Boolean(effect.values.imageLoopMirror) && (x + y) % 2 === 1;
+      copy.set({
+        left: baseLeft + x * tileWidth + offsetX,
+        top: baseTop + y * tileHeight + offsetY,
+        scaleX: mirrored ? -(copy.scaleX ?? 1) : copy.scaleX,
+        opacity: (copy.opacity ?? 1) * opacity,
+      });
+      result.push(copy);
+    }
+  }
+  return result;
 }

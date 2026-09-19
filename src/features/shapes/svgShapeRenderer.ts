@@ -18,6 +18,7 @@ export const createShapeSvgDataUrl = (
   if (layer.type !== "rectangle" && layer.type !== "circle" && layer.type !== "triangle") return null;
 
   const color = getEffectColor(layer.shape?.color ?? "#ffffff", effects);
+  const gradient = effects.find((effect) => effect.name === "gradient");
   const size = (canvasWidth * 0.45 * (layer.shape?.size ?? 100)) / 100;
   const aspect = 1 - (layer.shape?.aspectRatio ?? 0) / 100;
   const height = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
@@ -41,15 +42,19 @@ export const createShapeSvgDataUrl = (
   const mask = fillsShape
     ? ""
     : `<mask id="cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="${size}" height="${height}"><rect width="${size}" height="${height}" fill="black"/>${outer.replace("/>", ` fill="white"/>`)}${hole.replace("/>", ` fill="black"/>`)}</mask>`;
+  const gradientDefinition = gradient && Number(gradient.values.gradientStrength ?? 0) > 0
+    ? `<linearGradient id="effectGradient" gradientTransform="rotate(${Number(gradient.values.gradientAngle ?? 0)} .5 .5)"><stop offset="0%" stop-color="${escapeAttribute(gradient.values.gradientStartColor ?? color)}"/><stop offset="100%" stop-color="${escapeAttribute(gradient.values.gradientEndColor ?? color)}"/></linearGradient>`
+    : "";
+  const fill = gradientDefinition ? "url(#effectGradient)" : escapeAttribute(color);
   const body = part === "outer"
-    ? `<g fill="${escapeAttribute(color)}">${outer}</g>`
+    ? `<g fill="${fill}">${outer}</g>`
     : part === "hole"
       ? `<g fill="#000000">${hole}</g>`
       : fillsShape
-    ? `<g fill="${escapeAttribute(color)}">${outer}</g>`
+    ? `<g fill="${fill}">${outer}</g>`
     : isTriangle
-      ? trianglePath.replace("/>", ` fill="${escapeAttribute(color)}"/>`)
-      : `<g fill="${escapeAttribute(color)}" mask="url(#cutout)">${outer}</g>`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${height}" viewBox="0 0 ${size} ${height}">${mask}${body}</svg>`;
+      ? trianglePath.replace("/>", ` fill="${fill}"/>`)
+      : `<g fill="${fill}" mask="url(#cutout)">${outer}</g>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${height}" viewBox="0 0 ${size} ${height}"><defs>${gradientDefinition}</defs>${mask}${body}</svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
