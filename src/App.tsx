@@ -1008,7 +1008,11 @@ const isAvailableEffect = (effect: EffectInstance) =>
                   aria-label={
                     isLayerVisible ? "レイヤーを非表示" : "レイヤーを表示"
                   }
-                  onClick={() => setIsLayerVisible((visible) => !visible)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    recordHistory();
+                    setIsLayerVisible((visible) => !visible);
+                  }}
                 >
                   {isLayerVisible ? "◉" : "○"}
                 </button>

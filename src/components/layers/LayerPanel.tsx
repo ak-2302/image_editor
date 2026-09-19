@@ -118,7 +118,11 @@ function LayerPanel({
             type="button"
             className="layer_icon_button"
             aria-label={isLayerVisible ? "レイヤーを非表示" : "レイヤーを表示"}
-            onClick={() => setIsLayerVisible((visible) => !visible)}
+            onClick={(event) => {
+              event.stopPropagation();
+              recordHistory();
+              setIsLayerVisible((visible) => !visible);
+            }}
           >
             {isLayerVisible ? "◉" : "○"}
           </button>
