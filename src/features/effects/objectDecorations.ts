@@ -1,4 +1,4 @@
-import { Circle, Ellipse, Polygon, Rect, Shadow, type FabricObject } from "fabric";
+import { Circle, Ellipse, FabricImage, Polygon, Rect, Shadow, filters, type FabricImage as FabricImageType, type FabricObject } from "fabric";
 import type { EffectInstance } from "../project/projectTypes";
 
 const withOpacity = (color: string, opacity: number) => {
@@ -72,7 +72,13 @@ export function applyObjectClipping(object: FabricObject, effects: EffectInstanc
       : shape === "ellipse"
         ? new Ellipse({ rx: maskWidth / 2, ry: maskHeight / 2, left: x, top: y, originX: "center", originY: "center" })
         : new Rect({ width: maskWidth, height: maskHeight, left: x, top: y, originX: "center", originY: "center" });
-    object.set({ clipPath: mask.maskInvert ? undefined : clipPath });
+    clipPath.set({
+      inverted: Boolean(mask.maskInvert),
+      shadow: Number(mask.maskBlur ?? 0) > 0
+        ? new Shadow({ color: "#000000", blur: Number(mask.maskBlur ?? 0), offsetX: 0, offsetY: 0 })
+        : undefined,
+    });
+    object.set({ clipPath });
   }
   if (left || right || top || bottom) {
     object.set({
@@ -133,4 +139,40 @@ export async function createImageLoopCopies(
     }
   }
   return result;
+}
+
+export async function applyImageGradient(
+  object: FabricImageType,
+  effects: EffectInstance[],
+) {
+  const effect = effects.find((item) => item.name === "gradient");
+  const strength = Number(effect?.values.gradientStrength ?? 0);
+  if (!effect || strength <= 0) return;
+  const width = Math.max(1, Math.ceil(object.width ?? 1));
+  const height = Math.max(1, Math.ceil(object.height ?? 1));
+  const element = document.createElement("canvas");
+  element.width = width;
+  element.height = height;
+  const context = element.getContext("2d");
+  if (!context) return;
+  const angle = (Number(effect.values.gradientAngle ?? 0) * Math.PI) / 180;
+  const length = Math.sqrt(width * width + height * height);
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const gradient = context.createLinearGradient(
+    centerX - Math.cos(angle) * length / 2,
+    centerY - Math.sin(angle) * length / 2,
+    centerX + Math.cos(angle) * length / 2,
+    centerY + Math.sin(angle) * length / 2,
+  );
+  gradient.addColorStop(0, effect.values.gradientStartColor ?? "#ffffff");
+  gradient.addColorStop(1, effect.values.gradientEndColor ?? "#000000");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, width, height);
+  const overlay = await FabricImage.fromURL(element.toDataURL());
+  object.filters = [
+    ...(object.filters ?? []),
+    new filters.BlendImage({ image: overlay, mode: "multiply", alpha: Math.min(1, strength / 100) }),
+  ];
+  object.applyFilters();
 }

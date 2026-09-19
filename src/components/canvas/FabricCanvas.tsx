@@ -15,7 +15,7 @@ import { getEffectColor } from "../../features/effects/fabricEffectStyles";
 import { createShapeSvgDataUrl } from "../../features/shapes/svgShapeRenderer";
 import { createRegularPolygon } from "../../features/shapes/polygonRenderer";
 import { defaultObjectTransform } from "../../features/objects/useObjectTransforms";
-import { applyObjectClipping, applyObjectDecorations, createImageLoopCopies } from "../../features/effects/objectDecorations";
+import { applyImageGradient, applyObjectClipping, applyObjectDecorations, createImageLoopCopies } from "../../features/effects/objectDecorations";
 
 type FabricCanvasProps = {
   width: number;
@@ -220,6 +220,10 @@ function FabricCanvas({
             isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
           );
           object.applyFilters();
+          await applyImageGradient(
+            object,
+            isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+          );
         }
         object.set({
           ...getTransform(
