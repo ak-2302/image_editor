@@ -86,7 +86,8 @@ const drawObject = async (
     const size = (shape?.size ?? 100) / 100;
     const aspect = 1 - (shape?.aspectRatio ?? 0) / 100;
     const shapeWidth = canvasWidth * 0.45 * size;
-    const shapeHeight = canvasHeight * 0.45 * size * aspect;
+    const baseHeightRatio = layer.type === "triangle" ? Math.sqrt(3) / 2 : 1;
+    const shapeHeight = shapeWidth * baseHeightRatio * aspect;
     const shapeColor = shape?.color ?? shape?.fillColor ?? shape?.strokeColor ?? "#ffffff";
     const lineWidth = shape?.lineWidth ?? 0;
     const isFilled = lineWidth === 0;

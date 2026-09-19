@@ -17,6 +17,9 @@ function ShapeObject({ type, name, transform, opacity, properties }: ShapeObject
   const shapeProperties = normalizeShapeProperties(properties);
   const isTriangle = type === "triangle";
   const isFilled = shapeProperties.lineWidth === 0;
+  const aspect = 1 - shapeProperties.aspectRatio / 100;
+  const baseHeightRatio = isTriangle ? Math.sqrt(3) / 2 : 1;
+  const heightRatio = baseHeightRatio * aspect;
   const shapeClass = [
     "canvas_shape",
     type === "circle" ? "canvas_shape_circle" : "",
@@ -33,17 +36,16 @@ function ShapeObject({ type, name, transform, opacity, properties }: ShapeObject
         transform,
         opacity,
         boxSizing: "border-box",
-        backgroundColor: isTriangle || !isFilled ? "transparent" : shapeProperties.color,
+        backgroundColor: isFilled ? shapeProperties.color : "transparent",
         boxShadow:
           !isTriangle && !isFilled
             ? `inset 0 0 0 ${shapeProperties.lineWidth}px ${shapeProperties.color}`
             : undefined,
         borderRadius: type === "rectangle" ? `${shapeProperties.cornerRadius}%` : undefined,
-        width: isTriangle ? 0 : `${45 * (shapeProperties.size / 100)}%`,
-        height: isTriangle ? 0 : `${45 * (shapeProperties.size / 100) * (1 - shapeProperties.aspectRatio / 100)}%`,
-        borderLeftColor: isTriangle ? "transparent" : undefined,
-        borderRightColor: isTriangle ? "transparent" : undefined,
-        borderBottomColor: isTriangle && isFilled ? shapeProperties.color : "transparent",
+        width: `${45 * (shapeProperties.size / 100)}%`,
+        height: "auto",
+        aspectRatio: `${1 / heightRatio}`,
+        clipPath: isTriangle ? "polygon(50% 0%, 100% 100%, 0% 100%)" : undefined,
       } satisfies CSSProperties}
     />
   );

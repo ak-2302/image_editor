@@ -1051,12 +1051,7 @@ input[type="range"] {
   border-radius: 50%;
 }
 .canvas_shape_triangle {
-  width: 0;
-  height: 0;
   background: transparent;
-  border-left: 10rem solid transparent;
-  border-right: 10rem solid transparent;
-  border-bottom: 18rem solid var(--accent_color);
 }
 
 .canvas_text {
