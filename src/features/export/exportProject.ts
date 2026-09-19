@@ -90,11 +90,14 @@ const drawObject = async (
     const shapeColor = shape?.color ?? shape?.fillColor ?? shape?.strokeColor ?? "#ffffff";
     const lineWidth = shape?.lineWidth ?? 0;
     const isFilled = lineWidth === 0;
-    const renderedWidth = isFilled ? shapeWidth : Math.max(0, shapeWidth - lineWidth);
-    const renderedHeight = isFilled ? shapeHeight : Math.max(0, shapeHeight - lineWidth);
+    const renderedLineWidth = isFilled
+      ? 0
+      : Math.min(lineWidth, Math.min(shapeWidth, shapeHeight) / 2);
+    const renderedWidth = isFilled ? shapeWidth : shapeWidth - renderedLineWidth;
+    const renderedHeight = isFilled ? shapeHeight : shapeHeight - renderedLineWidth;
     context.fillStyle = isFilled ? shapeColor : "transparent";
     context.strokeStyle = shapeColor;
-    context.lineWidth = lineWidth;
+    context.lineWidth = renderedLineWidth;
     drawShape(context, layer.type, renderedWidth, renderedHeight);
     if ((shape?.lineWidth ?? 0) > 0) context.stroke();
   }

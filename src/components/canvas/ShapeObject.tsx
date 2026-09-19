@@ -34,11 +34,10 @@ function ShapeObject({ type, name, transform, opacity, properties }: ShapeObject
         opacity,
         boxSizing: "border-box",
         backgroundColor: isTriangle || !isFilled ? "transparent" : shapeProperties.color,
-        border: isTriangle
-          ? undefined
-          : isFilled
-            ? "none"
-            : `${shapeProperties.lineWidth}px solid ${shapeProperties.color}`,
+        boxShadow:
+          !isTriangle && !isFilled
+            ? `inset 0 0 0 ${shapeProperties.lineWidth}px ${shapeProperties.color}`
+            : undefined,
         borderRadius: type === "rectangle" ? `${shapeProperties.cornerRadius}%` : undefined,
         width: isTriangle ? 0 : `${45 * (shapeProperties.size / 100)}%`,
         height: isTriangle ? 0 : `${45 * (shapeProperties.size / 100) * (1 - shapeProperties.aspectRatio / 100)}%`,
