@@ -43,6 +43,7 @@ function ShapeObject({
     zIndex,
     filter,
     boxSizing: "border-box",
+    overflow: "hidden",
     width: `${45 * (shapeProperties.size / 100)}%`,
     height: "auto",
     aspectRatio: `${1 / heightRatio}`,
