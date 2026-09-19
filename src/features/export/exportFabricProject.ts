@@ -67,20 +67,21 @@ const createShape = (layer: ObjectLayer, canvasWidth: number, effects: EditorHis
   const aspect = 1 - (shape?.aspectRatio ?? 0) / 100;
   const height = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
   const requestedLineWidth = shape?.lineWidth ?? 0;
-  const lineWidth = Math.min(requestedLineWidth, size, height);
-  const innerWidth = lineWidth > 0 ? size - lineWidth : size;
-  const innerHeight = lineWidth > 0 ? height - lineWidth : height;
+  const fillsShape = requestedLineWidth * 2 >= Math.min(size, height);
+  const lineWidth = fillsShape ? 0 : requestedLineWidth;
+  const pathWidth = lineWidth > 0 ? size - lineWidth : size;
+  const pathHeight = lineWidth > 0 ? height - lineWidth : height;
   const options = {
-    fill: lineWidth === 0 ? getEffectColor(color, effects) : "transparent",
-    stroke: lineWidth === 0 ? undefined : color,
+    fill: getEffectColor(color, effects),
+    stroke: fillsShape ? undefined : lineWidth > 0 ? color : undefined,
     strokeWidth: lineWidth,
-    width: innerWidth,
-    height: innerHeight,
+    width: pathWidth,
+    height: pathHeight,
     originX: "center" as const,
     originY: "center" as const,
   };
   if (layer.type === "rectangle") return new Rect(options);
-  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(innerWidth, innerHeight) / 2 });
+  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(pathWidth, pathHeight) / 2 });
   if (layer.type === "triangle") return new Triangle(options);
   return null;
 };

@@ -65,18 +65,19 @@ const createShape = (
   const aspect = 1 - (layer.shape?.aspectRatio ?? 0) / 100;
   const shapeHeight = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
   const requestedLineWidth = layer.shape?.lineWidth ?? 0;
-  const lineWidth = Math.min(requestedLineWidth, size, shapeHeight);
-  const innerWidth = lineWidth > 0 ? size - lineWidth : size;
-  const innerHeight = lineWidth > 0 ? shapeHeight - lineWidth : shapeHeight;
+  const fillsShape = requestedLineWidth * 2 >= Math.min(size, shapeHeight);
+  const lineWidth = fillsShape ? 0 : requestedLineWidth;
+  const pathWidth = lineWidth > 0 ? size - lineWidth : size;
+  const pathHeight = lineWidth > 0 ? shapeHeight - lineWidth : shapeHeight;
   const options = {
-    fill: lineWidth === 0 ? getEffectColor(color, effects) : "transparent",
-    stroke: lineWidth === 0 ? undefined : color,
+    fill: getEffectColor(color, effects),
+    stroke: fillsShape ? undefined : lineWidth > 0 ? color : undefined,
     strokeWidth: lineWidth,
-    width: innerWidth,
-    height: innerHeight,
+    width: pathWidth,
+    height: pathHeight,
   };
   if (layer.type === "rectangle") return new Rect(options);
-  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(innerWidth, innerHeight) / 2 });
+  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(pathWidth, pathHeight) / 2 });
   if (layer.type === "triangle") return new Triangle(options);
   return null;
 };
