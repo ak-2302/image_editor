@@ -121,6 +121,8 @@ const createObject = async (
       fontStyle: layer.text.italic ? "italic" : "normal",
       underline: layer.text.underline,
       linethrough: layer.text.linethrough,
+      objectCaching: false,
+      noScaleCache: false,
       originX: "center",
       originY: "center",
     });

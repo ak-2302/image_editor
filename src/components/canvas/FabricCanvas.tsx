@@ -206,6 +206,8 @@ function FabricCanvas({
             fontStyle: layer.text.italic ? "italic" : "normal",
             underline: layer.text.underline,
             linethrough: layer.text.linethrough,
+            objectCaching: false,
+            noScaleCache: false,
           });
         } else {
           object = await createShape(
