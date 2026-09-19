@@ -348,9 +348,11 @@ const isAvailableEffect = (effect: EffectInstance) =>
       const target = event.target as HTMLElement;
       if (
         !target.closest(".header_menu_group") &&
-        !target.closest(".effects_toolbar") &&
+        !target.closest(".effect_menu") &&
+        !target.closest(".add_effect_button") &&
         !target.closest(".effect_more_menu") &&
-        !target.closest(".layer_add_menu_wrap")
+        !target.closest(".layer_add_menu") &&
+        !target.closest(".layer_add_button")
       ) {
         setOpenMenu(null);
         setShowEffectMenu(false);
