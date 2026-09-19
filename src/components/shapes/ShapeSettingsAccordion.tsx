@@ -1,5 +1,6 @@
 import { useRef, type PointerEvent as ReactPointerEvent } from "react";
 import type { ShapeProperties, ShapeType } from "../../features/shapes/shapeTypes";
+import ColorInputRow from "../ui/ColorInputRow";
 
 type ShapeSettingsAccordionProps = {
   shapeType: ShapeType;
@@ -82,27 +83,7 @@ function ShapeSettingsAccordion({
 
   const fields = (
     <div className="initial_effect_fields">
-      <div className="initial_effect_row">
-        <label htmlFor="shape_color">{labels.color}</label>
-        <input
-          className="shape_color_code"
-          aria-label="色のカラーコード"
-          type="text"
-          value={values.color}
-          pattern="^#[0-9a-fA-F]{6}$"
-          onChange={(event) => {
-            const value = event.target.value;
-            if (/^#[0-9a-fA-F]{6}$/.test(value)) onChange("color", value);
-          }}
-        />
-        <input
-          id="shape_color"
-          className="shape_color_picker"
-          type="color"
-          value={values.color}
-          onChange={(event) => onChange("color", event.target.value)}
-        />
-      </div>
+      <ColorInputRow label={labels.color} id="shape_color" value={values.color} onChange={(value) => onChange("color", value)} />
       {numericFields.map(({ key, unit }) => (
         <div
           className="initial_effect_row"
