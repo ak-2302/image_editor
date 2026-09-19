@@ -35,6 +35,7 @@ import type { ObjectLayer } from "./features/layers/objectTypes";
 import { useUndoRedo } from "./features/history/useUndoRedo";
 import type { EditorHistorySnapshot } from "./features/history/historyTypes";
 import { loadProject, saveProject } from "./features/project/projectStorage";
+import { exportProject } from "./features/export/exportProject";
 
 const isShapeLayer = (
   layer: ObjectLayer,
@@ -545,6 +546,15 @@ function App() {
     setMovingEffect(to);
     window.setTimeout(() => setMovingEffect(null), 260);
   };
+  const handleExport = async (format: "png" | "jpeg") => {
+    try {
+      await exportProject(createHistorySnapshot(), format);
+      setOpenMenu(null);
+      setNotice(`${format.toUpperCase()}を書き出しました。`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "画像を書き出せませんでした。");
+    }
+  };
 
   return (
     <main className="editor_app">
@@ -589,6 +599,12 @@ function App() {
                   }}
                 >
                   画像を削除
+                </button>
+                <button type="button" disabled={!hasCanvas} onClick={() => handleExport("png")}>
+                  PNGを書き出す
+                </button>
+                <button type="button" disabled={!hasCanvas} onClick={() => handleExport("jpeg")}>
+                  JPEGを書き出す
                 </button>
               </div>
             )}
