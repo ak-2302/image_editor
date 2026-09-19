@@ -30,6 +30,7 @@ import {
   defaultObjectTransform,
   useObjectTransforms,
 } from "./features/objects/useObjectTransforms";
+import type { EffectInstance } from "./features/project/projectTypes";
 import type { ObjectLayer } from "./features/layers/objectTypes";
 
 const isShapeLayer = (
@@ -74,12 +75,12 @@ function App() {
   const [colorKeyColor, setColorKeyColor] = useState("#ffffff");
   const [colorKeyTolerance, setColorKeyTolerance] = useState(10);
   const [luminanceKey, setLuminanceKey] = useState(0);
-  const [activeEffects, setActiveEffects] = useState<EffectName[]>([]);
+  const [activeEffects, setActiveEffects] = useState<EffectInstance[]>([]);
   const [selectedObjectId, setSelectedObjectId] = useState<string | number>(
     "main",
   );
   const [effectsByObject, setEffectsByObject] = useState<
-    Record<string, EffectName[]>
+    Record<string, EffectInstance[]>
   >({ main: [] });
   const [parametersByObject, setParametersByObject] = useState<
     Record<string, EffectParameters>
@@ -102,8 +103,8 @@ function App() {
   >(null);
   const [objectLayers, setObjectLayers] = useState<ObjectLayer[]>([]);
   const [openEffectMenu, setOpenEffectMenu] = useState<number | null>(null);
-  const [draggingEffect, setDraggingEffect] = useState<EffectName | null>(null);
-  const [movingEffect, setMovingEffect] = useState<EffectName | null>(null);
+  const [draggingEffect, setDraggingEffect] = useState<string | null>(null);
+  const [movingEffect, setMovingEffect] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const objectKey = String(selectedObjectId);
@@ -168,7 +169,7 @@ function App() {
     setters[key](value as never);
   };
   const updateActiveEffects = (
-    updater: (effects: EffectName[]) => EffectName[],
+    updater: (effects: EffectInstance[]) => EffectInstance[],
   ) => {
     setActiveEffects((current) => {
       const next = updater(current);
@@ -386,18 +387,17 @@ function App() {
   const handleInitialEffectChange = (key: InitialEffectKey, value: number) => {
     updateTransform(key, value);
   };
-  const reorderEffects = (from: EffectName, to: EffectName) => {
+  const reorderEffects = (from: string, to: string) => {
     updateActiveEffects((effects) => {
-      const fromIndex = effects.indexOf(from);
-      const toIndex = effects.indexOf(to);
+      const fromIndex = effects.findIndex((effect) => effect.id === from);
+      const toIndex = effects.findIndex((effect) => effect.id === to);
       if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return effects;
       const next = [...effects];
       next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, from);
+      next.splice(toIndex, 0, effects[fromIndex]);
       return next;
     });
-    setMovingEffect(null);
-    window.setTimeout(() => setMovingEffect(to), 0);
+    setMovingEffect(to);
     window.setTimeout(() => setMovingEffect(null), 260);
   };
 
@@ -896,7 +896,15 @@ function App() {
                       type="button"
                       key={name}
                       onClick={() => {
-                        updateActiveEffects((effects) => [...effects, name]);
+                        updateActiveEffects((effects) => [
+                          ...effects,
+                          {
+                            id: `effect-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                            name,
+                            expanded: true,
+                            values: {},
+                          },
+                        ]);
                         setExpandedEffectIndex(activeEffects.length);
                         setShowEffectMenu(false);
                       }}
@@ -943,7 +951,8 @@ function App() {
                 onToggle={() => setInitialEffectsOpen((open) => !open)}
                 onChange={handleInitialEffectChange}
               />
-              {activeEffects.map((name, index) => {
+              {activeEffects.map((effect, index) => {
+                const { name } = effect;
                 const definition = effectDefinitions.find(
                   (effect) => effect.name === name,
                 )!;
@@ -959,15 +968,15 @@ function App() {
                 return (
                   <div
                     className={`effect_accordion${isExpanded ? " is_open" : ""}`}
-                    key={`${name}-${index}`}
+                    key={effect.id}
                   >
                     <div
                       className="effect_accordion_header"
                       draggable="true"
-                      onDragStart={() => setDraggingEffect(name)}
+                      onDragStart={() => setDraggingEffect(effect.id)}
                       onDragEnter={() => {
                         if (draggingEffect)
-                          reorderEffects(draggingEffect, name);
+                          reorderEffects(draggingEffect, effect.id);
                       }}
                       onDragOver={(event) => event.preventDefault()}
                       onDragEnd={() => setDraggingEffect(null)}
@@ -1114,7 +1123,7 @@ function App() {
                         <div className="initial_effect_fields">
                           <EffectValueRow
                             label="強度"
-                            value={effectValues[name]}
+                            value={effectValues[effect.name]}
                             min={definition.min}
                             max={definition.max}
                             unit="%"
