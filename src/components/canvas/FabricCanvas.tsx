@@ -64,9 +64,10 @@ const createShape = (
   const size = (canvasWidth * 0.45 * (layer.shape?.size ?? 100)) / 100;
   const aspect = 1 - (layer.shape?.aspectRatio ?? 0) / 100;
   const shapeHeight = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
-  const lineWidth = layer.shape?.lineWidth ?? 0;
-  const innerWidth = lineWidth > 0 ? Math.max(0, size - lineWidth) : size;
-  const innerHeight = lineWidth > 0 ? Math.max(0, shapeHeight - lineWidth) : shapeHeight;
+  const requestedLineWidth = layer.shape?.lineWidth ?? 0;
+  const lineWidth = Math.min(requestedLineWidth, size, shapeHeight);
+  const innerWidth = lineWidth > 0 ? size - lineWidth : size;
+  const innerHeight = lineWidth > 0 ? shapeHeight - lineWidth : shapeHeight;
   const options = {
     fill: lineWidth === 0 ? getEffectColor(color, effects) : "transparent",
     stroke: lineWidth === 0 ? undefined : color,
