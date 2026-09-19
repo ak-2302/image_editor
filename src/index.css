@@ -5,6 +5,10 @@
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
+    "Hiragino Sans",
+    "Yu Gothic UI",
+    "Yu Gothic",
+    Meiryo,
     "Segoe UI",
     sans-serif;
   color: #1b232d;
@@ -17,6 +21,8 @@
   --border_color: #d5dde4;
   --surface_color: #f9fbfc;
   --accent_color: #e1603c;
+  --ui_font_size: 0.75rem;
+  --ui_line_height: 1.4;
 }
 * {
   box-sizing: border-box;
@@ -32,7 +38,10 @@ body {
   overflow: hidden;
 }
 button,
-a {
+a,
+input,
+select,
+textarea {
   font: inherit;
 }
 :focus-visible {

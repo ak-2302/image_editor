@@ -3,6 +3,16 @@
   overflow: hidden;
   background: #eef1f3;
   color: var(--heading_color);
+  font-family: inherit;
+  font-size: var(--ui_font_size);
+  line-height: var(--ui_line_height);
+}
+
+.editor_app button,
+.editor_app input,
+.editor_app select,
+.editor_app textarea {
+  font-family: inherit;
 }
 
 .top_bar {
@@ -199,7 +209,8 @@
   padding: 0.65rem;
   border: 1px solid transparent;
   background: #e5e9ec;
-  font-size: 0.75rem;
+  font-size: var(--ui_font_size);
+  line-height: var(--ui_line_height);
   cursor: grab;
   transition: transform 160ms ease, background-color 160ms ease, opacity 160ms ease;
 }
@@ -373,7 +384,8 @@ input[type="range"] {
   border: 0;
   background: transparent;
   color: var(--heading_color);
-  font-size: 0.82rem;
+  font-size: var(--ui_font_size);
+  line-height: var(--ui_line_height);
   text-align: left;
   cursor: pointer;
 }
@@ -393,7 +405,7 @@ input[type="range"] {
 }
 
 .effect_accordion .range_control > span {
-  font-size: 0.72rem;
+  font-size: var(--ui_font_size);
 }
 
 .effect_accordion .range_control > span span {
