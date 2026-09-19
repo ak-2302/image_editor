@@ -10,13 +10,15 @@ export function applyObjectDecorations(object: FabricObject, effects: EffectInst
   for (const effect of effects) {
     if (effect.name === "shadow" && Number(effect.values.shadowOpacity ?? 0) > 0) {
       const angle = (Number(effect.values.shadowAngle ?? 45) * Math.PI) / 180;
-      const distance = Number(effect.values.shadowDistance ?? 8);
+      const size = Number(effect.values.shadowSize ?? effect.values.shadowDistance ?? 8);
+      const positionX = Number(effect.values.shadowPositionX ?? 0);
+      const positionY = Number(effect.values.shadowPositionY ?? 0);
       object.set({
         shadow: new Shadow({
           color: withOpacity(effect.values.shadowColor ?? "#000000", Number(effect.values.shadowOpacity ?? 0) / 100),
           blur: Number(effect.values.shadowBlur ?? 8),
-          offsetX: Math.cos(angle) * distance,
-          offsetY: Math.sin(angle) * distance,
+          offsetX: positionX + Math.cos(angle) * size,
+          offsetY: positionY + Math.sin(angle) * size,
         }),
       });
     }

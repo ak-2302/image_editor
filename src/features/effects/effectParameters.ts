@@ -47,6 +47,9 @@ export type EffectParameters = {
   shadowColor: string;
   shadowOpacity: number;
   shadowDistance: number;
+  shadowSize: number;
+  shadowPositionX: number;
+  shadowPositionY: number;
   shadowAngle: number;
   shadowBlur: number;
   outlineColor: string;
@@ -107,6 +110,9 @@ export const defaultEffectParameters: EffectParameters = {
   shadowColor: "#000000",
   shadowOpacity: 0,
   shadowDistance: 8,
+  shadowSize: 8,
+  shadowPositionX: 0,
+  shadowPositionY: 0,
   shadowAngle: 45,
   shadowBlur: 8,
   outlineColor: "#000000",
