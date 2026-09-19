@@ -1342,7 +1342,8 @@ input[type="range"] {
 
 .text_settings input[type="text"],
 .text_settings input[type="number"],
-.text_settings textarea {
+.text_settings textarea,
+.text_settings select {
   width: 100%;
   min-height: 2rem;
   box-sizing: border-box;
@@ -1352,6 +1353,29 @@ input[type="range"] {
   color: var(--heading_color);
   font: inherit;
   resize: vertical;
+}
+
+.text_settings select {
+  appearance: none;
+  min-height: 2rem;
+  padding: 0.35rem 2rem 0.35rem 0.55rem;
+  border-radius: 0.35rem;
+  background-color: #fff;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted_color) 50%), linear-gradient(135deg, var(--muted_color) 50%, transparent 50%);
+  background-position: calc(100% - 0.8rem) 0.85rem, calc(100% - 0.55rem) 0.85rem;
+  background-repeat: no-repeat;
+  background-size: 0.25rem 0.25rem, 0.25rem 0.25rem;
+  color: var(--heading_color);
+  cursor: pointer;
+}
+
+.text_settings select:hover {
+  border-color: var(--accent_color);
+}
+
+.text_settings select:focus-visible {
+  outline: 2px solid var(--accent_color);
+  outline-offset: 1px;
 }
 
 .text_settings textarea {
