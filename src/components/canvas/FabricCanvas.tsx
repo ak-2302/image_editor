@@ -3,6 +3,7 @@ import {
   Canvas,
   Circle,
   FabricImage,
+  Group,
   Rect,
   Triangle,
   Textbox,
@@ -79,6 +80,13 @@ const createShape = (
   };
   if (layer.type === "rectangle") return new Rect(options);
   if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(pathWidth, pathHeight) / 2 });
+  if (layer.type === "triangle" && !fillsShape && lineWidth > 0) {
+    const innerWidth = Math.max(0, size - lineWidth * 2);
+    const innerHeight = Math.max(0, shapeHeight - lineWidth * 2);
+    const outer = new Triangle({ fill: color, width: size, height: shapeHeight, originX: "center", originY: "center" });
+    const inner = new Triangle({ fill: "#000000", width: innerWidth, height: innerHeight, originX: "center", originY: "center", globalCompositeOperation: "destination-out" });
+    return new Group([outer, inner], { originX: "center", originY: "center" });
+  }
   if (layer.type === "triangle") return new Triangle(options);
   return null;
 };
