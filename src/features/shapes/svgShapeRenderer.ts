@@ -23,7 +23,7 @@ export const createShapeSvgDataUrl = (
   const aspect = 1 - (layer.shape?.aspectRatio ?? 0) / 100;
   const height = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
   const requestedLineWidth = Math.max(0, layer.shape?.lineWidth ?? 0);
-  const fillsShape = requestedLineWidth * 2 >= Math.min(size, height);
+  const fillsShape = requestedLineWidth === 0 || requestedLineWidth * 2 >= Math.min(size, height);
   const lineWidth = fillsShape ? 0 : requestedLineWidth;
   const holeWidth = Math.max(0, size - lineWidth * 2);
   const holeHeight = Math.max(0, height - lineWidth * 2);
