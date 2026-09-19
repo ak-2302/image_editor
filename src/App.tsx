@@ -602,6 +602,14 @@ const isAvailableEffect = (effect: EffectInstance) =>
     const scaleY = flip?.flipVertical ? -1 : 1;
     return `translate(${transform.x}px, ${transform.y}px) scale(${(transform.scale / 100) * scaleX}, ${(transform.scale / 100) * scaleY}) rotate(${transform.rotation}deg)`;
   };
+  const getObjectOpacity = (opacity: number, effects: EffectInstance[]) => {
+    const value = (100 - opacity) / 100;
+    return effects.some(
+      (effect) => effect.name === "flip" && effect.values.invertAlpha,
+    )
+      ? 1 - value
+      : value;
+  };
   const imageTransform =
     selectedObjectId === "main"
       ? getObjectTransform(initialEffects, activeEffects)
@@ -613,11 +621,12 @@ const isAvailableEffect = (effect: EffectInstance) =>
       ? selectedObjectTransform
       : getObjectTransform(mainObjectTransform, effectsByObject.main ?? []);
   const mainShapeOpacity =
-    (100 -
-      (selectedObjectId === "main"
+    getObjectOpacity(
+      selectedObjectId === "main"
         ? initialEffects.opacity
-        : mainObjectTransform.opacity)) /
-    100;
+        : mainObjectTransform.opacity,
+      selectedObjectId === "main" ? activeEffects : effectsByObject.main ?? [],
+    );
   const hasCanvas = Boolean(imageUrl || canvasSize || shapeType);
   const frameScale = canvasSize
     ? Math.min(800 / canvasSize.width, 560 / canvasSize.height, 1)
@@ -819,7 +828,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     style={{
                       filter,
                       transform: imageTransform,
-                      opacity: (100 - initialEffects.opacity) / 100,
+                      opacity: getObjectOpacity(initialEffects.opacity, activeEffects),
                     }}
                   />
                 )}
@@ -843,8 +852,11 @@ const isAvailableEffect = (effect: EffectInstance) =>
                         effectsByObject[String(layer.id)] ?? [],
                       );
                   const opacity = isSelected
-                    ? (100 - initialEffects.opacity) / 100
-                    : 1;
+                    ? getObjectOpacity(initialEffects.opacity, activeEffects)
+                    : getObjectOpacity(
+                        transformsByObject[String(layer.id)]?.opacity ?? 0,
+                        effectsByObject[String(layer.id)] ?? [],
+                      );
                   const zIndex = renderIndex + 1;
                   if (layer.type === "image" && layer.url) {
                     return (

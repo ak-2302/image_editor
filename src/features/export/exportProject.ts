@@ -76,7 +76,12 @@ const drawObject = async (
     (transform.scale / 100) * (flip?.flipHorizontal ? -1 : 1),
     (transform.scale / 100) * (flip?.flipVertical ? -1 : 1),
   );
-  context.globalAlpha = (100 - transform.opacity) / 100;
+  const baseOpacity = (100 - transform.opacity) / 100;
+  context.globalAlpha = effects.some(
+    (effect) => effect.name === "flip" && effect.values.invertAlpha,
+  )
+    ? 1 - baseOpacity
+    : baseOpacity;
   context.filter = getFilter(effects);
 
   if (layer.type === "image" && layer.url) {
