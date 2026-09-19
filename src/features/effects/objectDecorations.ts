@@ -91,9 +91,6 @@ export function applyObjectClipping(object: FabricObject, effects: EffectInstanc
           : new Rect({ width: maskWidth, height: maskHeight, left: x, top: y, originX: "center", originY: "center" });
       clipPath.set({
         inverted: Boolean(values.maskInvert),
-        shadow: Number(values.maskBlur ?? 0) > 0
-          ? new Shadow({ color: "#000000", blur: Number(values.maskBlur ?? 0), offsetX: 0, offsetY: 0 })
-          : undefined,
       });
       appendClipPath(clipPath);
     }
