@@ -808,6 +808,21 @@ const isAvailableEffect = (effect: EffectInstance) =>
                 >
                   空キャンバスを作成
                 </button>
+                <button
+                  type="button"
+                  disabled={!canvasSize}
+                  onClick={() => {
+                    if (blankWidth < 1 || blankHeight < 1) {
+                      setNotice("幅と高さは1以上で指定してください。");
+                      return;
+                    }
+                    recordHistory();
+                    setCanvasSize({ width: blankWidth, height: blankHeight });
+                    setOpenMenu(null);
+                  }}
+                >
+                  キャンバスサイズを更新
+                </button>
                 <label htmlFor="canvas_frame_opacity">
                   枠線の濃さ <output>{frameOpacity}%</output>
                 </label>
