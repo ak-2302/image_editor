@@ -212,6 +212,38 @@
   background: #dce5e8;
 }
 
+.layer_item.is_drop_target {
+  border-color: var(--accent_color);
+  background: #fff1ed;
+  transform: translateY(-0.12rem);
+}
+
+.layer_item.is_reordered {
+  animation: layer_reordered 280ms ease-out;
+}
+
+@keyframes layer_reordered {
+  0% {
+    background: #ffe4da;
+    transform: scale(1.015);
+  }
+
+  100% {
+    background: transparent;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer_item {
+    transition: none;
+  }
+
+  .layer_item.is_reordered {
+    animation: none;
+  }
+}
+
 .layer_item.is_selected {
   border-color: var(--accent_color);
   background: #fff;

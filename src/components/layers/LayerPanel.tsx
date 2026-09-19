@@ -44,6 +44,8 @@ function LayerPanel({
   const [showObjectMenu, setShowObjectMenu] = useState(false);
   const [isRenamingLayer, setIsRenamingLayer] = useState(false);
   const [draggedLayerId, setDraggedLayerId] = useState<number | null>(null);
+  const [dropTargetId, setDropTargetId] = useState<number | null>(null);
+  const [reorderedLayerId, setReorderedLayerId] = useState<number | null>(null);
   const hasMainObject = Boolean(imageUrl || canvasSize || shapeType);
 
   return (
@@ -194,13 +196,14 @@ function LayerPanel({
                 selectObject(layer.id);
               }
             }}
-            className={`layer_item${selectedObjectId === layer.id ? " is_selected" : ""}`}
+            className={`layer_item${selectedObjectId === layer.id ? " is_selected" : ""}${dropTargetId === layer.id ? " is_drop_target" : ""}${reorderedLayerId === layer.id ? " is_reordered" : ""}`}
             role="listitem"
             tabIndex={0}
             aria-label={`${layer.name}レイヤー`}
             key={layer.id}
             draggable
             onDragStart={() => setDraggedLayerId(layer.id)}
+            onDragEnter={() => setDropTargetId(layer.id)}
             onDragOver={(event) => event.preventDefault()}
             onDrop={() => {
               if (draggedLayerId === null || draggedLayerId === layer.id) return;
@@ -209,8 +212,14 @@ function LayerPanel({
                 reorderLayers(layers, draggedLayerId, layer.id),
               );
               setDraggedLayerId(null);
+              setDropTargetId(null);
+              setReorderedLayerId(layer.id);
+              window.setTimeout(() => setReorderedLayerId(null), 280);
             }}
-            onDragEnd={() => setDraggedLayerId(null)}
+            onDragEnd={() => {
+              setDraggedLayerId(null);
+              setDropTargetId(null);
+            }}
           >
             <button
               type="button"
