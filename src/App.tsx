@@ -939,29 +939,11 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     <button
                       type="button"
                       onClick={() => {
-                        addShape("rectangle", "四角形");
-                        setShowObjectMenu(false);
-                      }}
-                    >
-                      四角形
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
                         addShape("circle", "円形");
                         setShowObjectMenu(false);
                       }}
                     >
                       円形
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        addShape("triangle", "三角形");
-                        setShowObjectMenu(false);
-                      }}
-                    >
-                      三角形
                     </button>
                     <button
                       type="button"

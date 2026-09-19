@@ -71,9 +71,7 @@ function LayerPanel({
               </button>
               {(
                 [
-                  ["rectangle", "四角形"],
                   ["circle", "円形"],
-                  ["triangle", "三角形"],
                   ["polygon", "正多角形"],
                 ] as const
               ).map(([type, name]) => (
