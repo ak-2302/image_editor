@@ -116,6 +116,22 @@ const getFabricFilters = (
         );
       }
     }
+    if (effect.name === "blur") {
+      const radius = Math.max(0, Number(effect.values.blurRadius ?? 0));
+      if (radius > 0) result.push(new filters.Blur({ blur: Math.min(radius / 100, 1) }) as never);
+    }
+    if (effect.name === "mosaic") {
+      const strength = Number(effect.values.mosaicStrength ?? 0);
+      const size = Math.max(1, Number(effect.values.mosaicSize ?? 8));
+      if (strength > 0) result.push(new filters.Pixelate({ blocksize: Math.max(2, Math.round(size * strength / 20)) }) as never);
+    }
+    if (effect.name === "monochrome") {
+      const strength = Number(effect.values.monochromeStrength ?? 0) / 100;
+      if (strength > 0) {
+        result.push(new filters.Grayscale() as never);
+        if (strength < 1) result.push(new filters.BlendColor({ color: effect.values.monochromeColor ?? "#ffffff", mode: "tint", alpha: strength }) as never);
+      }
+    }
   }
   return result;
 };
