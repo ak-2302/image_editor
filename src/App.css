@@ -450,9 +450,14 @@ input[type="range"] {
 }
 
 .effect_menu {
+  position: fixed;
+  top: auto;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 30;
   display: grid;
   max-width: calc(100vw - 2rem);
-  max-height: calc(100vh - 7rem);
+  max-height: calc(100vh - 2rem);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
