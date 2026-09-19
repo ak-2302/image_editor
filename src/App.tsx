@@ -566,8 +566,9 @@ const isAvailableEffect = (effect: EffectInstance) =>
       ? value
       : effectDefaultValues[effect.name];
   };
-  const filter = activeEffects
-    .map((effect) => {
+  const getFilter = (effects: EffectInstance[]) =>
+    effects
+      .map((effect) => {
       switch (effect.name) {
         case "brightness":
           return `brightness(${getEffectValue(effect)}%)`;
@@ -590,9 +591,9 @@ const isAvailableEffect = (effect: EffectInstance) =>
         default:
           return "";
       }
-    })
-    .filter(Boolean)
-    .join(" ") || "none";
+      })
+      .filter(Boolean)
+      .join(" ") || "none";
   const getObjectTransform = (
     transform: typeof initialEffects,
     effects: EffectInstance[],
@@ -826,7 +827,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                       );
                     }}
                     style={{
-                      filter,
+                      filter: getFilter(activeEffects),
                       transform: imageTransform,
                       opacity: getObjectOpacity(initialEffects.opacity, activeEffects),
                     }}
@@ -839,6 +840,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     transform={mainShapeTransform}
                     opacity={mainShapeOpacity}
                     zIndex={0}
+                    filter={getFilter(activeEffects)}
                     properties={shapeProperties}
                   />
                 )}
@@ -866,7 +868,12 @@ const isAvailableEffect = (effect: EffectInstance) =>
                         src={layer.url}
                         alt={layer.name}
                         onError={() => setNotice(`${layer.name}を表示できませんでした。`)}
-                        style={{ filter, transform, opacity, zIndex }}
+                        style={{
+                          filter: getFilter(effectsByObject[String(layer.id)] ?? []),
+                          transform,
+                          opacity,
+                          zIndex,
+                        }}
                       />
                     );
                   }
@@ -879,6 +886,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                         transform={transform}
                         opacity={opacity}
                         zIndex={zIndex}
+                        filter={getFilter(effectsByObject[String(layer.id)] ?? [])}
                         properties={layer.shape}
                       />
                     );
@@ -892,6 +900,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                         transform={transform}
                         opacity={opacity}
                         zIndex={zIndex}
+                        filter={getFilter(effectsByObject[String(layer.id)] ?? [])}
                       />
                     );
                   }

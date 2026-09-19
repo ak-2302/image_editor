@@ -9,6 +9,7 @@ type TextObjectProps = {
   transform: string;
   opacity: number;
   zIndex?: number;
+  filter?: string;
   name: string;
 };
 
@@ -21,6 +22,7 @@ function TextObject({
   transform,
   opacity,
   zIndex = 1,
+  filter = "none",
   name,
 }: TextObjectProps) {
   return (
@@ -35,6 +37,7 @@ function TextObject({
         transform,
         opacity,
         zIndex,
+        filter,
       } satisfies CSSProperties}
     >
       {content}
