@@ -1,10 +1,5 @@
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, type PointerEvent as ReactPointerEvent } from "react";
 import EffectValueRow from "../effects/EffectValueRow";
-import type {
-  InitialEffectKey,
-  InitialEffectValues,
-} from "../initial-effects/effectTypes";
-import { initialEffectFields } from "../initial-effects/effectTypes";
 
 type TextSettingsProps = {
   content: string;
@@ -14,8 +9,6 @@ type TextSettingsProps = {
   italic: boolean;
   underline?: boolean;
   linethrough?: boolean;
-  initialEffects: InitialEffectValues;
-  onInitialEffectChange: (key: InitialEffectKey, value: number) => void;
   onChange: (changes: {
     content?: string;
     fontSize?: number;
@@ -35,11 +28,8 @@ function TextSettings({
   italic,
   underline = false,
   linethrough = false,
-  initialEffects,
-  onInitialEffectChange,
   onChange,
 }: TextSettingsProps) {
-  const [isOpen, setIsOpen] = useState(true);
   const colorDragStart = useRef<{ x: number; color: string } | null>(null);
   const colorDragged = useRef(false);
   const handleColorPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -65,33 +55,7 @@ function TextSettings({
   };
 
   return (
-    <section className={`effect_accordion${isOpen ? " is_open" : ""}`} aria-label="テキストエフェクト">
-      <div className="effect_accordion_header">
-        <button
-          type="button"
-          className="effect_accordion_trigger"
-          aria-expanded={isOpen}
-          onClick={() => setIsOpen((open) => !open)}
-        >
-          <b>テキスト</b>
-          <span>{isOpen ? "−" : "＋"}</span>
-        </button>
-      </div>
-      {isOpen && <div className="text_settings">
-        <div className="initial_effect_fields text_transform_fields">
-          {initialEffectFields.map(({ key, label, min, max, unit, initial }) => (
-            <EffectValueRow
-              key={key}
-              label={label}
-              value={initialEffects[key]}
-              min={min}
-              max={max}
-              unit={unit}
-              initial={initial}
-              onChange={(value) => onInitialEffectChange(key, value)}
-            />
-          ))}
-        </div>
+    <div className="text_settings">
         <label htmlFor="text_content">文字列</label>
         <textarea
           id="text_content"
@@ -164,8 +128,7 @@ function TextSettings({
           />
           取消線
         </label>
-      </div>}
-    </section>
+    </div>
   );
 }
 

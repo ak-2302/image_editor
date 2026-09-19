@@ -1190,44 +1190,38 @@ const isAvailableEffect = (effect: EffectInstance) =>
             <div
               className={`effect_controls${movingEffect ? " effect_reordering" : ""}`}
             >
-              {selectedObjectId !== "main" &&
-                objectLayers.find((layer) => layer.id === selectedObjectId)
-                  ?.type === "text" &&
-                (() => {
-                  const textLayer = objectLayers.find(
-                    (layer) => layer.id === selectedObjectId,
-                  );
-                  if (!textLayer?.text) return null;
-                  return (
-                    <TextSettings
-                      {...textLayer.text}
-                      initialEffects={initialEffects}
-                      onInitialEffectChange={handleInitialEffectChange}
-                      onChange={(changes) =>
-                        setObjectLayers((layers) =>
-                          layers.map((layer) =>
-                            layer.id === selectedObjectId
-                              ? {
-                                  ...layer,
-                                  text: { ...layer.text!, ...changes },
-                                }
-                              : layer,
-                          ),
-                        )
-                      }
-                    />
-                  );
-                })()}
-              {selectedObjectId !== "main" &&
-              objectLayers.find((layer) => layer.id === selectedObjectId)?.type === "text" ? null : (
-                <InitialEffectsAccordion
+              <InitialEffectsAccordion
                   values={initialEffects}
                   title={selectedObjectLabel}
                   isOpen={initialEffectsOpen}
                   onToggle={() => setInitialEffectsOpen((open) => !open)}
                   onChange={handleInitialEffectChange}
                   extraContent={
-                    selectedShapeType === "rectangle" ||
+                    selectedObjectId !== "main" &&
+                    objectLayers.find((layer) => layer.id === selectedObjectId)?.type === "text" ? (
+                      (() => {
+                        const textLayer = objectLayers.find(
+                          (layer) => layer.id === selectedObjectId,
+                        );
+                        return textLayer?.text ? (
+                          <TextSettings
+                            {...textLayer.text}
+                            onChange={(changes) =>
+                              setObjectLayers((layers) =>
+                                layers.map((layer) =>
+                                  layer.id === selectedObjectId
+                                    ? {
+                                        ...layer,
+                                        text: { ...layer.text!, ...changes },
+                                      }
+                                    : layer,
+                                ),
+                              )
+                            }
+                          />
+                        ) : null;
+                      })()
+                    ) : selectedShapeType === "rectangle" ||
                     selectedShapeType === "circle" ||
                     selectedShapeType === "triangle" ||
                     selectedShapeType === "polygon" ||
@@ -1241,7 +1235,6 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     ) : null
                   }
                 />
-              )}
               {activeEffects.map((effect, index) => {
                 const { name } = effect;
                 const definition = effectDefinitions.find(
