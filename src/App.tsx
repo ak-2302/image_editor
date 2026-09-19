@@ -40,6 +40,7 @@ import { loadProject, saveProject } from "./features/project/projectStorage";
 import { exportProject } from "./features/export/exportProject";
 import EditorNotice from "./components/feedback/EditorNotice";
 import ShapeSettingsAccordion from "./components/shapes/ShapeSettingsAccordion";
+import MenuPopover from "./components/ui/MenuPopover";
 import {
   defaultShapeProperties,
   normalizeShapeProperties,
@@ -737,19 +738,13 @@ const isAvailableEffect = (effect: EffectInstance) =>
           <span>Image Editor</span>
         </div>
         <nav className="header_menu" aria-label="アプリメニュー">
-          <div className="header_menu_group">
-            <button
-              type="button"
-              className="header_menu_button"
-              aria-expanded={openMenu === "file"}
-              onClick={() =>
-                setOpenMenu((menu) => (menu === "file" ? null : "file"))
-              }
-            >
-              ファイル
-            </button>
-            {openMenu === "file" && (
-              <div className="header_dropdown">
+          <MenuPopover
+            className="header_menu_group"
+            open={openMenu === "file"}
+            onToggle={() => setOpenMenu((menu) => (menu === "file" ? null : "file"))}
+            trigger={<button type="button" className="header_menu_button" aria-expanded={openMenu === "file"}>ファイル</button>}
+            menuClassName="header_dropdown"
+          >
                 <button
                   type="button"
                   onClick={() => {
@@ -778,20 +773,14 @@ const isAvailableEffect = (effect: EffectInstance) =>
                 <button type="button" disabled={!hasCanvas} onClick={() => handleExport("jpeg")}>
                   JPEGを書き出す
                 </button>
-              </div>
-            )}
-          </div>
-          <div className="header_menu_group">
-            <button
-              type="button"
-              className="header_menu_button"
-              aria-expanded={openMenu === "canvas"}
-              onClick={() => setOpenMenu((menu) => (menu === "canvas" ? null : "canvas"))}
-            >
-              キャンバス
-            </button>
-            {openMenu === "canvas" && (
-              <div className="header_dropdown canvas_dropdown">
+          </MenuPopover>
+          <MenuPopover
+            className="header_menu_group"
+            open={openMenu === "canvas"}
+            onToggle={() => setOpenMenu((menu) => (menu === "canvas" ? null : "canvas"))}
+            trigger={<button type="button" className="header_menu_button" aria-expanded={openMenu === "canvas"}>キャンバス</button>}
+            menuClassName="header_dropdown canvas_dropdown"
+          >
                 <label htmlFor="canvas_width">幅</label>
                 <input
                   id="canvas_width"
@@ -846,22 +835,14 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     setFrameThickness(Number(event.target.value));
                   }}
                 />
-              </div>
-            )}
-          </div>
-          <div className="header_menu_group settings_menu_group">
-            <button
-              type="button"
-              className="header_menu_button"
-              aria-expanded={openMenu === "settings"}
-              onClick={() =>
-                setOpenMenu((menu) => (menu === "settings" ? null : "settings"))
-              }
-            >
-              設定
-            </button>
-            {openMenu === "settings" && (
-              <div className="header_dropdown settings_dropdown">
+          </MenuPopover>
+          <MenuPopover
+            className="header_menu_group settings_menu_group"
+            open={openMenu === "settings"}
+            onToggle={() => setOpenMenu((menu) => (menu === "settings" ? null : "settings"))}
+            trigger={<button type="button" className="header_menu_button" aria-expanded={openMenu === "settings"}>設定</button>}
+            menuClassName="header_dropdown settings_dropdown"
+          >
                 <label htmlFor="project_name">プロジェクト名</label>
                 <input
                   id="project_name"
@@ -898,9 +879,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                   <option value="above">上に挿入</option>
                   <option value="below">下に挿入</option>
                 </select>
-              </div>
-            )}
-          </div>
+          </MenuPopover>
           <div className="history_controls" aria-label="編集履歴">
             <button type="button" aria-label="操作を元に戻す" onClick={undo} disabled={!history.canUndo}>
               Undo
@@ -1186,17 +1165,13 @@ const isAvailableEffect = (effect: EffectInstance) =>
           />
           <section className="effects_section" aria-label="エフェクト設定">
             <div className="effects_toolbar">
-              <button
-                type="button"
-                className="add_effect_button"
-                aria-label="エフェクトを追加"
-                aria-expanded={showEffectMenu}
-                onClick={() => setShowEffectMenu((visible) => !visible)}
+              <MenuPopover
+                className="effect_menu_wrap"
+                open={showEffectMenu}
+                onToggle={() => setShowEffectMenu((visible) => !visible)}
+                trigger={<button type="button" className="add_effect_button" aria-label="エフェクトを追加" aria-expanded={showEffectMenu}>＋</button>}
+                menuClassName="effect_menu"
               >
-                ＋
-              </button>
-              {showEffectMenu && (
-                <div className="effect_menu">
                   {effectDefinitions.map(({ name, label }) => (
                     <button
                       type="button"
@@ -1218,8 +1193,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                       {label}
                     </button>
                   ))}
-                </div>
-              )}
+              </MenuPopover>
             </div>
             <div
               className={`effect_controls${movingEffect ? " effect_reordering" : ""}`}

@@ -1,6 +1,7 @@
 import { useState, type RefObject } from "react";
 import type { ObjectLayer } from "../../features/layers/objectTypes";
 import { reorderLayers } from "../../features/layers/useLayerOrdering";
+import MenuPopover from "../ui/MenuPopover";
 
 type LayerPanelProps = {
   fileInputRef: RefObject<HTMLInputElement | null>;
@@ -52,18 +53,13 @@ function LayerPanel({
     <section className="layers_section" aria-label="オブジェクトレイヤー">
       <div className="layers_section_header">
         <span>オブジェクト</span>
-        <div className="layer_add_menu_wrap">
-          <button
-            type="button"
-            className="layer_add_button"
-            aria-label="オブジェクトを追加"
-            aria-expanded={showObjectMenu}
-            onClick={() => setShowObjectMenu((visible) => !visible)}
-          >
-            ＋
-          </button>
-          {showObjectMenu && (
-            <div className="layer_add_menu">
+        <MenuPopover
+          className="layer_add_menu_wrap"
+          open={showObjectMenu}
+          onToggle={() => setShowObjectMenu((visible) => !visible)}
+          trigger={<button type="button" className="layer_add_button" aria-label="オブジェクトを追加" aria-expanded={showObjectMenu}>＋</button>}
+          menuClassName="layer_add_menu"
+        >
               <button
                 type="button"
                 onClick={() => {
@@ -100,9 +96,7 @@ function LayerPanel({
               >
                 テキスト
               </button>
-            </div>
-          )}
-        </div>
+        </MenuPopover>
       </div>
       <div className="layers_list" role="list">
         <div
