@@ -22,6 +22,7 @@ import {
 } from "./features/effects/effectDefinitions";
 import {
   defaultEffectParameters,
+  normalizeEffect,
   type EffectParameters,
 } from "./features/effects/effectParameters";
 import { isSupportedImage, readImageAsDataUrl } from "./features/images/imageUtils";
@@ -168,12 +169,14 @@ const isAvailableEffect = (effect: EffectInstance) =>
     setObjectInsertPosition(snapshot.objectInsertPosition ?? "above");
     setObjectLayers(snapshot.objectLayers);
     setSelectedObjectId(snapshot.selectedObjectId);
-    setActiveEffects(snapshot.activeEffects.filter(isAvailableEffect));
+    setActiveEffects(
+      snapshot.activeEffects.filter(isAvailableEffect).map(normalizeEffect),
+    );
     setEffectsByObject(
       Object.fromEntries(
         Object.entries(snapshot.effectsByObject).map(([id, effects]) => [
           id,
-          effects.filter(isAvailableEffect),
+          effects.filter(isAvailableEffect).map(normalizeEffect),
         ]),
       ),
     );
@@ -1205,7 +1208,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                             id: `effect-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
                             name,
                             expanded: true,
-                            values: {},
+                            values: { ...defaultEffectParameters },
                           },
                         ]);
                         setExpandedEffectIndex(activeEffects.length);

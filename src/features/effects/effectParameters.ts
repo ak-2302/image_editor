@@ -1,3 +1,5 @@
+import type { EffectInstance } from "../project/projectTypes";
+
 export type EffectParameters = {
   brightness: number;
   contrast: number;
@@ -113,3 +115,11 @@ export const defaultEffectParameters: EffectParameters = {
   imageLoopMirror: false,
   imageLoopOpacity: 100,
 };
+
+export const normalizeEffect = (effect: EffectInstance): EffectInstance => ({
+  ...effect,
+  values: {
+    ...defaultEffectParameters,
+    ...effect.values,
+  },
+});
