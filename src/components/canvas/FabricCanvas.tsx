@@ -70,7 +70,7 @@ const createShape = (
   const pathWidth = lineWidth > 0 ? size - lineWidth : size;
   const pathHeight = lineWidth > 0 ? shapeHeight - lineWidth : shapeHeight;
   const options = {
-    fill: getEffectColor(color, effects),
+    fill: fillsShape ? getEffectColor(color, effects) : "transparent",
     stroke: fillsShape ? undefined : lineWidth > 0 ? color : undefined,
     strokeWidth: lineWidth,
     width: pathWidth,
