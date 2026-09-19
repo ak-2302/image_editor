@@ -1095,10 +1095,15 @@ input[type="range"] {
   }
 }
 .layers_section_header {
+  position: sticky;
+  top: 0;
+  z-index: 6;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.7rem;
+  padding: 0.35rem 0;
+  background: #f1f4f5;
   color: var(--muted_color);
   font-size: 0.7rem;
   font-weight: 700;
