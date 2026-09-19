@@ -603,7 +603,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
           name: layerName,
           type: shapeType,
           visible: isLayerVisible,
-          shape: shapeProperties,
+          shape: selectedObjectId === "main" ? shapeProperties : mainShapeProperties,
         }
       : null;
   const frameScale = canvasSize
