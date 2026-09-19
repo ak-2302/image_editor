@@ -103,7 +103,6 @@ function App() {
     null,
   );
   const [initialEffectsOpen, setInitialEffectsOpen] = useState(true);
-  const [shapeSettingsOpen, setShapeSettingsOpen] = useState(true);
   const {
     values: initialEffects,
     update: updateTransform,
@@ -1155,22 +1154,23 @@ function App() {
                 })()}
               <InitialEffectsAccordion
                 values={initialEffects}
-                title={`${selectedObjectLabel}の初期エフェクト`}
+                title={selectedObjectLabel}
                 isOpen={initialEffectsOpen}
                 onToggle={() => setInitialEffectsOpen((open) => !open)}
                 onChange={handleInitialEffectChange}
+                extraContent={
+                  selectedShapeType === "rectangle" ||
+                  selectedShapeType === "circle" ||
+                  selectedShapeType === "triangle" ? (
+                    <ShapeSettingsAccordion
+                      shapeType={selectedShapeType}
+                      values={shapeProperties}
+                      onChange={updateShapeProperty}
+                      embedded
+                    />
+                  ) : null
+                }
               />
-              {selectedShapeType === "rectangle" ||
-              selectedShapeType === "circle" ||
-              selectedShapeType === "triangle" ? (
-                <ShapeSettingsAccordion
-                  shapeType={selectedShapeType}
-                  values={shapeProperties}
-                  isOpen={shapeSettingsOpen}
-                  onToggle={() => setShapeSettingsOpen((open) => !open)}
-                  onChange={updateShapeProperty}
-                />
-              ) : null}
               {activeEffects.map((effect, index) => {
                 const { name } = effect;
                 const definition = effectDefinitions.find(

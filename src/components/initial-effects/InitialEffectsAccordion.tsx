@@ -1,4 +1,4 @@
-import { useRef, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import {
   initialEffectFields,
   type InitialEffectKey,
@@ -11,6 +11,7 @@ type InitialEffectsAccordionProps = {
   onToggle: () => void;
   onChange: (key: InitialEffectKey, value: number) => void;
   title?: string;
+  extraContent?: ReactNode;
 };
 
 function InitialEffectsAccordion({
@@ -19,6 +20,7 @@ function InitialEffectsAccordion({
   onToggle,
   onChange,
   title = "初期エフェクト",
+  extraContent,
 }: InitialEffectsAccordionProps) {
   const draggingRef = useRef<{
     key: InitialEffectKey;
@@ -117,6 +119,7 @@ function InitialEffectsAccordion({
               </div>
             ),
           )}
+          {extraContent}
         </div>
       )}
     </div>
