@@ -1,9 +1,18 @@
+import { useState } from "react";
+import InitialEffectsAccordion from "../initial-effects/InitialEffectsAccordion";
+import type {
+  InitialEffectKey,
+  InitialEffectValues,
+} from "../initial-effects/effectTypes";
+
 type TextSettingsProps = {
   content: string;
   fontSize: number;
   color: string;
   bold: boolean;
   italic: boolean;
+  initialEffects: InitialEffectValues;
+  onInitialEffectChange: (key: InitialEffectKey, value: number) => void;
   onChange: (changes: {
     content?: string;
     fontSize?: number;
@@ -19,6 +28,8 @@ function TextSettings({
   color,
   bold,
   italic,
+  initialEffects,
+  onInitialEffectChange,
   onChange,
 }: TextSettingsProps) {
   const [isOpen, setIsOpen] = useState(true);
@@ -37,6 +48,13 @@ function TextSettings({
         </button>
       </div>
       {isOpen && <div className="text_settings">
+        <InitialEffectsAccordion
+          values={initialEffects}
+          title="座標・変形"
+          isOpen
+          onToggle={() => undefined}
+          onChange={onInitialEffectChange}
+        />
         <label htmlFor="text_content">文字列</label>
         <input
           id="text_content"
@@ -84,4 +102,3 @@ function TextSettings({
 }
 
 export default TextSettings;
-import { useState } from "react";

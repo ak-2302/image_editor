@@ -1173,6 +1173,8 @@ const isAvailableEffect = (effect: EffectInstance) =>
                   return (
                     <TextSettings
                       {...textLayer.text}
+                      initialEffects={initialEffects}
+                      onInitialEffectChange={handleInitialEffectChange}
                       onChange={(changes) =>
                         setObjectLayers((layers) =>
                           layers.map((layer) =>
@@ -1188,27 +1190,30 @@ const isAvailableEffect = (effect: EffectInstance) =>
                     />
                   );
                 })()}
-              <InitialEffectsAccordion
-                values={initialEffects}
-                title={selectedObjectLabel}
-                isOpen={initialEffectsOpen}
-                onToggle={() => setInitialEffectsOpen((open) => !open)}
-                onChange={handleInitialEffectChange}
-                extraContent={
-                  selectedShapeType === "rectangle" ||
-                  selectedShapeType === "circle" ||
-                  selectedShapeType === "triangle" ||
-                  selectedShapeType === "polygon" ||
-                  selectedShapeType === "line" ? (
-                    <ShapeSettingsAccordion
-                      shapeType={selectedShapeType}
-                      values={shapeProperties}
-                      onChange={updateShapeProperty}
-                      embedded
-                    />
-                  ) : null
-                }
-              />
+              {selectedObjectId !== "main" &&
+              objectLayers.find((layer) => layer.id === selectedObjectId)?.type === "text" ? null : (
+                <InitialEffectsAccordion
+                  values={initialEffects}
+                  title={selectedObjectLabel}
+                  isOpen={initialEffectsOpen}
+                  onToggle={() => setInitialEffectsOpen((open) => !open)}
+                  onChange={handleInitialEffectChange}
+                  extraContent={
+                    selectedShapeType === "rectangle" ||
+                    selectedShapeType === "circle" ||
+                    selectedShapeType === "triangle" ||
+                    selectedShapeType === "polygon" ||
+                    selectedShapeType === "line" ? (
+                      <ShapeSettingsAccordion
+                        shapeType={selectedShapeType}
+                        values={shapeProperties}
+                        onChange={updateShapeProperty}
+                        embedded
+                      />
+                    ) : null
+                  }
+                />
+              )}
               {activeEffects.map((effect, index) => {
                 const { name } = effect;
                 const definition = effectDefinitions.find(
