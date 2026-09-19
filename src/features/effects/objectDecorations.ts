@@ -176,3 +176,15 @@ export async function applyImageGradient(
   ];
   object.applyFilters();
 }
+
+export async function rasterizeObjectForEffects(
+  object: FabricObject,
+  effects: EffectInstance[],
+): Promise<FabricObject> {
+  if (object instanceof FabricImage) return object;
+  const requiresRaster = effects.some((effect) =>
+    effect.name === "blur" || effect.name === "mosaic" || effect.name === "monochrome",
+  );
+  if (!requiresRaster) return object;
+  return FabricImage.fromURL(object.toDataURL({ format: "png", multiplier: 1 }));
+}

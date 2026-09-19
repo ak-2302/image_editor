@@ -15,7 +15,7 @@ import { getEffectColor } from "../../features/effects/fabricEffectStyles";
 import { createShapeSvgDataUrl } from "../../features/shapes/svgShapeRenderer";
 import { createRegularPolygon } from "../../features/shapes/polygonRenderer";
 import { defaultObjectTransform } from "../../features/objects/useObjectTransforms";
-import { applyImageGradient, applyObjectClipping, applyObjectDecorations, createImageLoopCopies } from "../../features/effects/objectDecorations";
+import { applyImageGradient, applyObjectClipping, applyObjectDecorations, createImageLoopCopies, rasterizeObjectForEffects } from "../../features/effects/objectDecorations";
 
 type FabricCanvasProps = {
   width: number;
@@ -215,15 +215,13 @@ function FabricCanvas({
           );
         }
         if (!object || cancelled) continue;
+        const objectEffects = isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [];
+        object = await rasterizeObjectForEffects(object, objectEffects);
+        if (cancelled) continue;
         if (object instanceof FabricImage) {
-          object.filters = getFabricFilters(
-            isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
-          );
+          object.filters = getFabricFilters(objectEffects);
           object.applyFilters();
-          await applyImageGradient(
-            object,
-            isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
-          );
+          await applyImageGradient(object, objectEffects);
         }
         object.set({
           ...getTransform(
@@ -243,15 +241,15 @@ function FabricCanvas({
         });
         applyObjectDecorations(
           object,
-          isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+          objectEffects,
         );
         applyObjectClipping(
           object,
-          isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+          objectEffects,
         );
         const copies = await createImageLoopCopies(
           object,
-          isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+          objectEffects,
         );
         copies.forEach((copy) => canvas.add(copy));
       }

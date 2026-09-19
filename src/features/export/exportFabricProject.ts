@@ -13,7 +13,7 @@ import { defaultObjectTransform } from "../objects/useObjectTransforms";
 import { getEffectColor } from "../effects/fabricEffectStyles";
 import { createShapeSvgDataUrl } from "../shapes/svgShapeRenderer";
 import { createRegularPolygon } from "../shapes/polygonRenderer";
-import { applyImageGradient, applyObjectClipping, applyObjectDecorations, createImageLoopCopies } from "../effects/objectDecorations";
+import { applyImageGradient, applyObjectClipping, applyObjectDecorations, createImageLoopCopies, rasterizeObjectForEffects } from "../effects/objectDecorations";
 
 type ExportFormat = "png" | "jpeg";
 
@@ -155,8 +155,9 @@ export async function exportFabricProject(
     const effects = layer.id === 0
       ? snapshot.activeEffects
       : snapshot.effectsByObject[String(layer.id)] ?? [];
-    const object = await createObject(layer, width, effects);
+    let object = await createObject(layer, width, effects);
     if (!object) continue;
+    object = await rasterizeObjectForEffects(object, effects);
     const flip = effects.find((effect) => effect.name === "flip")?.values;
     object.set({
       left: width / 2 + transform.x,
