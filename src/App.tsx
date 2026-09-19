@@ -817,19 +817,11 @@ const isAvailableEffect = (effect: EffectInstance) =>
                 )}
                 {[...objectLayers].reverse().map((layer, renderIndex) => {
                   if (!layer.visible) return null;
-                  const isSelected = selectedObjectId === layer.id;
-                  const transform = isSelected
-                    ? selectedObjectTransform
-                    : getObjectTransform(
-                        transformsByObject[String(layer.id)] ?? defaultObjectTransform,
-                        effectsByObject[String(layer.id)] ?? [],
-                      );
-                  const opacity = isSelected
-                    ? getObjectOpacity(initialEffects.opacity, activeEffects)
-                    : getObjectOpacity(
-                        transformsByObject[String(layer.id)]?.opacity ?? 0,
-                        effectsByObject[String(layer.id)] ?? [],
-                      );
+                  const layerEffects = effectsByObject[String(layer.id)] ?? [];
+                  const layerTransform =
+                    transformsByObject[String(layer.id)] ?? defaultObjectTransform;
+                  const transform = getObjectTransform(layerTransform, layerEffects);
+                  const opacity = getObjectOpacity(layerTransform.opacity, layerEffects);
                   const zIndex = renderIndex + 1;
                   if (layer.type === "image" && layer.url) {
                     return (
@@ -840,7 +832,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                         alt={layer.name}
                         onError={() => setNotice(`${layer.name}を表示できませんでした。`)}
                         style={{
-                          filter: getEffectsFilter(effectsByObject[String(layer.id)] ?? []),
+                          filter: getEffectsFilter(layerEffects),
                           transform,
                           opacity,
                           zIndex,
@@ -857,7 +849,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                         transform={transform}
                         opacity={opacity}
                         zIndex={zIndex}
-                        filter={getEffectsFilter(effectsByObject[String(layer.id)] ?? [])}
+                        filter={getEffectsFilter(layerEffects)}
                         properties={layer.shape}
                       />
                     );
@@ -871,7 +863,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
                         transform={transform}
                         opacity={opacity}
                         zIndex={zIndex}
-                        filter={getEffectsFilter(effectsByObject[String(layer.id)] ?? [])}
+                        filter={getEffectsFilter(layerEffects)}
                       />
                     );
                   }
