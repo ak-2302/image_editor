@@ -804,6 +804,17 @@ input[type="range"] {
   text-align: right;
 }
 
+.shape_color_code {
+  width: 5.5rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--border_color);
+  background: #fff;
+  color: var(--heading_color);
+  font: inherit;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
 .effect_unit {
   color: var(--muted_color);
 }

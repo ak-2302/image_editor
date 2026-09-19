@@ -89,7 +89,17 @@ function ShapeSettingsAccordion({
           value={values.color}
           onChange={(event) => onChange("color", event.target.value)}
         />
-        <span className="effect_unit">{values.color}</span>
+        <input
+          className="shape_color_code"
+          aria-label="色のカラーコード"
+          type="text"
+          value={values.color}
+          pattern="^#[0-9a-fA-F]{6}$"
+          onChange={(event) => {
+            const value = event.target.value;
+            if (/^#[0-9a-fA-F]{6}$/.test(value)) onChange("color", value);
+          }}
+        />
       </div>
       {numericFields.map(({ key, unit }) => (
         <div
