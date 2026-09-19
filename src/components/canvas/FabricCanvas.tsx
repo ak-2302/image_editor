@@ -65,15 +65,17 @@ const createShape = (
   const aspect = 1 - (layer.shape?.aspectRatio ?? 0) / 100;
   const shapeHeight = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
   const lineWidth = layer.shape?.lineWidth ?? 0;
+  const innerWidth = lineWidth > 0 ? Math.max(0, size - lineWidth) : size;
+  const innerHeight = lineWidth > 0 ? Math.max(0, shapeHeight - lineWidth) : shapeHeight;
   const options = {
     fill: lineWidth === 0 ? getEffectColor(color, effects) : "transparent",
     stroke: lineWidth === 0 ? undefined : color,
     strokeWidth: lineWidth,
-    width: size,
-    height: shapeHeight,
+    width: innerWidth,
+    height: innerHeight,
   };
   if (layer.type === "rectangle") return new Rect(options);
-  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(size, shapeHeight) / 2 });
+  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(innerWidth, innerHeight) / 2 });
   if (layer.type === "triangle") return new Triangle(options);
   return null;
 };

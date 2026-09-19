@@ -67,17 +67,19 @@ const createShape = (layer: ObjectLayer, canvasWidth: number, effects: EditorHis
   const aspect = 1 - (shape?.aspectRatio ?? 0) / 100;
   const height = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
   const lineWidth = shape?.lineWidth ?? 0;
+  const innerWidth = lineWidth > 0 ? Math.max(0, size - lineWidth) : size;
+  const innerHeight = lineWidth > 0 ? Math.max(0, height - lineWidth) : height;
   const options = {
     fill: lineWidth === 0 ? getEffectColor(color, effects) : "transparent",
     stroke: lineWidth === 0 ? undefined : color,
     strokeWidth: lineWidth,
-    width: size,
-    height,
+    width: innerWidth,
+    height: innerHeight,
     originX: "center" as const,
     originY: "center" as const,
   };
   if (layer.type === "rectangle") return new Rect(options);
-  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(size, height) / 2 });
+  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(innerWidth, innerHeight) / 2 });
   if (layer.type === "triangle") return new Triangle(options);
   return null;
 };
