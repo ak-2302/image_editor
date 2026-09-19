@@ -25,6 +25,7 @@ import {
 } from "./features/effects/effectParameters";
 import { isSupportedImage, readImageAsDataUrl } from "./features/images/imageUtils";
 import { useCanvasState } from "./features/canvas/useCanvasState";
+import { insertObjectLayer, type ObjectInsertPosition } from "./features/layers/insertObjectLayer";
 import {
   defaultObjectTransform,
   useObjectTransforms,
@@ -118,7 +119,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
   const [mainShapeProperties, setMainShapeProperties] =
     useState<ShapeProperties>(defaultShapeProperties);
   const [objectLayers, setObjectLayers] = useState<ObjectLayer[]>([]);
-  const [objectInsertPosition, setObjectInsertPosition] = useState<"above" | "below">("above");
+  const [objectInsertPosition, setObjectInsertPosition] = useState<ObjectInsertPosition>("above");
   const [openEffectMenu, setOpenEffectMenu] = useState<number | null>(null);
   const [draggingEffect, setDraggingEffect] = useState<string | null>(null);
   const [movingEffect, setMovingEffect] = useState<string | null>(null);
@@ -148,10 +149,8 @@ const isAvailableEffect = (effect: EffectInstance) =>
     initialEffects,
   });
   const recordHistory = () => history.push(createHistorySnapshot());
-  const insertObjectLayer = (layer: ObjectLayer) => {
-    setObjectLayers((layers) =>
-      objectInsertPosition === "above" ? [layer, ...layers] : [...layers, layer],
-    );
+  const addObjectLayer = (layer: ObjectLayer) => {
+    setObjectLayers((layers) => insertObjectLayer(layers, layer, objectInsertPosition));
   };
   const restoreHistorySnapshot = (snapshot: EditorHistorySnapshot) => {
     setProjectName(snapshot.projectName ?? "image-editor");
@@ -418,7 +417,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     }
     recordHistory();
     const imageLayerId = Date.now();
-    insertObjectLayer({ id: imageLayerId, name: file.name, type: "image", url: nextUrl, visible: true });
+    addObjectLayer({ id: imageLayerId, name: file.name, type: "image", url: nextUrl, visible: true });
     setSelectedObjectId(imageLayerId);
     setTransformForObject(String(imageLayerId), defaultObjectTransform);
     setEffectsByObject((effects) => ({ ...effects, [String(imageLayerId)]: [] }));
@@ -446,7 +445,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     const id = Date.now();
     if (!imageUrl && shapeType) {
       const previousMainId = id;
-      insertObjectLayer({
+      addObjectLayer({
           id: previousMainId,
           name: layerName,
           type: shapeType,
@@ -477,7 +476,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
         main: defaultEffectParameters,
       }));
     }
-    insertObjectLayer({ id, name, type, visible: true, shape: defaultShapeProperties });
+    addObjectLayer({ id, name, type, visible: true, shape: defaultShapeProperties });
     setShapeType(null);
     setLayerName(name);
     setTransformForObject(String(id), defaultObjectTransform);
@@ -492,7 +491,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     recordHistory();
     const id = Date.now();
     setCanvasSize((size) => size ?? { width: 800, height: 600 });
-    insertObjectLayer({
+    addObjectLayer({
         id,
         name: "テキスト",
         type: "text",
