@@ -33,12 +33,28 @@ export function applyObjectDecorations(object: FabricObject, effects: EffectInst
       });
     }
     if (effect.name === "outline" && Number(effect.values.outlineWidth ?? 0) > 0) {
-      object.set({
-        stroke: effect.values.outlineColor ?? "#000000",
-        strokeWidth: Number(effect.values.outlineWidth ?? 0),
-        strokeUniform: true,
-        opacity: Number(effect.values.outlineOpacity ?? 100) / 100,
-      });
+      const width = Number(effect.values.outlineWidth ?? 0);
+      const color = withOpacity(
+        effect.values.outlineColor ?? "#000000",
+        Number(effect.values.outlineOpacity ?? 100) / 100,
+      );
+      if (object instanceof FabricImage) {
+        object.set({
+          shadow: new Shadow({
+            color,
+            blur: Math.max(1, width * 2),
+            offsetX: 0,
+            offsetY: 0,
+          }),
+        });
+      } else {
+        object.set({
+          stroke: effect.values.outlineColor ?? "#000000",
+          strokeWidth: width,
+          strokeUniform: true,
+          opacity: Number(effect.values.outlineOpacity ?? 100) / 100,
+        });
+      }
     }
   }
 }
