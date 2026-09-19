@@ -45,6 +45,16 @@ const getEffects = (
           useAlpha: true,
         }) as never,
       );
+      const luminanceKey = effect.values.luminanceKey ?? 0;
+      if (luminanceKey > 0) {
+        result.push(
+          new filters.RemoveColor({
+            color: "#000000",
+            distance: luminanceKey / 100,
+            useAlpha: true,
+          }) as never,
+        );
+      }
     }
   }
   return result;
