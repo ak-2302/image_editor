@@ -452,8 +452,13 @@ function App() {
     setImageUrl(null);
     setShapeType(null);
     setLayerName("画像レイヤー");
-    resetCanvas();
-    setObjectLayers([]);
+    if (objectLayers.length === 0) {
+      resetCanvas();
+      setSelectedObjectId("main");
+      setActiveEffects([]);
+      return;
+    }
+    selectObject(objectLayers[0].id);
   };
   const updateEffectValue = <K extends keyof EffectParameters>(
     effectId: string,
