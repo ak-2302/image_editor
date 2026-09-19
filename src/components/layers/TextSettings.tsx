@@ -72,11 +72,11 @@ function TextSettings({
           value={fontFamily}
           onChange={(event) => onChange({ fontFamily: event.target.value })}
         >
-          <option value="sans-serif">ゴシック体</option>
-          <option value="serif">明朝体</option>
-          <option value="Arial, sans-serif">Arial</option>
-          <option value="Georgia, serif">Georgia</option>
-          <option value="monospace">等幅</option>
+          <option value="sans-serif" style={{ fontFamily: "sans-serif" }}>ゴシック体</option>
+          <option value="serif" style={{ fontFamily: "serif" }}>明朝体</option>
+          <option value="Arial, sans-serif" style={{ fontFamily: "Arial, sans-serif" }}>Arial</option>
+          <option value="Georgia, serif" style={{ fontFamily: "Georgia, serif" }}>Georgia</option>
+          <option value="monospace" style={{ fontFamily: "monospace" }}>等幅</option>
         </select>
         <EffectValueRow
           label="文字サイズ"

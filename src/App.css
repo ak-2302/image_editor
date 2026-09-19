@@ -1378,6 +1378,12 @@ input[type="range"] {
   outline-offset: 1px;
 }
 
+.text_settings select option {
+  padding: 0.35rem 0.5rem;
+  background: #fff;
+  color: var(--heading_color);
+}
+
 .text_settings textarea {
   min-height: 4.5rem;
   line-height: 1.45;
