@@ -29,11 +29,12 @@ type Props = EffectValueProps & {
 export default function EffectSettings({ name, ...props }: Props) {
   if (name === "colorAdjust") return <ColorAdjustEffect {...props} />;
   if (name === "transparency") return <TransparencyEffect {...props} />;
+  if (name === "flip") return null;
   const Component = {
     brightness: BrightnessEffect,
     contrast: ContrastEffect,
     grayscale: GrayscaleEffect,
     sepia: SepiaEffect,
-  }[name as Exclude<EffectName, "colorAdjust" | "transparency">];
+  }[name as Exclude<EffectName, "colorAdjust" | "transparency" | "flip">];
   return <Component name={name} {...props} />;
 }

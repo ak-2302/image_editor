@@ -11,6 +11,11 @@ export type EffectParameters = {
   colorKeyColor: string;
   colorKeyTolerance: number;
   luminanceKey: number;
+  flipHorizontal: boolean;
+  flipVertical: boolean;
+  invertLuminance: boolean;
+  invertHue: boolean;
+  invertAlpha: boolean;
 };
 
 export const defaultEffectParameters: EffectParameters = {
@@ -26,4 +31,9 @@ export const defaultEffectParameters: EffectParameters = {
   colorKeyColor: "#ffffff",
   colorKeyTolerance: 10,
   luminanceKey: 0,
+  flipHorizontal: false,
+  flipVertical: false,
+  invertLuminance: false,
+  invertHue: false,
+  invertAlpha: false,
 };

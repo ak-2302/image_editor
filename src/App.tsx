@@ -257,6 +257,11 @@ const isAvailableEffect = (effect: EffectInstance) =>
     colorKeyColor,
     colorKeyTolerance,
     luminanceKey,
+    flipHorizontal: false,
+    flipVertical: false,
+    invertLuminance: false,
+    invertHue: false,
+    invertAlpha: false,
   });
   const updateParameter = <K extends keyof EffectParameters>(
     key: K,
@@ -283,7 +288,8 @@ const isAvailableEffect = (effect: EffectInstance) =>
       colorKeyTolerance: setColorKeyTolerance,
       luminanceKey: setLuminanceKey,
     } as const;
-    setters[key](value as never);
+    const setter = setters[key as keyof typeof setters];
+    if (setter) setter(value as never);
   };
   const updateActiveEffects = (
     updater: (effects: EffectInstance[]) => EffectInstance[],
@@ -543,6 +549,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     sepia: 0,
     colorAdjust: 0,
     transparency: 0,
+    flip: 0,
   };
   const effectParameterKeys: Record<EffectName, keyof EffectParameters> = {
     brightness: "brightness",
@@ -551,6 +558,7 @@ const isAvailableEffect = (effect: EffectInstance) =>
     sepia: "sepia",
     colorAdjust: "hue",
     transparency: "luminanceKey",
+    flip: "flipHorizontal",
   };
   const getEffectValue = (effect: EffectInstance) => {
     const value = effect.values[effectParameterKeys[effect.name]];
@@ -577,22 +585,33 @@ const isAvailableEffect = (effect: EffectInstance) =>
         }
         case "transparency":
           return "";
+        case "flip":
+          return `${effect.values.invertLuminance ? "invert(100%)" : ""} ${effect.values.invertHue ? "hue-rotate(180deg)" : ""}`.trim();
         default:
           return "";
       }
     })
     .filter(Boolean)
     .join(" ") || "none";
+  const getObjectTransform = (
+    transform: typeof initialEffects,
+    effects: EffectInstance[],
+  ) => {
+    const flip = effects.find((effect) => effect.name === "flip")?.values;
+    const scaleX = flip?.flipHorizontal ? -1 : 1;
+    const scaleY = flip?.flipVertical ? -1 : 1;
+    return `translate(${transform.x}px, ${transform.y}px) scale(${(transform.scale / 100) * scaleX}, ${(transform.scale / 100) * scaleY}) rotate(${transform.rotation}deg)`;
+  };
   const imageTransform =
     selectedObjectId === "main"
-      ? `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`
+      ? getObjectTransform(initialEffects, activeEffects)
       : "none";
-  const selectedObjectTransform = `translate(${initialEffects.x}px, ${initialEffects.y}px) scale(${initialEffects.scale / 100}) rotate(${initialEffects.rotation}deg)`;
+  const selectedObjectTransform = getObjectTransform(initialEffects, activeEffects);
   const mainObjectTransform = transformsByObject.main ?? defaultObjectTransform;
   const mainShapeTransform =
     selectedObjectId === "main"
       ? selectedObjectTransform
-      : `translate(${mainObjectTransform.x}px, ${mainObjectTransform.y}px) scale(${mainObjectTransform.scale / 100}) rotate(${mainObjectTransform.rotation}deg)`;
+      : getObjectTransform(mainObjectTransform, effectsByObject.main ?? []);
   const mainShapeOpacity =
     (100 -
       (selectedObjectId === "main"
@@ -817,7 +836,12 @@ const isAvailableEffect = (effect: EffectInstance) =>
                 {[...objectLayers].reverse().map((layer, renderIndex) => {
                   if (!layer.visible) return null;
                   const isSelected = selectedObjectId === layer.id;
-                  const transform = isSelected ? selectedObjectTransform : "none";
+                  const transform = isSelected
+                    ? selectedObjectTransform
+                    : getObjectTransform(
+                        transformsByObject[String(layer.id)] ?? defaultObjectTransform,
+                        effectsByObject[String(layer.id)] ?? [],
+                      );
                   const opacity = isSelected
                     ? (100 - initialEffects.opacity) / 100
                     : 1;
@@ -1389,6 +1413,31 @@ const isAvailableEffect = (effect: EffectInstance) =>
                               )
                             }
                           />
+                        </div>
+                      ) : name === "flip" ? (
+                        <div className="initial_effect_fields">
+                          {[
+                            ["flipVertical", "上下反転"],
+                            ["flipHorizontal", "左右反転"],
+                            ["invertLuminance", "輝度反転"],
+                            ["invertHue", "色相反転"],
+                            ["invertAlpha", "透明度反転"],
+                          ].map(([key, label]) => (
+                            <label className="initial_effect_row" key={key}>
+                              <span>{label}</span>
+                              <input
+                                type="checkbox"
+                                checked={Boolean(effect.values[key as keyof EffectParameters])}
+                                onChange={(event) =>
+                                  updateEffectValue(
+                                    effect.id,
+                                    key as keyof EffectParameters,
+                                    event.target.checked,
+                                  )
+                                }
+                              />
+                            </label>
+                          ))}
                         </div>
                       ) : (
                         <div className="initial_effect_fields">
