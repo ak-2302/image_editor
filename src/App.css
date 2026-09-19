@@ -328,7 +328,7 @@ input[type="range"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.9rem 0;
+  padding: 0.55rem 0;
   border: 0;
   background: transparent;
   color: var(--heading_color);
@@ -734,8 +734,8 @@ input[type="range"] {
 
 .initial_effect_fields {
   display: grid;
-  gap: 0.7rem;
-  padding-top: 1rem;
+  gap: 0.35rem;
+  padding-top: 0.5rem;
 }
 
 .initial_effect_row {
@@ -752,7 +752,7 @@ input[type="range"] {
 
 .initial_effect_row input[type="number"] {
   width: 100%;
-  padding: 0.4rem 0.5rem;
+  padding: 0.25rem 0.5rem;
   border: 1px solid var(--border_color);
   background: #fff;
   color: var(--heading_color);
@@ -796,7 +796,7 @@ input[type="range"] {
 }
 
 .initial_effect_row {
-  padding: 0.35rem 0.45rem;
+  padding: 0.2rem 0.45rem;
   margin: 0 -0.45rem;
   border-radius: 0.2rem;
   transition: background 0.15s;
