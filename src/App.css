@@ -237,6 +237,8 @@ input:focus-visible {
 }
 
 .layer_name {
+  min-width: 0;
+  flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -778,17 +780,20 @@ input[type="range"] {
 }
 
 .layers_section {
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .layers_list {
   display: grid;
   gap: 0.3rem;
+  min-width: 0;
 }
 
 .layers_list .layer_item {
   margin-top: 0;
   padding: 0.4rem 0.5rem;
+  min-width: 0;
 }
 
 .layers_list .layer_thumbnail {
@@ -827,7 +832,9 @@ input[type="range"] {
 
 .layer_name_input {
   min-width: 0;
+  flex: 1 1 auto;
   width: 100%;
+  box-sizing: border-box;
   padding: 0.25rem 0.35rem;
   border: 1px solid var(--accent_color);
   background: #fff;
@@ -851,6 +858,7 @@ input[type="range"] {
 .layer_actions {
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 0.2rem;
   margin-left: auto;
 }
