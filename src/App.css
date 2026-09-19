@@ -165,7 +165,7 @@
 }
 
 .effects_section {
-  overflow: auto;
+  overflow: hidden;
 }
 
 .section_header {
@@ -467,6 +467,7 @@ input[type="range"] {
 
 .effect_controls {
   margin-top: 1rem;
+  min-height: 0;
 }
 
 .canvas_panel {
@@ -511,6 +512,16 @@ input[type="range"] {
 .effects_section .effect_controls {
   margin-top: 0;
   padding-top: 0;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.effects_section .effect_controls::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .layer_delete_button {
@@ -1405,6 +1416,6 @@ input[type="range"] {
 
   .effects_section {
     min-height: 20rem;
-    overflow: visible;
+    overflow: hidden;
   }
 }
