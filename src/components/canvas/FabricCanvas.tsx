@@ -53,12 +53,21 @@ const getTransform = (
   };
 };
 
-const createShape = (layer: ObjectLayer): FabricObject | null => {
+const createShape = (layer: ObjectLayer, canvasWidth: number): FabricObject | null => {
   const color = layer.shape?.color ?? "#ffffff";
-  const size = layer.shape?.size ?? 100;
-  const options = { fill: color, width: size, height: size };
+  const size = (canvasWidth * 0.45 * (layer.shape?.size ?? 100)) / 100;
+  const aspect = 1 - (layer.shape?.aspectRatio ?? 0) / 100;
+  const shapeHeight = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
+  const lineWidth = layer.shape?.lineWidth ?? 0;
+  const options = {
+    fill: lineWidth === 0 ? color : "transparent",
+    stroke: lineWidth === 0 ? undefined : color,
+    strokeWidth: lineWidth,
+    width: size,
+    height: shapeHeight,
+  };
   if (layer.type === "rectangle") return new Rect(options);
-  if (layer.type === "circle") return new Circle({ ...options, radius: size / 2 });
+  if (layer.type === "circle") return new Circle({ ...options, radius: Math.min(size, shapeHeight) / 2 });
   if (layer.type === "triangle") return new Triangle(options);
   return null;
 };
@@ -135,7 +144,7 @@ function FabricCanvas({
             fontStyle: layer.text.italic ? "italic" : "normal",
           });
         } else {
-          object = createShape(layer);
+          object = createShape(layer, width);
         }
         if (!object || cancelled) continue;
         const isMainLayer = layer.id === 0;
@@ -175,7 +184,7 @@ function FabricCanvas({
         | (FabricObject & { data?: { objectId?: string | number } })
         | undefined;
       const id = selected?.data?.objectId;
-      if (id !== undefined) onSelect?.(id);
+      if (id !== undefined) onSelect?.(id === 0 ? "main" : id);
     };
     const handleObjectModified = (event: {
       target?: FabricObject & {
