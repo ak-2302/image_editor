@@ -13,6 +13,7 @@ export function createRegularPolygon(
     return new Line([-length / 2, 0, length / 2, 0], {
       stroke: getEffectColor(layer.shape?.color ?? "#ffffff", effects),
       strokeWidth: Math.max(1, layer.shape?.lineWidth ?? 0),
+      strokeLineCap: "round",
       originX: "center",
       originY: "center",
     });
