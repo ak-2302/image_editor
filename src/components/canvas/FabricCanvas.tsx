@@ -6,6 +6,7 @@ import {
   Rect,
   Triangle,
   Textbox,
+  filters,
   type FabricObject,
 } from "fabric";
 import type { ObjectLayer } from "../../features/layers/objectTypes";
@@ -62,6 +63,28 @@ const createShape = (layer: ObjectLayer): FabricObject | null => {
   return null;
 };
 
+const getFabricFilters = (
+  effects: FabricCanvasProps["effectsByObject"][string],
+) => {
+  const result = [] as InstanceType<typeof filters.Brightness>[];
+  for (const effect of effects ?? []) {
+    if (effect.name === "colorAdjust") {
+      const values = effect.values;
+      const brightness = Number(values.lightness ?? 100);
+      const saturation = Number(values.saturation ?? 100);
+      const hue = Number(values.hue ?? 0);
+      if (brightness !== 100) result.push(new filters.Brightness({ brightness: (brightness - 100) / 100 }));
+      if (saturation !== 100) result.push(new filters.Saturation({ saturation: (saturation - 100) / 100 }) as never);
+      if (hue !== 0) result.push(new filters.HueRotation({ rotation: hue / 180 }) as never);
+    }
+    if (effect.name === "flip") {
+      if (effect.values.invertLuminance) result.push(new filters.Invert({ invert: true, alpha: false }) as never);
+      if (effect.values.invertHue) result.push(new filters.HueRotation({ rotation: 1 }) as never);
+    }
+  }
+  return result;
+};
+
 function FabricCanvas({
   width,
   height,
@@ -116,6 +139,12 @@ function FabricCanvas({
         }
         if (!object || cancelled) continue;
         const isMainLayer = layer.id === 0;
+        if (layer.type === "image" && object instanceof FabricImage) {
+          object.filters = getFabricFilters(
+            isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+          );
+          object.applyFilters();
+        }
         object.set({
           ...getTransform(
             layer,
