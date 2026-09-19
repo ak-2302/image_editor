@@ -639,7 +639,42 @@ input[type="range"] {
 }
 
 .history_controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-left: 0.35rem;
+  padding: 0.15rem;
+  border: 1px solid var(--border_color);
+  border-radius: 0.35rem;
+  background: #eef1f3;
   order: 2;
+}
+
+.history_controls button {
+  min-width: 2.6rem;
+  padding: 0.3rem 0.45rem;
+  border: 0;
+  border-radius: 0.2rem;
+  background: transparent;
+  color: var(--heading_color);
+  font-size: 0.7rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.history_controls button:hover:not(:disabled) {
+  background: #fff;
+  color: var(--accent_color);
+}
+
+.history_controls button:focus-visible {
+  outline: 2px solid var(--accent_color);
+  outline-offset: 1px;
+}
+
+.history_controls button:disabled {
+  color: #aeb8bf;
+  cursor: not-allowed;
 }
 
 .header_menu_button {
