@@ -1281,12 +1281,35 @@ input[type="range"] {
 }
 
 .text_settings input[type="text"],
-.text_settings input[type="number"] {
+.text_settings input[type="number"],
+.text_settings textarea {
   width: 100%;
   min-height: 2rem;
+  box-sizing: border-box;
   border: 1px solid var(--line_color);
   background: #fff;
   padding: 0.25rem 0.45rem;
+  color: var(--heading_color);
+  font: inherit;
+  resize: vertical;
+}
+
+.text_settings textarea {
+  min-height: 4.5rem;
+  line-height: 1.45;
+}
+
+.text_color_row input[type="text"] {
+  min-width: 0;
+  text-align: right;
+}
+
+.text_color_row input[type="color"] {
+  width: 2.1rem;
+  height: 2rem;
+  padding: 0.15rem;
+  border: 1px solid var(--line_color);
+  background: #fff;
 }
 
 .text_setting_inline {
