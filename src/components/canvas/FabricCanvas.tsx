@@ -10,7 +10,9 @@ import {
   type FabricObject,
 } from "fabric";
 import type { ObjectLayer } from "../../features/layers/objectTypes";
+import type { EffectInstance } from "../../features/project/projectTypes";
 import { getFlipScale } from "../../features/effects/processors/flipEffect";
+import { getEffectColor } from "../../features/effects/fabricEffectStyles";
 import { defaultObjectTransform } from "../../features/objects/useObjectTransforms";
 
 type FabricCanvasProps = {
@@ -19,9 +21,9 @@ type FabricCanvasProps = {
   mainLayer: ObjectLayer | null;
   layers: ObjectLayer[];
   mainTransform: typeof defaultObjectTransform;
-  mainEffects: { name: string; values: Record<string, unknown> }[];
+  mainEffects: EffectInstance[];
   transformsByObject: Record<string, typeof defaultObjectTransform>;
-  effectsByObject: Record<string, { name: string; values: Record<string, unknown> }[]>;
+  effectsByObject: Record<string, EffectInstance[]>;
   onSelect?: (id: string | number) => void;
   onTransformChange?: (
     id: string | number,
@@ -53,14 +55,18 @@ const getTransform = (
   };
 };
 
-const createShape = (layer: ObjectLayer, canvasWidth: number): FabricObject | null => {
+const createShape = (
+  layer: ObjectLayer,
+  canvasWidth: number,
+  effects: EffectInstance[],
+): FabricObject | null => {
   const color = layer.shape?.color ?? "#ffffff";
   const size = (canvasWidth * 0.45 * (layer.shape?.size ?? 100)) / 100;
   const aspect = 1 - (layer.shape?.aspectRatio ?? 0) / 100;
   const shapeHeight = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
   const lineWidth = layer.shape?.lineWidth ?? 0;
   const options = {
-    fill: lineWidth === 0 ? color : "transparent",
+    fill: lineWidth === 0 ? getEffectColor(color, effects) : "transparent",
     stroke: lineWidth === 0 ? undefined : color,
     strokeWidth: lineWidth,
     width: size,
@@ -133,21 +139,28 @@ function FabricCanvas({
       const renderableLayers = mainLayer ? [mainLayer, ...layers] : layers;
       for (const layer of renderableLayers) {
         if (cancelled || !layer.visible) continue;
+        const isMainLayer = layer.id === 0;
         let object: FabricObject | null = null;
         if (layer.type === "image" && layer.url) {
           object = await FabricImage.fromURL(layer.url);
         } else if (layer.type === "text" && layer.text) {
           object = new Textbox(layer.text.content, {
-            fill: layer.text.color,
+            fill: getEffectColor(
+              layer.text.color,
+              isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+            ),
             fontSize: layer.text.fontSize,
             fontWeight: layer.text.bold ? "700" : "400",
             fontStyle: layer.text.italic ? "italic" : "normal",
           });
         } else {
-          object = createShape(layer, width);
+          object = createShape(
+            layer,
+            width,
+            isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],
+          );
         }
         if (!object || cancelled) continue;
-        const isMainLayer = layer.id === 0;
         if (layer.type === "image" && object instanceof FabricImage) {
           object.filters = getFabricFilters(
             isMainLayer ? mainEffects : effectsByObject[String(layer.id)] ?? [],

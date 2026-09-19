@@ -11,6 +11,7 @@ import {
 import type { EditorHistorySnapshot } from "../history/historyTypes";
 import type { ObjectLayer } from "../layers/objectTypes";
 import { defaultObjectTransform } from "../objects/useObjectTransforms";
+import { getEffectColor } from "../effects/fabricEffectStyles";
 
 type ExportFormat = "png" | "jpeg";
 
@@ -35,7 +36,7 @@ const getEffects = (
   return result;
 };
 
-const createShape = (layer: ObjectLayer, canvasWidth: number): FabricObject | null => {
+const createShape = (layer: ObjectLayer, canvasWidth: number, effects: EditorHistorySnapshot["activeEffects"]): FabricObject | null => {
   const shape = layer.shape;
   const color = shape?.color ?? "#ffffff";
   const size = (canvasWidth * 0.45 * (shape?.size ?? 100)) / 100;
@@ -43,7 +44,7 @@ const createShape = (layer: ObjectLayer, canvasWidth: number): FabricObject | nu
   const height = layer.type === "triangle" ? size * (Math.sqrt(3) / 2) * aspect : size * aspect;
   const lineWidth = shape?.lineWidth ?? 0;
   const options = {
-    fill: lineWidth === 0 ? color : "transparent",
+    fill: lineWidth === 0 ? getEffectColor(color, effects) : "transparent",
     stroke: lineWidth === 0 ? undefined : color,
     strokeWidth: lineWidth,
     width: size,
@@ -60,11 +61,12 @@ const createShape = (layer: ObjectLayer, canvasWidth: number): FabricObject | nu
 const createObject = async (
   layer: ObjectLayer,
   canvasWidth: number,
+  effects: EditorHistorySnapshot["activeEffects"],
 ): Promise<FabricObject | null> => {
   if (layer.type === "image" && layer.url) return FabricImage.fromURL(layer.url);
   if (layer.type === "text" && layer.text) {
     return new Textbox(layer.text.content, {
-      fill: layer.text.color,
+      fill: getEffectColor(layer.text.color, effects),
       fontSize: layer.text.fontSize,
       fontWeight: layer.text.bold ? "700" : "400",
       fontStyle: layer.text.italic ? "italic" : "normal",
@@ -72,7 +74,7 @@ const createObject = async (
       originY: "center",
     });
   }
-  return createShape(layer, canvasWidth);
+  return createShape(layer, canvasWidth, effects);
 };
 
 export async function exportFabricProject(
@@ -94,13 +96,13 @@ export async function exportFabricProject(
 
   for (const layer of layers) {
     if (!layer.visible) continue;
-    const object = await createObject(layer, width);
-    if (!object) continue;
     const id = layer.id === 0 ? "main" : String(layer.id);
     const transform = snapshot.transformsByObject[id] ?? defaultObjectTransform;
     const effects = layer.id === 0
       ? snapshot.activeEffects
       : snapshot.effectsByObject[String(layer.id)] ?? [];
+    const object = await createObject(layer, width, effects);
+    if (!object) continue;
     const flip = effects.find((effect) => effect.name === "flip")?.values;
     object.set({
       left: width / 2 + transform.x,
