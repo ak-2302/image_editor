@@ -95,13 +95,17 @@ const createShape = async (layer: ObjectLayer, canvasWidth: number, effects: Edi
 
 const getTextFill = (color: string, effects: EditorHistorySnapshot["activeEffects"]) => {
   const gradient = effects.find((effect) => effect.name === "gradient");
-  if (!gradient || Number(gradient.values.gradientStrength ?? 0) <= 0) return getEffectColor(color, effects);
+  if (!gradient) return getEffectColor(color, effects);
   const angle = (Number(gradient.values.gradientAngle ?? 0) * Math.PI) / 180;
+  const start = Math.max(0, Math.min(100, Number(gradient.values.gradientPosition ?? 0))) / 100;
+  const end = Math.max(start, Math.min(100, start * 100 + Number(gradient.values.gradientRange ?? 100))) / 100;
   return new Gradient({
     type: "linear",
     coords: { x1: 0, y1: 0, x2: Math.cos(angle) * 200, y2: Math.sin(angle) * 200 },
     colorStops: [
       { offset: 0, color: gradient.values.gradientStartColor ?? color },
+      { offset: start, color: gradient.values.gradientStartColor ?? color },
+      { offset: end, color: gradient.values.gradientEndColor ?? color },
       { offset: 1, color: gradient.values.gradientEndColor ?? color },
     ],
   });

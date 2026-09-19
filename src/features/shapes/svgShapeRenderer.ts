@@ -42,8 +42,10 @@ export const createShapeSvgDataUrl = (
   const mask = fillsShape
     ? ""
     : `<mask id="cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="${size}" height="${height}"><rect width="${size}" height="${height}" fill="black"/>${outer.replace("/>", ` fill="white"/>`)}${hole.replace("/>", ` fill="black"/>`)}</mask>`;
-  const gradientDefinition = gradient && Number(gradient.values.gradientStrength ?? 0) > 0
-    ? `<linearGradient id="effectGradient" gradientTransform="rotate(${Number(gradient.values.gradientAngle ?? 0)} .5 .5)"><stop offset="0%" stop-color="${escapeAttribute(gradient.values.gradientStartColor ?? color)}"/><stop offset="100%" stop-color="${escapeAttribute(gradient.values.gradientEndColor ?? color)}"/></linearGradient>`
+  const gradientPosition = Math.max(0, Math.min(100, Number(gradient?.values.gradientPosition ?? 0)));
+  const gradientEnd = Math.max(gradientPosition, Math.min(100, gradientPosition + Number(gradient?.values.gradientRange ?? 100)));
+  const gradientDefinition = gradient
+    ? `<linearGradient id="effectGradient" gradientTransform="rotate(${Number(gradient.values.gradientAngle ?? 0)} .5 .5)"><stop offset="0%" stop-color="${escapeAttribute(gradient.values.gradientStartColor ?? color)}"/><stop offset="${gradientPosition}%" stop-color="${escapeAttribute(gradient.values.gradientStartColor ?? color)}"/><stop offset="${gradientEnd}%" stop-color="${escapeAttribute(gradient.values.gradientEndColor ?? color)}"/><stop offset="100%" stop-color="${escapeAttribute(gradient.values.gradientEndColor ?? color)}"/></linearGradient>`
     : "";
   const fill = gradientDefinition ? "url(#effectGradient)" : escapeAttribute(color);
   const body = part === "outer"

@@ -23,6 +23,8 @@ export type EffectParameters = {
   gradientStartColor: string;
   gradientEndColor: string;
   gradientAngle: number;
+  gradientPosition: number;
+  gradientRange: number;
   gradientStrength: number;
   glowColor: string;
   glowStrength: number;
@@ -81,6 +83,8 @@ export const defaultEffectParameters: EffectParameters = {
   gradientStartColor: "#ffffff",
   gradientEndColor: "#000000",
   gradientAngle: 0,
+  gradientPosition: 0,
+  gradientRange: 100,
   gradientStrength: 0,
   glowColor: "#ffffff",
   glowStrength: 0,

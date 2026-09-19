@@ -140,8 +140,7 @@ export async function applyImageGradient(
   effects: EffectInstance[],
 ) {
   const effect = effects.find((item) => item.name === "gradient");
-  const strength = Number(effect?.values.gradientStrength ?? 0);
-  if (!effect || strength <= 0) return;
+  if (!effect) return;
   const width = Math.max(1, Math.ceil(object.width ?? 1));
   const height = Math.max(1, Math.ceil(object.height ?? 1));
   const element = document.createElement("canvas");
@@ -159,14 +158,18 @@ export async function applyImageGradient(
     centerX + Math.cos(angle) * length / 2,
     centerY + Math.sin(angle) * length / 2,
   );
+  const start = Math.max(0, Math.min(100, Number(effect.values.gradientPosition ?? 0))) / 100;
+  const end = Math.max(start, Math.min(100, start * 100 + Number(effect.values.gradientRange ?? 100))) / 100;
   gradient.addColorStop(0, effect.values.gradientStartColor ?? "#ffffff");
+  gradient.addColorStop(start, effect.values.gradientStartColor ?? "#ffffff");
+  gradient.addColorStop(end, effect.values.gradientEndColor ?? "#000000");
   gradient.addColorStop(1, effect.values.gradientEndColor ?? "#000000");
   context.fillStyle = gradient;
   context.fillRect(0, 0, width, height);
   const overlay = await FabricImage.fromURL(element.toDataURL());
   object.filters = [
     ...(object.filters ?? []),
-    new filters.BlendImage({ image: overlay, mode: "multiply", alpha: Math.min(1, strength / 100) }),
+    new filters.BlendImage({ image: overlay, mode: "multiply", alpha: 1 }),
   ];
   object.applyFilters();
 }

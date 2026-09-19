@@ -28,7 +28,7 @@ export default function AdvancedEffectSettings({ effect, onChange }: Props) {
     case "monochrome":
       return <div className="initial_effect_fields"><ColorRow label="色" value={color("monochromeColor", "#ffffff")} onChange={(next) => onChange("monochromeColor", next)} />{row("強度", "monochromeStrength", 100, "%")}</div>;
     case "gradient":
-      return <div className="initial_effect_fields"><ColorRow label="開始色" value={color("gradientStartColor", "#ffffff")} onChange={(next) => onChange("gradientStartColor", next)} /><ColorRow label="終了色" value={color("gradientEndColor", "#000000")} onChange={(next) => onChange("gradientEndColor", next)} />{row("角度", "gradientAngle", 0, "°")}{row("強度", "gradientStrength", 0, "%")}</div>;
+      return <div className="initial_effect_fields"><ColorRow label="開始色" value={color("gradientStartColor", "#ffffff")} onChange={(next) => onChange("gradientStartColor", next)} /><ColorRow label="終了色" value={color("gradientEndColor", "#000000")} onChange={(next) => onChange("gradientEndColor", next)} />{row("角度", "gradientAngle", 0, "°")}{row("位置", "gradientPosition", 0, "%", 0, 100)}{row("変化範囲", "gradientRange", 100, "%", 0, 100)}</div>;
     case "glow":
       return <div className="initial_effect_fields"><ColorRow label="色" value={color("glowColor", "#ffffff")} onChange={(next) => onChange("glowColor", next)} />{row("強度", "glowStrength", 0, "%")}{row("半径", "glowRadius", 8, "px")}</div>;
     case "blur":
